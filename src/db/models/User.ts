@@ -1,11 +1,10 @@
 import { eq } from "drizzle-orm"
 
-import { users } from "../schema"
+import { users } from "../schemas/User.schema"
 import { BaseModel } from "../base-model"
 import { UserModelConfig, type IUserSchema, type IUserPublic } from "../schemas/User.schema"
 
 class UserModel extends BaseModel<IUserSchema> {
-
   async findByEmail(email: string): Promise<IUserSchema | null> {
     return this.findOneWhere(eq(users.email, email.toLowerCase()))
   }
@@ -16,7 +15,8 @@ class UserModel extends BaseModel<IUserSchema> {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      subscriptionTier: user.subscriptionTier,
+      subscriptionStatus: user.subscriptionStatus,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     }

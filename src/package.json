@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Q-Ai Backend — Node, Express, tRPC, TypeScript, PostgreSQL",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "tsx watch ./main.ts",
     "build": "tsc",
     "start": "node dist/main.js",
     "db:generate": "drizzle-kit generate",

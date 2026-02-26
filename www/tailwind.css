@@ -1,0 +1,77 @@
+/* ============================================================
+   Q-Ai  –  Tailwind CSS v4  +  Academic Sanctuary theme
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ── Design tokens → Tailwind utilities + auto-generated :root vars ── */
+@theme {
+  /* Brand / Primary */
+  --color-primary: #1a2332;
+  --color-primary-hover: #253045;
+
+  /* Accent */
+  --color-accent: #8b9e6c;
+  --color-accent-light: #a8ba8a;
+  --color-accent-dark: #6c7d50;
+
+  /* Backgrounds */
+  --color-bg: #f5f4ef;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f0efe9;
+  --color-bg-muted: #eceae3;
+
+  /* Borders */
+  --color-border: #e2e0d8;
+  --color-border-focus: #8b9e6c;
+
+  /* Text */
+  --color-text: #1a2332;
+  --color-text-secondary: #5c6370;
+  --color-text-muted: #9ca3af;
+  --color-text-inverse: #ffffff;
+
+  /* Semantic */
+  --color-success: #8b9e6c;
+  --color-warning: #d4a843;
+  --color-error: #c0392b;
+  --color-info: #4a7fa5;
+
+  /* Font families */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-serif: "Lora", "Georgia", "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(26, 35, 50, 0.06);
+  --shadow-md: 0 4px 12px rgba(26, 35, 50, 0.08);
+  --shadow-lg: 0 8px 24px rgba(26, 35, 50, 0.12);
+  --shadow-xl: 0 16px 40px rgba(26, 35, 50, 0.16);
+}
+
+/* ── Responsive container ── */
+@utility container {
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: 1.5rem;
+
+  @media (width >= 640px) {
+    max-width: 640px;
+  }
+  @media (width >= 768px) {
+    max-width: 768px;
+  }
+  @media (width >= 1024px) {
+    max-width: 1024px;
+  }
+  @media (width >= 1280px) {
+    max-width: 1280px;
+  }
+}

@@ -11,9 +11,11 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "isolatedModules": true,
+    "typeRoots": ["./node_modules/@types"],
     "paths": {
-      "@backend/*": ["../backend/src/*"]
+      "@src/*": ["../src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["./**/*"],
+  "exclude": ["node_modules", "../src/node_modules"]
 }

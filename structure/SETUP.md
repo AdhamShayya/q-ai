@@ -41,15 +41,17 @@ cd ..
    - **Mac/Linux:** Open Terminal and run `ifconfig` or `ip addr`. Look for your network interface IP
 
 2. Update `src/constants/config.js`:
+
    ```javascript
-   BASE_URL: __DEV__ 
+   BASE_URL: __DEV__
      ? 'http://YOUR_IP_ADDRESS:3000/api'  // Replace YOUR_IP_ADDRESS
      : 'https://api.q-ai.com/api',
    ```
 
    Example:
+
    ```javascript
-   BASE_URL: __DEV__ 
+   BASE_URL: __DEV__
      ? 'http://192.168.1.100:3000/api'
      : 'https://api.q-ai.com/api',
    ```
@@ -69,11 +71,13 @@ Keep this terminal open. Metro is the JavaScript bundler for React Native.
 ### 5. Run the App
 
 **For Android:**
+
 ```bash
 npm run android
 ```
 
 **For iOS (macOS only):**
+
 ```bash
 npm run ios
 ```
@@ -83,7 +87,8 @@ npm run ios
 ### Issue: Cannot connect to backend API
 
 **Solution:**
-1. Make sure backend server is running: `cd ../backend && npm start`
+
+1. Make sure backend server is running: `cd ../src && npm start`
 2. Verify API URL in `src/constants/config.js` uses your IP address, not localhost
 3. Check that your phone/emulator is on the same WiFi network
 4. Test the API URL in a browser: `http://YOUR_IP:3000/health`
@@ -91,6 +96,7 @@ npm run ios
 ### Issue: Metro bundler won't start
 
 **Solution:**
+
 ```bash
 # Clear Metro cache
 npm start -- --reset-cache
@@ -99,6 +105,7 @@ npm start -- --reset-cache
 ### Issue: iOS build fails
 
 **Solution:**
+
 ```bash
 cd ios
 pod deintegrate
@@ -109,6 +116,7 @@ cd ..
 ### Issue: Android build fails
 
 **Solution:**
+
 1. Make sure Android Studio is installed
 2. Open Android Studio and install required SDKs
 3. Check that `ANDROID_HOME` environment variable is set
@@ -146,4 +154,3 @@ For different environments, you can use `react-native-config`:
    API_BASE_URL=http://192.168.1.100:3000/api
    ```
 3. Update `src/constants/config.js` to use `Config.API_BASE_URL`
-

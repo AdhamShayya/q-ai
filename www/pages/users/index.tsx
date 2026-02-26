@@ -1,6 +1,6 @@
 import { useLoaderData } from "react-router";
 
-import { userApi } from "../trpc";
+import { userApi } from "../../trpc";
 
 export async function loader() {
   const users = await userApi.getAllUsers.query();
@@ -16,7 +16,7 @@ function UsersPage() {
       <ul>
         {users.map((user) => (
           <li key={user.id}>
-            <strong>{user.name}</strong> — {user.email} ({user.role})
+            <strong>{user.name}</strong> — {user.email}
           </li>
         ))}
       </ul>

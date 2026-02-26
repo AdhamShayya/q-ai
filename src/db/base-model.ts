@@ -1,5 +1,6 @@
 import { eq, type SQL } from "drizzle-orm"
 import { type PgTable } from "drizzle-orm/pg-core"
+
 import { db } from "./index"
 import type { IModelConfig } from "./types/model-config"
 
@@ -17,7 +18,11 @@ export class BaseModel<TSchema extends object> {
   }
 
   async findById(id: string): Promise<TSchema | null> {
-    const rows = await db.select().from(this.table).where(eq(idCol(this.table), id)).limit(1)
+    const rows = await db
+      .select()
+      .from(this.table)
+      .where(eq(idCol(this.table), id))
+      .limit(1)
     return ((rows as unknown[])[0] as TSchema) ?? null
   }
 
@@ -37,7 +42,10 @@ export class BaseModel<TSchema extends object> {
   }
 
   async create(data: Record<string, unknown>): Promise<TSchema> {
-    const rows = await db.insert(this.table).values(data as never).returning()
+    const rows = await db
+      .insert(this.table)
+      .values(data as never)
+      .returning()
     return (rows as unknown[])[0] as TSchema
   }
 
