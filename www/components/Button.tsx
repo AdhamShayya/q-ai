@@ -1,13 +1,13 @@
-import React from "react";
+﻿import React from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 /**
- * solid          → primary bg, white text  (default SCSS button)
- * outline        → transparent bg, border, text-secondary
+ * solid → primary bg, white text (default SCSS button)
+ * outline → transparent bg, border, text-secondary
  * outline-accent → transparent bg, border, accent-colored text
- * ghost          → no bg, no border, muted text  (icon-only buttons)
- * muted          → muted bg, border, text-secondary  (Browse Vault etc.)
+ * ghost → no bg, no border, muted text (icon-only buttons)
+ * muted → muted bg, border, text-secondary (Browse Vault etc.)
  */
 export type ButtonVariant =
   | "solid"
@@ -16,17 +16,6 @@ export type ButtonVariant =
   | "ghost"
   | "muted";
 
-/**
- * sm      → small pill  (header actions, action pills)
- * md      → default SCSS padding
- * icon    → 32 × 32 fixed circle, no padding
- */
-/**
- * sm      → small pill  (header actions, action pills)
- * md      → default SCSS padding
- * icon    → 32 × 32 fixed circle, no padding
- * none    → no size class — caller controls padding via className
- */
 export type ButtonSize = "sm" | "md" | "icon" | "none";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

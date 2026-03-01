@@ -1,9 +1,32 @@
-import React, { useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
+
+import { useLoaderData } from "react-router";
 import Navbar from "../../components/Navbar";
-import SVGIcon from "../../components/SVGIcon";
 import Button from "../../components/Button";
+import SVGIcon from "../../components/SVGIcon";
+import { vaultApi, userApi } from "../../trpc";
+import type { Serialised } from "../../shared";
+import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
+const DEMO_NAME = "Demo User";
+const DEMO_EMAIL = "demo@q-ai.app";
 
 // ── Types ────────────────────────────────────────────────────────────────────
+
+type Vault = Serialised<IVaultSchema>;
+
+const CHAT_WEBHOOK_URL = "https://techflow12.app.n8n.cloud/webhook/chat-tutor";
+
+type MessageRole = "user" | "assistant";
+
+interface ChatMessage {
+  id: string;
+  role: MessageRole;
+  content: string;
+  timestamp: Date;
+}
 
 interface Material {
   id: number;
@@ -24,32 +47,16 @@ interface ActionPillData {
   label: string;
 }
 
-// ── Mock data ────────────────────────────────────────────────────────────────
+// ── Loader ────────────────────────────────────────────────────────────────────
 
-const CURRENT_MATERIAL: Material = {
-  id: 1,
-  title: "Introduction to Quantum Mecha...",
-  subtitle: "PDF Document • 45 pages",
-  thumbnail:
-    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&q=80",
-};
-
-const RELATED_MATERIALS: Material[] = [
-  {
-    id: 2,
-    title: "Organic Chemistry Lecture 5",
-    subtitle: "Feb 4",
-    thumbnail:
-      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&q=80",
-  },
-  {
-    id: 3,
-    title: "Statistical Analysis Methods",
-    subtitle: "Feb 3",
-    thumbnail:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80",
-  },
-];
+export async function loader() {
+  const user = await userApi.ensureUser.mutate({
+    email: DEMO_EMAIL,
+    name: DEMO_NAME,
+  });
+  const vaults = await vaultApi.listByUser.query({ userId: user.id });
+  return { userId: user.id, vaults };
+}
 
 const ICON_STYLE_SUGGESTION = {
   flexShrink: 0 as const,
@@ -60,22 +67,22 @@ const ICON_STYLE_PILL = { flexShrink: 0 as const };
 const SUGGESTIONS: Suggestion[] = [
   {
     id: 1,
-    icon: <SVGIcon name="book" style={ICON_STYLE_SUGGESTION} />,
+    icon: <SVGIcon name="book" style={ICON_STYLE_SUGGESTION} size={20} />,
     text: "Explain the main concepts from this chapter",
   },
   {
     id: 2,
-    icon: <SVGIcon name="key" style={ICON_STYLE_SUGGESTION} />,
+    icon: <SVGIcon name="key" style={ICON_STYLE_SUGGESTION} size={20} />,
     text: "What are the key takeaways I should remember?",
   },
   {
     id: 3,
-    icon: <SVGIcon name="list" style={ICON_STYLE_SUGGESTION} />,
+    icon: <SVGIcon name="list" style={ICON_STYLE_SUGGESTION} size={20} />,
     text: "Can you break down this topic step by step?",
   },
   {
     id: 4,
-    icon: <SVGIcon name="globe" style={ICON_STYLE_SUGGESTION} />,
+    icon: <SVGIcon name="globe" style={ICON_STYLE_SUGGESTION} size={20} />,
     text: "Help me understand this with real-world examples",
   },
 ];
@@ -83,22 +90,22 @@ const SUGGESTIONS: Suggestion[] = [
 const ACTION_PILLS: ActionPillData[] = [
   {
     id: 1,
-    icon: <SVGIcon name="lightbulb" style={ICON_STYLE_PILL} />,
+    icon: <SVGIcon name="lightbulb" style={ICON_STYLE_PILL} size={20} />,
     label: "Explain Concept",
   },
   {
     id: 2,
-    icon: <SVGIcon name="list" size={14} style={ICON_STYLE_PILL} />,
+    icon: <SVGIcon name="list" size={20} style={ICON_STYLE_PILL} />,
     label: "Show Examples",
   },
   {
     id: 3,
-    icon: <SVGIcon name="analogy-cycle" style={ICON_STYLE_PILL} />,
+    icon: <SVGIcon name="analogy-cycle" size={20} style={ICON_STYLE_PILL} />,
     label: "Use Analogy",
   },
   {
     id: 4,
-    icon: <SVGIcon name="file" style={ICON_STYLE_PILL} />,
+    icon: <SVGIcon name="file" size={20} style={ICON_STYLE_PILL} />,
     label: "Summarize",
   },
 ];
@@ -163,6 +170,7 @@ function EmptyState({
     >
       <SVGIcon
         name="sparkles"
+        size={40}
         style={{ color: "var(--color-text-secondary)" }}
       />
 
@@ -205,12 +213,14 @@ function EmptyState({
         ))}
       </div>
 
-      <div className="flex items-center gap-3 mt-4">
+      <div className="flex items-center gap-6 mt-4">
         <span className="flex items-center gap-1.5 text-xs text-muted">
-          🔒 Privacy Protected
+          <SVGIcon name="lock" size={22} />
+          Privacy Protecte
         </span>
         <span className="flex items-center gap-1.5 text-xs text-muted">
-          🎓 Academic Integrity
+          <SVGIcon name="shield" size={22} />
+          Academic Integrity
         </span>
       </div>
     </div>
@@ -224,7 +234,7 @@ function ConversationHeader({ title }: { title: string }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0.875rem 2rem",
+        padding: "18px 30px",
         borderBottom: "1.5px solid var(--color-border)",
         background: "var(--color-bg-card)",
       }}
@@ -267,13 +277,13 @@ function ConversationHeader({ title }: { title: string }) {
   );
 }
 
-function ChatInput({
-  value,
-  onChange,
-}: {
+function ChatInput(props: {
   value: string;
   onChange: (v: string) => void;
+  onSend?: () => void;
+  disabled?: boolean;
 }) {
+  const { value, onChange, onSend, disabled } = props;
   const MAX = 2000;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -308,7 +318,7 @@ function ChatInput({
             key={p.id}
             icon={p.icon}
             label={p.label}
-            onClick={() => onChange(value + p.label + " ")}
+            onClick={() => onChange(value + p.label + "")}
           />
         ))}
       </div>
@@ -356,6 +366,7 @@ function ChatInput({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
+              if (!disabled && value.trim()) onSend?.();
             }
           }}
         />
@@ -373,13 +384,16 @@ function ChatInput({
           <Button
             variant="solid"
             size="icon"
+            onClick={() => {
+              if (!disabled && value.trim()) onSend?.();
+            }}
             style={
-              !value.trim()
-                ? { background: "var(--color-text-muted)", cursor: "default" }
+              !value.trim() || disabled
+                ? { background: "var(--color-text-muted)", cursor: "pointer" }
                 : undefined
             }
           >
-            <SVGIcon name="send" />
+            <SVGIcon name="send" size={16} />
           </Button>
         </div>
       </div>
@@ -416,8 +430,152 @@ function ChatInput({
   );
 }
 
-function ChatArea({ conversationTitle }: { conversationTitle?: string }) {
+function MessageBubble({ msg }: { msg: ChatMessage }) {
+  const isUser = msg.role === "user";
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: isUser ? "flex-end" : "flex-start",
+        padding: "0.25rem 2rem",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "72%",
+          padding: "0.65rem 1rem",
+          borderRadius: isUser
+            ? "1rem 1rem 0.25rem 1rem"
+            : "1rem 1rem 1rem 0.25rem",
+          background: isUser ? "var(--color-primary)" : "var(--color-bg-card)",
+          color: isUser ? "#fff" : "var(--color-text)",
+          fontSize: "var(--font-size-sm)",
+          lineHeight: "var(--line-height-normal)",
+          border: isUser ? "none" : "1.5px solid var(--color-border)",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+        }}
+      >
+        {msg.content}
+      </div>
+    </div>
+  );
+}
+
+function TypingIndicator() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-start",
+        padding: "0.25rem 2rem",
+      }}
+    >
+      <div
+        style={{
+          padding: "0.65rem 1rem",
+          borderRadius: "1rem 1rem 1rem 0.25rem",
+          background: "var(--color-bg-card)",
+          border: "1.5px solid var(--color-border)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.3rem",
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              background: "var(--color-text-muted)",
+              display: "inline-block",
+              animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChatArea({
+  conversationTitle,
+  userId,
+  vaultId,
+}: {
+  conversationTitle?: string;
+  userId: string;
+  vaultId: string | null;
+}) {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  const sendMessage = async () => {
+    const text = message.trim();
+    if (!text || isLoading) return;
+
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: text,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setMessage("");
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(CHAT_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, userId, vaultId }),
+      });
+
+      let replyText = "Sorry, I couldn't get a response.";
+      if (res.ok) {
+        const contentType = res.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+          const data = await res.json();
+          replyText =
+            data?.output ??
+            data?.message ??
+            data?.text ??
+            data?.reply ??
+            data?.response ??
+            (typeof data === "string" ? data : JSON.stringify(data));
+        } else {
+          replyText = await res.text();
+        }
+      }
+
+      const aiMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: replyText,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      const errMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Network error — please check your connection and try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errMsg]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -430,8 +588,35 @@ function ChatArea({ conversationTitle }: { conversationTitle?: string }) {
       }}
     >
       {conversationTitle && <ConversationHeader title={conversationTitle} />}
-      <EmptyState onSuggestionClick={(text) => setMessage(text)} />
-      <ChatInput value={message} onChange={setMessage} />
+
+      {/* Messages area */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          paddingTop: "1rem",
+          paddingBottom: "0.5rem",
+        }}
+      >
+        {messages.length === 0 ? (
+          <EmptyState onSuggestionClick={(text) => setMessage(text)} />
+        ) : (
+          <>
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} msg={msg} />
+            ))}
+            {isLoading && <TypingIndicator />}
+            <div ref={bottomRef} />
+          </>
+        )}
+      </div>
+
+      <ChatInput
+        value={message}
+        onChange={setMessage}
+        onSend={sendMessage}
+        disabled={isLoading}
+      />
     </div>
   );
 }
@@ -478,19 +663,7 @@ function SidebarMaterialCard({
         />
       </div>
       <div style={{ padding: "0.625rem 0.75rem 0.75rem" }}>
-        <p
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.375rem",
-            fontSize: "var(--font-size-sm)",
-            fontWeight: "var(--font-weight-medium)",
-            color: "var(--color-text)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <p className="text-[12px]">
           <span style={{ fontSize: "var(--font-size-xs)", flexShrink: 0 }}>
             📄
           </span>
@@ -527,7 +700,109 @@ function SidebarSectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StudyMaterialsSidebar() {
+const VAULT_COLORS = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+  "#ef4444",
+  "#14b8a6",
+];
+
+function VaultCard(props: {
+  vault: Serialised<IVaultSchema>;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const { vault, selected, onClick } = props;
+  const color = VAULT_COLORS[vault.name.charCodeAt(0) % VAULT_COLORS.length];
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: selected ? "var(--color-bg)" : "var(--color-bg-card)",
+        border: selected
+          ? `1.5px solid ${color}`
+          : "1.5px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
+        overflow: "hidden",
+        cursor: "pointer",
+        transition:
+          "box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast)",
+        boxShadow: selected ? `0 0 0 2px ${color}22` : "none",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.transform =
+          "translateY(-1px)";
+        (e.currentTarget as HTMLDivElement).style.boxShadow =
+          "var(--shadow-md)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLDivElement).style.boxShadow = selected
+          ? `0 0 0 2px ${color}22`
+          : "none";
+      }}
+    >
+      {/* Colour accent bar */}
+      <div style={{ height: 6, background: color }} />
+      <div
+        style={{
+          padding: "0.625rem 0.75rem 0.75rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.6rem",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            background: color,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontWeight: "var(--font-weight-bold)",
+            fontSize: "var(--font-size-sm)",
+            flexShrink: 0,
+          }}
+        >
+          {vault.name.charAt(0).toUpperCase()}
+        </div>
+        <div style={{ minWidth: 0, gap: 0 }}>
+          <p>{vault.name}</p>
+          {vault.courseName != null && (
+            <p className="text-[12px]">{vault.courseName}</p>
+          )}
+        </div>
+        {selected === true && (
+          <span
+            style={{
+              marginLeft: "auto",
+              color,
+              flexShrink: 0,
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+          >
+            ✓
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StudyMaterialsSidebar(props: {
+  vaults: Serialised<IVaultSchema>[];
+  selectedVaultId: string | null;
+  onSelectVault: (id: string) => void;
+}) {
+  const { vaults, selectedVaultId, onSelectVault } = props;
   return (
     <aside
       style={{
@@ -541,12 +816,7 @@ function StudyMaterialsSidebar() {
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          padding: "1rem 1.25rem",
-          borderBottom: "1.5px solid var(--color-border)",
-        }}
-      >
+      <div className="p-4.75 border-b border-gray-300">
         <h3
           style={{
             fontSize: "var(--font-size-base)",
@@ -556,6 +826,9 @@ function StudyMaterialsSidebar() {
         >
           Study Materials
         </h3>
+        <p className="text-gray-400 text-[12px]">
+          Select a vault to link this chat
+        </p>
       </div>
 
       {/* Scrollable content */}
@@ -566,24 +839,23 @@ function StudyMaterialsSidebar() {
           padding: "1.125rem 1.25rem",
           display: "flex",
           flexDirection: "column",
-          gap: "1.5rem",
+          gap: "0.75rem",
         }}
       >
-        <div>
-          <SidebarSectionLabel>Current Material</SidebarSectionLabel>
-          <SidebarMaterialCard material={CURRENT_MATERIAL} isLarge />
-        </div>
-
-        <div>
-          <SidebarSectionLabel>Related Materials</SidebarSectionLabel>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-          >
-            {RELATED_MATERIALS.map((m) => (
-              <SidebarMaterialCard key={m.id} material={m} />
-            ))}
-          </div>
-        </div>
+        {vaults.length === 0 ? (
+          <p className="flex items-center justify-center text-center text-gray-400 text-[12px] h-full">
+            No vaults found. Create one on the home page.
+          </p>
+        ) : (
+          vaults.map((v) => (
+            <VaultCard
+              key={v.id}
+              vault={v}
+              selected={v.id === selectedVaultId}
+              onClick={() => onSelectVault(v.id)}
+            />
+          ))
+        )}
       </div>
 
       {/* Browse Vault */}
@@ -598,7 +870,7 @@ function StudyMaterialsSidebar() {
           size="sm"
           fullWidth
           className="rounded-md py-2.5"
-          leftIcon={<SVGIcon name="folder" />}
+          leftIcon={<SVGIcon name="folder" size={26} />}
         >
           Browse Vault
         </Button>
@@ -610,7 +882,13 @@ function StudyMaterialsSidebar() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 function AiTutor() {
-  const conversationTitle = "Introduction to Quantum Mechanics";
+  const { userId, vaults } = useLoaderData<typeof loader>();
+  const [selectedVaultId, setSelectedVaultId] = useState<string | null>(
+    vaults[0]?.id ?? null,
+  );
+
+  const selectedVault = vaults.find((v) => v.id === selectedVaultId);
+  const conversationTitle = selectedVault?.name ?? "AI Tutor";
 
   return (
     <div
@@ -623,8 +901,16 @@ function AiTutor() {
     >
       <Navbar />
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <ChatArea conversationTitle={conversationTitle} />
-        <StudyMaterialsSidebar />
+        <ChatArea
+          conversationTitle={conversationTitle}
+          userId={userId}
+          vaultId={selectedVaultId}
+        />
+        <StudyMaterialsSidebar
+          vaults={vaults}
+          selectedVaultId={selectedVaultId}
+          onSelectVault={setSelectedVaultId}
+        />
       </div>
     </div>
   );

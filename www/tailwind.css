@@ -1,10 +1,5 @@
-/* ============================================================
-   Q-Ai  –  Tailwind CSS v4  +  Academic Sanctuary theme
-   ============================================================ */
-
 @import "tailwindcss";
 
-/* ── Design tokens → Tailwind utilities + auto-generated :root vars ── */
 @theme {
   /* Brand / Primary */
   --color-primary: #1a2332;
@@ -69,9 +64,24 @@
     max-width: 768px;
   }
   @media (width >= 1024px) {
-    max-width: 1024px;
+    max-width: 1224px;
   }
   @media (width >= 1280px) {
-    max-width: 1280px;
+    max-width: 1480px;
   }
+}
+
+/* ── Waveform animation ── */
+@keyframes waveform {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.waveform-bar {
+  animation: waveform 0.9s ease-in-out infinite;
 }

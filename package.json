@@ -5,5 +5,9 @@
   "workspaces": [
     "www",
     "src"
-  ]
+  ],
+  "scripts": {
+    "dev": "bun run --cwd www dev",
+    "backend": "bun run --cwd src dev"
+  }
 }

@@ -11,7 +11,8 @@ const pool = new Pool({
   connectionString: env.DATABASE_URL,
   max: 10, // max connections in the pool
   idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 2_000,
+  connectionTimeoutMillis: 10_000,
+  ssl: { rejectUnauthorized: false }, // required by Supabase pooler
 })
 
 pool.on("error", (err: Error) => {

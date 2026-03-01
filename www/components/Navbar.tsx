@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation } from "react-router";
 
 function NavLink({
@@ -17,7 +17,7 @@ function NavLink({
   return (
     <Link
       to={href}
-      className={`no-underline inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium transition-colors border-b-2 ${
+      className={`no-underline items-center gap-1.5 h-1/2 transition-colors border-b-2 ${
         active
           ? "text-accent border-accent"
           : "text-text-secondary border-transparent hover:text-text"
@@ -31,7 +31,7 @@ function NavLink({
 
 function Navbar() {
   return (
-    <nav className="bg-bg-card border-b-[1.5px] border-border">
+    <nav className="border-b border-(--secondary-color) ">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -48,10 +48,10 @@ function Navbar() {
         </Link>
 
         {/* Nav links */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-10 h-full">
           <NavLink label="Dashboard" icon="🗂️" href="/" />
           <NavLink label="AI Tutor" icon="💬" href="/ai-tutor" />
-          <NavLink label="Voice Study" icon="🎙️" href="/voice-study" />
+          {/* <NavLink label="Voice Study" icon="🎙️" href="/voice-study" /> */}
         </div>
       </div>
     </nav>
