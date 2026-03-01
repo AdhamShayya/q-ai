@@ -1,6 +1,13 @@
 ﻿import React from "react";
 import { Link, useLocation } from "react-router";
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface NavbarProps {
+  /** Pass the current user to show their name; omit or pass null for the Sign In link. */
+  user?: { name: string } | null;
+}
+
 function NavLink({
   label,
   icon,
@@ -29,7 +36,7 @@ function NavLink({
   );
 }
 
-function Navbar() {
+function Navbar({ user = null }: NavbarProps) {
   return (
     <nav className="border-b border-(--secondary-color) ">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -53,6 +60,24 @@ function Navbar() {
           <NavLink label="AI Tutor" icon="💬" href="/ai-tutor" />
           {/* <NavLink label="Voice Study" icon="🎙️" href="/voice-study" /> */}
         </div>
+
+        {/* Auth slot */}
+        {user ? (
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-semibold select-none">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-sm font-medium text-text">{user.name}</span>
+          </div>
+        ) : (
+          <Link
+            to="/sign-in"
+            className="text-sm font-medium text-text-secondary hover:text-text transition-colors border border-border hover:border-border-focus rounded-lg px-4 py-1.5"
+            style={{ textDecoration: "none" }}
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </nav>
   );

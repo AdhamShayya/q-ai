@@ -447,8 +447,6 @@ function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-
       <main className="flex flex-col container w-full py-10">
         <h3>Knowledge Vault</h3>
         <p className="pt-2 mb-6">

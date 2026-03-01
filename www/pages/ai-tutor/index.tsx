@@ -1,7 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 
 import { useLoaderData } from "react-router";
-import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import SVGIcon from "../../components/SVGIcon";
 import { vaultApi, userApi } from "../../trpc";
@@ -131,22 +130,6 @@ function SuggestionButton({
     >
       {icon}
       <p>{text}</p>
-    </Button>
-  );
-}
-
-function ActionPill({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-}) {
-  return (
-    <Button variant="outline" size="sm" leftIcon={icon} onClick={onClick}>
-      {label}
     </Button>
   );
 }
@@ -305,21 +288,15 @@ function ChatInput(props: {
       }}
     >
       {/* Action pills */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          flexWrap: "wrap" as const,
-        }}
-      >
+      <div className="flex gap-3">
         {ACTION_PILLS.map((p) => (
-          <ActionPill
-            key={p.id}
-            icon={p.icon}
-            label={p.label}
+          <Button
+            variant="outline"
+            leftIcon={p.icon}
             onClick={() => onChange(value + p.label + "")}
-          />
+          >
+            {p.label}
+          </Button>
         ))}
       </div>
 
@@ -621,103 +598,13 @@ function ChatArea({
   );
 }
 
-function SidebarMaterialCard({
-  material,
-  isLarge,
-}: {
-  material: Material;
-  isLarge?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        background: "var(--color-bg-card)",
-        border: "1.5px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
-        overflow: "hidden",
-        cursor: "pointer",
-        transition:
-          "box-shadow var(--transition-fast), transform var(--transition-fast)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow =
-          "var(--shadow-md)";
-        (e.currentTarget as HTMLDivElement).style.transform =
-          "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-      }}
-    >
-      <div style={{ height: isLarge ? "130px" : "88px", overflow: "hidden" }}>
-        <img
-          src={material.thumbnail}
-          alt={material.title}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
-      </div>
-      <div style={{ padding: "0.625rem 0.75rem 0.75rem" }}>
-        <p className="text-[12px]">
-          <span style={{ fontSize: "var(--font-size-xs)", flexShrink: 0 }}>
-            📄
-          </span>
-          {material.title}
-        </p>
-        <p
-          style={{
-            fontSize: "var(--font-size-xs)",
-            color: "var(--color-text-muted)",
-            marginTop: "0.125rem",
-          }}
-        >
-          {material.subtitle}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function SidebarSectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      style={{
-        fontSize: "var(--font-size-xs)",
-        fontWeight: "var(--font-weight-semibold)",
-        color: "var(--color-text-muted)",
-        textTransform: "uppercase" as const,
-        letterSpacing: "0.07em",
-        marginBottom: "0.625rem",
-      }}
-    >
-      {children}
-    </p>
-  );
-}
-
-const VAULT_COLORS = [
-  "#6366f1",
-  "#8b5cf6",
-  "#ec4899",
-  "#f59e0b",
-  "#10b981",
-  "#3b82f6",
-  "#ef4444",
-  "#14b8a6",
-];
-
 function VaultCard(props: {
   vault: Serialised<IVaultSchema>;
   selected: boolean;
   onClick: () => void;
 }) {
   const { vault, selected, onClick } = props;
-  const color = VAULT_COLORS[vault.name.charCodeAt(0) % VAULT_COLORS.length];
+  const color = "var(--secondary-color)";
   return (
     <div
       onClick={onClick}
@@ -733,44 +620,11 @@ function VaultCard(props: {
           "box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast)",
         boxShadow: selected ? `0 0 0 2px ${color}22` : "none",
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform =
-          "translateY(-1px)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow =
-          "var(--shadow-md)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = selected
-          ? `0 0 0 2px ${color}22`
-          : "none";
-      }}
     >
       {/* Colour accent bar */}
       <div style={{ height: 6, background: color }} />
-      <div
-        style={{
-          padding: "0.625rem 0.75rem 0.75rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.6rem",
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            background: color,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontWeight: "var(--font-weight-bold)",
-            fontSize: "var(--font-size-sm)",
-            flexShrink: 0,
-          }}
-        >
+      <div className="flex p-4 gap-2 items-center">
+        <div className="rounded-full flex items-center justify-center text-white w-8 h-8 bg-(--secondary-color)">
           {vault.name.charAt(0).toUpperCase()}
         </div>
         <div style={{ minWidth: 0, gap: 0 }}>
@@ -816,16 +670,8 @@ function StudyMaterialsSidebar(props: {
       }}
     >
       {/* Header */}
-      <div className="p-4.75 border-b border-gray-300">
-        <h3
-          style={{
-            fontSize: "var(--font-size-base)",
-            fontWeight: "var(--font-weight-semibold)",
-            color: "var(--color-primary)",
-          }}
-        >
-          Study Materials
-        </h3>
+      <div className="p-4 border-b border-gray-300">
+        <h3 className="text-[20px]">Study Materials</h3>
         <p className="text-gray-400 text-[12px]">
           Select a vault to link this chat
         </p>
@@ -891,27 +737,17 @@ function AiTutor() {
   const conversationTitle = selectedVault?.name ?? "AI Tutor";
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        background: "var(--color-bg)",
-      }}
-    >
-      <Navbar />
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <ChatArea
-          conversationTitle={conversationTitle}
-          userId={userId}
-          vaultId={selectedVaultId}
-        />
-        <StudyMaterialsSidebar
-          vaults={vaults}
-          selectedVaultId={selectedVaultId}
-          onSelectVault={setSelectedVaultId}
-        />
-      </div>
+    <div className="container flex">
+      <ChatArea
+        conversationTitle={conversationTitle}
+        userId={userId}
+        vaultId={selectedVaultId}
+      />
+      <StudyMaterialsSidebar
+        vaults={vaults}
+        selectedVaultId={selectedVaultId}
+        onSelectVault={setSelectedVaultId}
+      />
     </div>
   );
 }
