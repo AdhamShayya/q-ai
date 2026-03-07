@@ -1,12 +1,13 @@
 import { TRPCError } from "@trpc/server"
 
-import { ORM } from "../db/orm"
+import VaultModel from "../db/models/Vault"
+import DocumentModel from "../db/models/Document"
 import type { IVaultSchema, CreateVaultInput, UpdateVaultInput } from "../db/schemas/Vault.schema"
 
 // ── Vault CRUD ────────────────────────────────────────────────────────────────
 
 export async function createVault(input: CreateVaultInput): Promise<IVaultSchema> {
-  return ORM.Vault.create({
+  return VaultModel.create({
     userId: input.userId,
     name: input.name,
     courseName: input.courseName ?? null,
@@ -15,11 +16,11 @@ export async function createVault(input: CreateVaultInput): Promise<IVaultSchema
 }
 
 export async function getVaultsByUserId(userId: string): Promise<IVaultSchema[]> {
-  return ORM.Vault.findByUserId(userId)
+  return VaultModel.findByUserId(userId)
 }
 
 export async function getVaultById(id: string): Promise<IVaultSchema> {
-  const vault = await ORM.Vault.findById(id)
+  const vault = await VaultModel.findById(id)
   if (vault == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Vault not found" })
   }
@@ -27,7 +28,7 @@ export async function getVaultById(id: string): Promise<IVaultSchema> {
 }
 
 export async function updateVault(id: string, input: UpdateVaultInput): Promise<IVaultSchema> {
-  const updated = await ORM.Vault.updateById(id, input)
+  const updated = await VaultModel.updateById(id, input)
   if (updated == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Vault not found" })
   }
@@ -35,7 +36,8 @@ export async function updateVault(id: string, input: UpdateVaultInput): Promise<
 }
 
 export async function deleteVault(id: string): Promise<{ id: string }> {
-  const deletedId = await ORM.Vault.deleteById(id)
+  await DocumentModel.deleteByVaultId(id)
+  const deletedId = await VaultModel.deleteById(id)
   if (deletedId == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Vault not found" })
   }

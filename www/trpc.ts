@@ -5,6 +5,9 @@ export const trpc = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: "http://localhost:4000/trpc",
+      fetch(url, opts) {
+        return fetch(url, { ...opts, credentials: "include" });
+      },
     }),
   ],
 });

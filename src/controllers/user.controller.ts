@@ -1,53 +1,73 @@
+import bcrypt from "bcryptjs"
 import { TRPCError } from "@trpc/server"
 
-import { ORM } from "../db/orm"
+import UserModel from "../db/models/User"
 import type { IUserPublic, UpdateUserInput } from "../db/schemas/User.schema"
+type SignUpInput = {
+  name: string
+  email: string
+  password: string
+}
+export async function signUp(props: SignUpInput): Promise<IUserPublic> {
+  const existing = await UserModel.findByEmail(props.email)
+  if (existing != null) {
+    throw new TRPCError({ code: "CONFLICT", message: "Email already in use" })
+  }
 
-const DEMO_PASSWORD_HASH = "$2b$10$demo_placeholder_hash_not_for_auth_use"
+  const passwordHash = await bcrypt.hash(props.password, 10)
+  const user = await UserModel.create({
+    email: props.email.toLowerCase(),
+    name: props.name,
+    passwordHash,
+    subscriptionTier: "free",
+    subscriptionStatus: "active",
+  })
+  return UserModel.toPublic(user)
+}
+
+type SignInInput = {
+  email: string
+  password: string
+}
+export async function signIn(input: SignInInput): Promise<IUserPublic> {
+  const user = await UserModel.findByEmail(input.email)
+  if (user == null) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" })
+  }
+
+  const isValid = await bcrypt.compare(input.password, user.passwordHash)
+  if (isValid === false) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" })
+  }
+
+  return UserModel.toPublic(user)
+}
 
 export async function getUserById(id: string): Promise<IUserPublic> {
-  const user = await ORM.User.findById(id)
+  const user = await UserModel.findById(id)
   if (user == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
   }
-  return ORM.User.toPublic(user)
+  return UserModel.toPublic(user)
 }
 
 export async function getAllUsers(): Promise<IUserPublic[]> {
-  const all = await ORM.User.findAll()
-  return all.map((u) => ORM.User.toPublic(u))
+  const all = await UserModel.findAll()
+  return all.map((u) => UserModel.toPublic(u))
 }
 
 export async function updateUser(id: string, input: UpdateUserInput): Promise<IUserPublic> {
-  const updated = await ORM.User.updateById(id, input)
+  const updated = await UserModel.updateById(id, input)
   if (updated == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
   }
-  return ORM.User.toPublic(updated)
+  return UserModel.toPublic(updated)
 }
 
 export async function deleteUser(id: string): Promise<{ id: string }> {
-  const deletedId = await ORM.User.deleteById(id)
+  const deletedId = await UserModel.deleteById(id)
   if (deletedId == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "User not found" })
   }
   return { id: deletedId }
-}
-
-/**
- * Find a user by email or create them if they don't exist.
- * Used during development to bootstrap a session-less demo user.
- */
-export async function ensureUser(input: { email: string; name: string }): Promise<IUserPublic> {
-  const existing = await ORM.User.findByEmail(input.email)
-  if (existing != null) return ORM.User.toPublic(existing)
-
-  const created = await ORM.User.create({
-    email: input.email.toLowerCase(),
-    name: input.name,
-    passwordHash: DEMO_PASSWORD_HASH,
-    subscriptionTier: "free",
-    subscriptionStatus: "active",
-  })
-  return ORM.User.toPublic(created)
 }

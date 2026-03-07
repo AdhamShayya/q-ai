@@ -66,7 +66,7 @@ export function UploadForm({
           <input
             required
             className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-            placeholder="e.g. Physics Notes"
+            placeholder="e.g. Physics"
             value={vaultName}
             onChange={(e) => setVaultName(e.target.value)}
           />
@@ -77,7 +77,7 @@ export function UploadForm({
           </span>
           <input
             className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
-            placeholder="e.g. computer_science_101"
+            placeholder="e.g. Quantum Mechanics"
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
           />

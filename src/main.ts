@@ -1,5 +1,6 @@
 import cors from "cors"
 import express from "express"
+import cookieParser from "cookie-parser"
 import { createExpressMiddleware } from "@trpc/server/adapters/express"
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 
@@ -7,10 +8,15 @@ import { env } from "./config/config"
 import { appRouter } from "./routers"
 import { checkDatabaseConnection } from "./db"
 
-export type Context = Record<string, never>
+export type Context = {
+  req: express.Request
+  res: express.Response
+  userId: string | null
+}
 
-export function createContext(_opts: CreateExpressContextOptions): Context {
-  return {}
+export function createContext({ req, res }: CreateExpressContextOptions): Context {
+  const userId = req.signedCookies?.session
+  return { req, res, userId }
 }
 
 const app = express()
@@ -22,6 +28,7 @@ app.use(
 )
 
 app.use(express.json())
+app.use(cookieParser(env.COOKIE_SECRET))
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => {

@@ -1,22 +1,18 @@
 ﻿import React from "react";
-import { Link, useLocation } from "react-router";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+import { Link, useLocation, useNavigate } from "react-router";
+import { userApi } from "../trpc";
+import SVGIcon from "./SVGIcon";
 
 interface NavbarProps {
-  /** Pass the current user to show their name; omit or pass null for the Sign In link. */
   user?: { name: string } | null;
 }
-
-function NavLink({
-  label,
-  icon,
-  href,
-}: {
+type HeaderLinkProps = {
   label: string;
   icon: string;
   href: string;
-}) {
+};
+function HeaderLink(props: HeaderLinkProps) {
+  const { label, icon, href } = props;
   const { pathname } = useLocation();
   const active =
     pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -36,7 +32,14 @@ function NavLink({
   );
 }
 
-function Navbar({ user = null }: NavbarProps) {
+function Header({ user = null }: NavbarProps) {
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await userApi.signOut.mutate();
+    navigate("/sign-in");
+  }
+
   return (
     <nav className="border-b border-(--secondary-color) ">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -56,18 +59,24 @@ function Navbar({ user = null }: NavbarProps) {
 
         {/* Nav links */}
         <div className="flex items-center gap-10 h-full">
-          <NavLink label="Dashboard" icon="🗂️" href="/" />
-          <NavLink label="AI Tutor" icon="💬" href="/ai-tutor" />
-          {/* <NavLink label="Voice Study" icon="🎙️" href="/voice-study" /> */}
+          <HeaderLink label="Dashboard" icon="🗂️" href="/" />
+          <HeaderLink label="AI Tutor" icon="💬" href="/ai-tutor" />
+          {/* <HeaderLink label="Voice Study" icon="🎙️" href="/voice-study" /> */}
         </div>
 
         {/* Auth slot */}
-        {user ? (
+        {user != null ? (
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-semibold select-none">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <span className="text-sm font-medium text-text">{user.name}</span>
+            <div
+              onClick={handleSignOut}
+              className="p-1.5 rounded-lg text-text-secondary hover:text-(--color-primary) transition-colors cursor-pointer"
+            >
+              <SVGIcon name="logout" size={18} />
+            </div>
           </div>
         ) : (
           <Link
@@ -83,4 +92,4 @@ function Navbar({ user = null }: NavbarProps) {
   );
 }
 
-export default Navbar;
+export default Header;

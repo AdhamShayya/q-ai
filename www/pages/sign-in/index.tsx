@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { type } from "arktype";
 import AuthCard from "../../components/AuthCard";
 import FormField from "../../components/FormField";
 import Button from "../../components/Button";
+import { userApi } from "../../trpc";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -18,8 +19,11 @@ export type SignInData = typeof SignInSchema.infer;
 // ── Component ─────────────────────────────────────────────────────────────────
 
 function SignInPage() {
+  const navigate = useNavigate();
   const [fields, setFields] = useState<SignInData>({ email: "", password: "" });
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -27,9 +31,10 @@ function SignInPage() {
     if (errors[name as keyof SignInData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+    setFormError("");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const result = SignInSchema(fields);
@@ -43,7 +48,15 @@ function SignInPage() {
       return;
     }
 
-    // TODO: implement sign-in action
+    setLoading(true);
+    try {
+      await userApi.signIn.mutate(fields);
+      navigate("/");
+    } catch (err: any) {
+      setFormError(err?.message ?? "Sign in failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -92,9 +105,14 @@ function SignInPage() {
           size="md"
           fullWidth
           className="mt-1"
+          disabled={loading}
         >
-          Sign In
+          {loading ? "Signing in…" : "Sign In"}
         </Button>
+
+        {formError && (
+          <p className="text-red-500 text-sm text-center mt-1">{formError}</p>
+        )}
       </form>
     </AuthCard>
   );

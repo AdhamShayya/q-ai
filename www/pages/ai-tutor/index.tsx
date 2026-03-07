@@ -7,15 +7,6 @@ import { vaultApi, userApi } from "../../trpc";
 import type { Serialised } from "../../shared";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 
-// ── Constants ────────────────────────────────────────────────────────────────
-
-const DEMO_NAME = "Demo User";
-const DEMO_EMAIL = "demo@q-ai.app";
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
-type Vault = Serialised<IVaultSchema>;
-
 const CHAT_WEBHOOK_URL = "https://techflow12.app.n8n.cloud/webhook/chat-tutor";
 
 type MessageRole = "user" | "assistant";
@@ -25,13 +16,6 @@ interface ChatMessage {
   role: MessageRole;
   content: string;
   timestamp: Date;
-}
-
-interface Material {
-  id: number;
-  title: string;
-  subtitle: string;
-  thumbnail: string;
 }
 
 interface Suggestion {
@@ -49,10 +33,8 @@ interface ActionPillData {
 // ── Loader ────────────────────────────────────────────────────────────────────
 
 export async function loader() {
-  const user = await userApi.ensureUser.mutate({
-    email: DEMO_EMAIL,
-    name: DEMO_NAME,
-  });
+  const user = await userApi.me.query();
+  if (!user) return Response.redirect("/sign-in");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
 }
@@ -326,19 +308,12 @@ function ChatInput(props: {
           onChange={handleChange}
           placeholder="Ask a question about your study material..."
           rows={1}
+          className="focus:outline-none"
           style={{
             flex: 1,
             resize: "none",
-            background: "transparent",
-            outline: "none",
-            border: "none",
-            fontSize: "var(--font-size-sm)",
-            color: "var(--color-text)",
-            lineHeight: "var(--line-height-normal)",
-            overflow: "hidden",
             minHeight: "1.5rem",
             maxHeight: "7.5rem",
-            fontFamily: "var(--font-sans)",
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {

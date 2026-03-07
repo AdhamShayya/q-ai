@@ -1,11 +1,12 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import _ from "lodash";
 import { useLoaderData } from "react-router";
-import _ from "lodash";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useRef, useState } from "react";
+
 import SVGIcon from "../components/SVGIcon";
 import { vaultApi, userApi } from "../trpc";
 import { UploadForm } from "../components/UploadForm";
 import UpgradeModal from "../components/UpgradeModal";
+import ConfirmModal, { ConfirmModalProps } from "../components/ConfirmModal";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
 
@@ -18,17 +19,14 @@ import {
 
 // backend
 export async function loader() {
-  const user = await userApi.ensureUser.mutate({
-    email: DEMO_EMAIL,
-    name: DEMO_NAME,
-  });
+  const user = await userApi.me.query();
+  if (user == null) {
+    // Not signed in — redirect to sign-in
+    return Response.redirect("/sign-in");
+  }
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
 }
-
-// Temporary demo identity — replaced by real auth session later
-const DEMO_NAME = "Demo User";
-const DEMO_EMAIL = "demo@q-ai.app";
 
 const USAGE_LIMITS = {
   plan: "Free Plan",
@@ -47,7 +45,6 @@ const Upload_Webhook_API =
   "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
 
 // ── Webhook helper ────────────────────────────────────────────────────────────
-
 async function sendFileToWebhook({
   file,
   userId,
@@ -106,8 +103,7 @@ function ProgressBar({ used, max }: { used: number; max: number }) {
   );
 }
 
-// ── Upload Dropzone ───────────────────────────────────────────────────────────
-
+// ── Upload Dropzone ─────────────────────────────────────────────────────
 function UploadDropzone({ onFiles }: { onFiles: (files: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -150,7 +146,7 @@ function UploadDropzone({ onFiles }: { onFiles: (files: File[]) => void }) {
 
       <div className="flex items-center justify-center gap-4">
         <FileBadge icon="📄" label="PDF" />
-        <FileBadge icon="📝" label="DOCX" />
+        <FileBadge icon="📝" label="PDF" />
         <FileBadge icon="🎬" label="MP4" />
         <span className="pl-3 border-l">Max 500 MB</span>
       </div>
@@ -198,12 +194,12 @@ function AddDocumentCard({
         }}
       />
       <div
-        className="h-full flex w-full items-center justify-center border-b"
+        className="h-full flex w-full items-center justify-center border-b min-h-50 min-w-50"
         style={{
           borderColor: "var(--color-border)",
         }}
       >
-        {isUploading ? (
+        {isUploading === true ? (
           <div className="w-7 h-7 border-2 border-accent/40 border-t-accent rounded-full animate-spin" />
         ) : (
           <p className="text-[26px] text-(--secondary-color)">+</p>
@@ -258,7 +254,7 @@ function DocumentCard({
           </div>
         </p>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-sm uppercase">
+          <span className="text-xs font-semibold py-0.5 rounded-sm uppercase">
             {doc.fileType}
           </span>
           <span className="text-xs">{formatFileSize(doc.fileSize)}</span>
@@ -282,12 +278,32 @@ function HomePage() {
 
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [vaultData, setVaultData] = useState<VaultWithDocuments[] | null>(null);
+
+  const [deletingVaultIds, setDeletingVaultIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  function openConfirmModal(opts: Omit<ConfirmModalProps, "isOpen">) {
+    setConfirmModal({ isOpen: true, ...opts });
+  }
+
+  function closeConfirmModal() {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+  }
   const [uploadingVaultIds, setUploadingVaultIds] = useState<Set<string>>(
     new Set(),
   );
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(
     null,
   );
+  const allDocuments = vaultData?.flatMap((v) => v.documents) ?? [];
 
   async function loadDocuments() {
     setDocsLoading(true);
@@ -307,8 +323,6 @@ function HomePage() {
   useEffect(() => {
     void loadDocuments();
   }, []);
-
-  const allDocuments = vaultData?.flatMap((v) => v.documents) ?? [];
 
   const items = [
     {
@@ -397,7 +411,7 @@ function HomePage() {
             filename: file.name,
             fileType: file.name.split(".").pop()?.toUpperCase() ?? "FILE",
             fileSize: file.size,
-            mimeType: file.type || undefined,
+            mimeType: file.type ?? undefined,
             courseVault: courseName,
           }),
         ),
@@ -425,6 +439,18 @@ function HomePage() {
     }
   }
 
+  function requestDeleteDocument(docId: string, docName: string) {
+    openConfirmModal({
+      title: "Delete Document",
+      message: `Are you sure you want to delete "${docName}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+      onConfirm: () => {
+        closeConfirmModal();
+        void handleDelete(docId);
+      },
+    });
+  }
+
   async function handleDelete(docId: string) {
     setDeletingIds((prev) => new Set(prev).add(docId));
     try {
@@ -445,6 +471,34 @@ function HomePage() {
     }
   }
 
+  function requestDeleteVault(vaultId: string, vaultName: string) {
+    openConfirmModal({
+      title: "Delete Vault",
+      message: `Are you sure you want to delete "${vaultName}" and all its documents? This cannot be undone.`,
+      confirmLabel: "Delete Vault",
+      onConfirm: () => {
+        closeConfirmModal();
+        void handleDeleteVault(vaultId);
+      },
+    });
+  }
+
+  async function handleDeleteVault(vaultId: string) {
+    setDeletingVaultIds((prev) => new Set(prev).add(vaultId));
+    try {
+      await vaultApi.delete.mutate({ id: vaultId });
+      setVaultData(
+        (prev) => prev?.filter((v) => v.vault.id !== vaultId) ?? null,
+      );
+    } finally {
+      setDeletingVaultIds((prev) => {
+        const next = new Set(prev);
+        next.delete(vaultId);
+        return next;
+      });
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex flex-col container w-full py-10">
@@ -453,9 +507,18 @@ function HomePage() {
           Your personal library of study materials, powered by AI
         </p>
 
-        {showUpgradeModal && (
+        {showUpgradeModal === true && (
           <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
         )}
+
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={closeConfirmModal}
+        />
 
         {/* Upload zone */}
         <div className="mb-10 py-10 space-y-4">
@@ -514,56 +577,73 @@ function HomePage() {
                   </div>
                 ))}
               </div>
-            ) : allDocuments.length === 0 ? (
+            ) : vaultData!.length === 0 ? (
               <p className="text-sm">
                 No materials yet. Upload your first file above to get started.
               </p>
             ) : (
               <div className="space-y-8">
-                {vaultData!.map(({ vault, documents }) =>
-                  documents.length === 0 ? null : (
-                    <div key={vault.id}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-base font-semibold">
-                          {vault.name}
+                {vaultData!.map(({ vault, documents }) => (
+                  <div key={vault.id}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-base font-semibold">
+                        {vault.name}
+                      </span>
+                      {vault.courseName != null && (
+                        <span className="text-xs px-2 py-0.5 rounded-full border">
+                          {vault.courseName}
                         </span>
-                        {vault.courseName != null && (
-                          <span className="text-xs px-2 py-0.5 rounded-full border">
-                            {vault.courseName}
-                          </span>
+                      )}
+                      <span className="text-xs ml-auto">
+                        {documents.length} file
+                        {documents.length !== 1 ? "s" : ""}
+                      </span>
+                      <div
+                        onClick={() =>
+                          !deletingVaultIds.has(vault.id) &&
+                          requestDeleteVault(vault.id, vault.name)
+                        }
+                        style={{
+                          cursor: deletingVaultIds.has(vault.id)
+                            ? "default"
+                            : "pointer",
+                        }}
+                      >
+                        {deletingVaultIds.has(vault.id) ? (
+                          <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                        ) : (
+                          <SVGIcon name="trash" size={16} color="red" />
                         )}
-                        <span className="text-xs ml-auto">
-                          {documents.length} file
-                          {documents.length !== 1 ? "s" : ""}
-                        </span>
                       </div>
-                      <div className="flex gap-4 overflow-x-auto p-2">
-                        {documents.map((doc) => (
-                          <div key={doc.id} className="shrink-0 w-52">
-                            <DocumentCard
-                              doc={doc}
-                              courseLabel={vault.courseName ?? vault.name}
-                              isDeleting={deletingIds.has(doc.id)}
-                              onDelete={() => handleDelete(doc.id)}
-                            />
-                          </div>
-                        ))}
-                        <div className="flex shrink-0 w-52">
-                          <AddDocumentCard
-                            isUploading={uploadingVaultIds.has(vault.id)}
-                            onFiles={(files) =>
-                              handleAddToVault(
-                                vault.id,
-                                files,
-                                vault.courseName ?? vault.name,
-                              )
+                    </div>
+                    <div className="flex gap-4 max-w-240 overflow-x-auto p-2">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="shrink-0 w-52">
+                          <DocumentCard
+                            doc={doc}
+                            courseLabel={vault.courseName ?? vault.name}
+                            isDeleting={deletingIds.has(doc.id)}
+                            onDelete={() =>
+                              requestDeleteDocument(doc.id, doc.filename)
                             }
                           />
                         </div>
+                      ))}
+                      <div className="flex shrink-0 w-52">
+                        <AddDocumentCard
+                          isUploading={uploadingVaultIds.has(vault.id)}
+                          onFiles={(files) =>
+                            handleAddToVault(
+                              vault.id,
+                              files,
+                              vault.courseName ?? vault.name,
+                            )
+                          }
+                        />
                       </div>
                     </div>
-                  ),
-                )}
+                  </div>
+                ))}
               </div>
             )}
           </div>

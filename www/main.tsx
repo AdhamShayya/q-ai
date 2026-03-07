@@ -9,23 +9,28 @@ import {
   href,
   Outlet,
   RouterProvider,
+  useLoaderData,
 } from "react-router";
 
+import { userApi } from "./trpc";
+import SignInPage from "./pages/sign-in";
+import SignUpPage from "./pages/sign-up";
+import Header from "./components/Navbar";
 import HomePage, { loader as homeLoader } from "./pages";
 import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
-import SignInPage from "./pages/sign-in";
-import SignUpPage from "./pages/sign-up";
-import Navbar from "./components/Navbar";
 // import VoiceStudyPage from "./pages/voice-study";
 
-// ── Root layout — shared by all main pages ────────────────────────────────────
+async function rootLoader() {
+  const user = await userApi.me.query();
+  return { user };
+}
 
 function RootLayout() {
-  // TODO: replace null with the authenticated user once auth is wired up
+  const { user } = useLoaderData<typeof rootLoader>();
   return (
     <>
-      <Navbar user={null} />
+      <Header user={user} />
       <Outlet />
     </>
   );
@@ -36,6 +41,7 @@ const rootElement = document.getElementById("root");
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
+    loader: rootLoader,
     children: [
       {
         path: href("/"),

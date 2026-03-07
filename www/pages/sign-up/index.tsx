@@ -1,10 +1,11 @@
-import React, { useState } from "react";
 import { type } from "arktype";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
+
+import { userApi } from "../../trpc";
+import Button from "../../components/Button";
 import AuthCard from "../../components/AuthCard";
 import FormField from "../../components/FormField";
-import Button from "../../components/Button";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export const SignUpSchema = type({
   name: "string >= 2",
@@ -13,20 +14,19 @@ export const SignUpSchema = type({
   confirmPassword: "string >= 8",
 });
 
-// ── Inferred types ────────────────────────────────────────────────────────────
-
 export type SignUpData = typeof SignUpSchema.infer;
 type FieldErrors = Partial<Record<keyof SignUpData, string>>;
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 function SignUpPage() {
+  const navigate = useNavigate();
   const [fields, setFields] = useState<SignUpData>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -35,9 +35,10 @@ function SignUpPage() {
     if (errors[name as keyof SignUpData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+    setFormError("");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const result = SignUpSchema(fields);
@@ -59,7 +60,19 @@ function SignUpPage() {
       return;
     }
 
-    // TODO: implement sign-up action
+    setLoading(true);
+    try {
+      await userApi.signUp.mutate({
+        name: fields.name,
+        email: fields.email,
+        password: fields.password,
+      });
+      navigate("/");
+    } catch (err: any) {
+      setFormError(err?.message ?? "Sign up failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -120,9 +133,14 @@ function SignUpPage() {
           size="md"
           fullWidth
           className="mt-1"
+          disabled={loading}
         >
-          Create Account
+          {loading ? "Creating account…" : "Create Account"}
         </Button>
+
+        {formError && (
+          <p className="text-red-500 text-sm text-center mt-1">{formError}</p>
+        )}
       </form>
     </AuthCard>
   );
