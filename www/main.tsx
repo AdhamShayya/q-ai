@@ -79,8 +79,18 @@ if (rootElement == null) {
   throw new Error("Root element not found");
 }
 
-createRoot(rootElement).render(
+const root = createRoot(rootElement);
+root.render(
   <StrictMode>
     <RouterProvider router={router} />
   </StrictMode>,
 );
+
+// Properly unmount the React root before HMR replaces this module.
+// Without this, every hot update re-executes createRoot() on the same
+// DOM node and the old root is never cleaned up, causing duplications.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    root.unmount();
+  });
+}

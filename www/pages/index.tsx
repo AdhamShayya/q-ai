@@ -1,21 +1,17 @@
-﻿import _ from "lodash";
-import { useLoaderData } from "react-router";
-import React, { useEffect, useRef, useState } from "react";
+﻿import { useLoaderData } from "react-router";
+import React, { useEffect, useState } from "react";
 
 import SVGIcon from "../components/SVGIcon";
 import { vaultApi, userApi } from "../trpc";
 import { UploadForm } from "../components/UploadForm";
 import UpgradeModal from "../components/UpgradeModal";
 import ConfirmModal, { ConfirmModalProps } from "../components/ConfirmModal";
+import { UploadDropzone } from "../components/UploadDropzone";
+import { AddDocumentCard } from "../components/AddDocumentCard";
+import { DocumentCard } from "../components/DocumentCard";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
-
-import {
-  formatFileSize,
-  getDocumentIcon,
-  PendingUpload,
-  Serialised,
-} from "../shared";
+import { PendingUpload, Serialised } from "../shared";
 
 // backend
 export async function loader() {
@@ -45,17 +41,13 @@ const Upload_Webhook_API =
   "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
 
 // ── Webhook helper ────────────────────────────────────────────────────────────
-async function sendFileToWebhook({
-  file,
-  userId,
-  vaultId,
-  documentId,
-}: {
+async function sendFileToWebhook(props: {
   file: File;
   userId: string;
   vaultId: string;
   documentId: string;
 }) {
+  const { file, userId, vaultId, documentId } = props;
   const form = new FormData();
   form.append("file", file);
   form.append("userId", userId);
@@ -78,193 +70,6 @@ async function sendFileToWebhook({
   } catch (err) {
     console.error("Webhook ingest failed for", file.name, err);
   }
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function FileBadge({ icon, label }: { icon: string; label: string }) {
-  return (
-    <div className="flex items-start gap-1 font-medium">
-      <span>{icon}</span>
-      {label}
-    </div>
-  );
-}
-
-function ProgressBar({ used, max }: { used: number; max: number }) {
-  const pct = Math.round((Math.min(used, max) / max) * 100);
-  return (
-    <div className="h-2 rounded-full overflow-hidden">
-      <div
-        className="h-full bg-accent rounded-full transition-[width] duration-600"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
-// ── Upload Dropzone ─────────────────────────────────────────────────────
-function UploadDropzone({ onFiles }: { onFiles: (files: File[]) => void }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileList = (list: FileList | null) => {
-    if (list?.[0] == null) {
-      return;
-    }
-    onFiles(Array.from(list));
-  };
-
-  return (
-    <div
-      className="border-[1.5px] bg-white border-(--secondary-color) border-dashed rounded-xl p-12 flex flex-col items-center gap-4 cursor-pointer transition-colors hover:border-accent"
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        handleFileList(e.dataTransfer.files);
-      }}
-      onClick={() => inputRef.current?.click()}
-    >
-      <input
-        ref={inputRef}
-        type="file"
-        hidden
-        accept=".pdf,.docx,.mp4,.png,.jpg,.jpeg"
-        multiple
-        onChange={(e) => handleFileList(e.target.files)}
-      />
-
-      <SVGIcon name="upload" size={40} strokeWidth={1.5} />
-      <div className="text-center">
-        <h3 className="text-xl font-bold text-primary mb-1.5">
-          What are we mastering today?
-        </h3>
-        <p className="text-sm mx-auto">
-          Drag and drop your PDFs, documents, or lecture videos here, or click
-          to browse
-        </p>
-      </div>
-
-      <div className="flex items-center justify-center gap-4">
-        <FileBadge icon="📄" label="PDF" />
-        <FileBadge icon="📝" label="PDF" />
-        <FileBadge icon="🎬" label="MP4" />
-        <span className="pl-3 border-l">Max 500 MB</span>
-      </div>
-
-      <button
-        className="bg-primary text-white rounded-full px-7 py-2.5 text-sm font-semibold hover:bg-primary-hover transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          inputRef.current?.click();
-        }}
-      >
-        Choose Files
-      </button>
-    </div>
-  );
-}
-
-function AddDocumentCard({
-  onFiles,
-  isUploading,
-}: {
-  onFiles: (files: File[]) => void;
-  isUploading?: boolean;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div
-      onClick={() => !isUploading && inputRef.current?.click()}
-      className="border-[1.5px] flex w-full border-dashed rounded-lg overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5"
-      style={{
-        cursor: isUploading ? "default" : "pointer",
-        opacity: isUploading ? 0.6 : 1,
-      }}
-    >
-      <input
-        ref={inputRef}
-        type="file"
-        hidden
-        accept=".pdf,.docx,.mp4,.png,.jpg,.jpeg"
-        multiple
-        onChange={(e) => {
-          const files = Array.from(e.target.files ?? []);
-          if (files.length) onFiles(files);
-          e.target.value = "";
-        }}
-      />
-      <div
-        className="h-full flex w-full items-center justify-center border-b min-h-50 min-w-50"
-        style={{
-          borderColor: "var(--color-border)",
-        }}
-      >
-        {isUploading === true ? (
-          <div className="w-7 h-7 border-2 border-accent/40 border-t-accent rounded-full animate-spin" />
-        ) : (
-          <p className="text-[26px] text-(--secondary-color)">+</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DocumentCard({
-  doc,
-  courseLabel,
-  onDelete,
-  isDeleting,
-}: {
-  doc: Serialised<IDocumentSchema>;
-  courseLabel: string;
-  onDelete?: () => void;
-  isDeleting?: boolean;
-}) {
-  const meta = doc.metadataJson as {
-    inputType?: string;
-    courseVault?: string;
-  } | null;
-  const inputType = meta?.inputType ?? "file";
-
-  return (
-    <div className="border-[1.5px] border-(--secondary-color) rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5">
-      <div className="h-36 flex items-center justify-center text-4xl select-none border-b border-(--secondary-color) bg-(--bg-card)">
-        {getDocumentIcon(inputType)}
-      </div>
-
-      <div className="px-4 py-3 space-y-1.5 bg-white">
-        <p className="text-sm font-medium leading-snug truncate flex justify-between items-center">
-          {_.truncate(doc.filename, { length: 24 })}
-          <div
-            onClick={(e) => {
-              if (isDeleting) return;
-              e.stopPropagation();
-              onDelete?.();
-            }}
-            style={{
-              cursor: isDeleting ? "default" : "pointer",
-              flexShrink: 0,
-            }}
-          >
-            {isDeleting ? (
-              <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-            ) : (
-              <SVGIcon name="trash" size={16} color="red" />
-            )}
-          </div>
-        </p>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-semibold py-0.5 rounded-sm uppercase">
-            {doc.fileType}
-          </span>
-          <span className="text-xs">{formatFileSize(doc.fileSize)}</span>
-        </div>
-        <p className="text-xs opacity-70 truncate">
-          {meta?.courseVault ?? courseLabel}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 // ── Page ────────────────────────────────────────────────────────────────────
@@ -308,8 +113,9 @@ function HomePage() {
   async function loadDocuments() {
     setDocsLoading(true);
     try {
+      const latestVaults = await vaultApi.listByUser.query({ userId });
       const withDocs = await Promise.all(
-        vaults.map(async (vault) => ({
+        latestVaults.map(async (vault) => ({
           vault,
           documents: await vaultApi.getDocuments.query({ vaultId: vault.id }),
         })),
@@ -342,7 +148,10 @@ function HomePage() {
       return;
     }
 
-    if (allDocuments.length >= USAGE_LIMITS.studyMaterials.max) {
+    if (
+      allDocuments.length + pendingUpload.files.length >
+      USAGE_LIMITS.studyMaterials.max
+    ) {
       setPendingUpload(null);
       setShowUpgradeModal(true);
       return;
@@ -397,7 +206,7 @@ function HomePage() {
     files: File[],
     courseName: string,
   ) {
-    if (allDocuments.length >= USAGE_LIMITS.studyMaterials.max) {
+    if (allDocuments.length + files.length > USAGE_LIMITS.studyMaterials.max) {
       setShowUpgradeModal(true);
       return;
     }
@@ -500,184 +309,187 @@ function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex flex-col container w-full py-10">
-        <h3>Knowledge Vault</h3>
-        <p className="pt-2 mb-6">
-          Your personal library of study materials, powered by AI
-        </p>
+    <main className="flex flex-col container w-full py-10">
+      <h3>Knowledge Vault</h3>
+      <p className="pt-2 mb-6">
+        Your personal library of study materials, powered by AI
+      </p>
 
-        {showUpgradeModal === true && (
-          <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      {showUpgradeModal === true && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirmModal}
+      />
+
+      {/* Upload zone */}
+      <div className="mb-10 py-10 space-y-4">
+        {pendingUpload == null ? (
+          <UploadDropzone
+            disabled={allDocuments.length >= USAGE_LIMITS.studyMaterials.max}
+            onDisabledClick={() => setShowUpgradeModal(true)}
+            onFiles={(files) => {
+              if (
+                allDocuments.length + files.length >
+                USAGE_LIMITS.studyMaterials.max
+              ) {
+                setShowUpgradeModal(true);
+                return;
+              }
+              setPendingUpload({ files });
+            }}
+          />
+        ) : (
+          <UploadForm
+            pending={pendingUpload}
+            isUploading={isUploading}
+            onSubmit={handleUpload}
+            onCancel={() => setPendingUpload(null)}
+          />
         )}
+        {uploadError != null && (
+          <p className="text-sm text-red-500 text-center">{uploadError}</p>
+        )}
+      </div>
 
-        <ConfirmModal
-          isOpen={confirmModal.isOpen}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          confirmLabel={confirmModal.confirmLabel}
-          onConfirm={confirmModal.onConfirm}
-          onCancel={closeConfirmModal}
-        />
+      {/* Vault content */}
+      <div className="grid grid-cols-[1fr_auto] gap-8 items-start">
+        <div>
+          <h5 className="text-lg font-bold text-primary mb-4">
+            Your Materials ({allDocuments.length})
+          </h5>
 
-        {/* Upload zone */}
-        <div className="mb-10 py-10 space-y-4">
-          {pendingUpload == null ? (
-            <UploadDropzone
-              onFiles={(files) => {
-                if (allDocuments.length >= USAGE_LIMITS.studyMaterials.max) {
-                  setShowUpgradeModal(true);
-                  return;
-                }
-                setPendingUpload({ files });
-              }}
-            />
-          ) : (
-            <UploadForm
-              pending={pendingUpload}
-              isUploading={isUploading}
-              onSubmit={handleUpload}
-              onCancel={() => setPendingUpload(null)}
-            />
-          )}
-          {uploadError != null && (
-            <p className="text-sm text-red-500 text-center">{uploadError}</p>
-          )}
-        </div>
-
-        {/* Vault content */}
-        <div className="grid grid-cols-[1fr_auto] gap-8 items-start">
-          <div>
-            <h5 className="text-lg font-bold text-primary mb-4">
-              Your Materials ({allDocuments.length})
-            </h5>
-
-            {docsLoading ? (
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {Array.from({ length: 4 }).map((_, i) => (
+          {docsLoading ? (
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
+                  style={{ borderColor: "var(--color-border)" }}
+                >
                   <div
-                    key={i}
-                    className="shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
-                    style={{ borderColor: "var(--color-border)" }}
-                  >
+                    className="h-36"
+                    style={{ background: "var(--color-bg-muted)" }}
+                  />
+                  <div className="px-4 py-3 space-y-2 bg-white">
                     <div
-                      className="h-36"
+                      className="h-3 rounded w-3/4"
                       style={{ background: "var(--color-bg-muted)" }}
                     />
-                    <div className="px-4 py-3 space-y-2 bg-white">
-                      <div
-                        className="h-3 rounded w-3/4"
-                        style={{ background: "var(--color-bg-muted)" }}
-                      />
-                      <div
-                        className="h-3 rounded w-1/2"
-                        style={{ background: "var(--color-bg-muted)" }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : vaultData!.length === 0 ? (
-              <p className="text-sm">
-                No materials yet. Upload your first file above to get started.
-              </p>
-            ) : (
-              <div className="space-y-8">
-                {vaultData!.map(({ vault, documents }) => (
-                  <div key={vault.id}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-base font-semibold">
-                        {vault.name}
-                      </span>
-                      {vault.courseName != null && (
-                        <span className="text-xs px-2 py-0.5 rounded-full border">
-                          {vault.courseName}
-                        </span>
-                      )}
-                      <span className="text-xs ml-auto">
-                        {documents.length} file
-                        {documents.length !== 1 ? "s" : ""}
-                      </span>
-                      <div
-                        onClick={() =>
-                          !deletingVaultIds.has(vault.id) &&
-                          requestDeleteVault(vault.id, vault.name)
-                        }
-                        style={{
-                          cursor: deletingVaultIds.has(vault.id)
-                            ? "default"
-                            : "pointer",
-                        }}
-                      >
-                        {deletingVaultIds.has(vault.id) ? (
-                          <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-                        ) : (
-                          <SVGIcon name="trash" size={16} color="red" />
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-4 max-w-240 overflow-x-auto p-2">
-                      {documents.map((doc) => (
-                        <div key={doc.id} className="shrink-0 w-52">
-                          <DocumentCard
-                            doc={doc}
-                            courseLabel={vault.courseName ?? vault.name}
-                            isDeleting={deletingIds.has(doc.id)}
-                            onDelete={() =>
-                              requestDeleteDocument(doc.id, doc.filename)
-                            }
-                          />
-                        </div>
-                      ))}
-                      <div className="flex shrink-0 w-52">
-                        <AddDocumentCard
-                          isUploading={uploadingVaultIds.has(vault.id)}
-                          onFiles={(files) =>
-                            handleAddToVault(
-                              vault.id,
-                              files,
-                              vault.courseName ?? vault.name,
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="border border-(--secondary-color) bg-white rounded-lg p-8 min-w-100">
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border">
-                {USAGE_LIMITS.plan}
-              </span>
-            </div>
-
-            {items.map(({ label, used, max }) => {
-              const pct = Math.round((Math.min(used, max) / max) * 100);
-              return (
-                <div key={label} className="mb-3.5 last:mb-0">
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-xs">{label}</span>
-                    <span className="text-xs">
-                      {used} / {max}
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-accent rounded-full transition-[width] duration-600"
-                      style={{ width: `${pct}%` }}
+                      className="h-3 rounded w-1/2"
+                      style={{ background: "var(--color-bg-muted)" }}
                     />
                   </div>
                 </div>
-              );
-            })}
-          </div>{" "}
+              ))}
+            </div>
+          ) : vaultData!.length === 0 ? (
+            <p className="text-sm">
+              No materials yet. Upload your first file above to get started.
+            </p>
+          ) : (
+            <div className="space-y-8">
+              {vaultData!.map(({ vault, documents }) => (
+                <div key={vault.id}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-base font-semibold">
+                      {vault.name}
+                    </span>
+                    {vault.courseName != null && (
+                      <span className="text-xs px-2 py-0.5 rounded-full border">
+                        {vault.courseName}
+                      </span>
+                    )}
+                    <span className="text-xs ml-auto">
+                      {documents.length} file
+                      {documents.length !== 1 ? "s" : ""}
+                    </span>
+                    <div
+                      onClick={() =>
+                        !deletingVaultIds.has(vault.id) &&
+                        requestDeleteVault(vault.id, vault.name)
+                      }
+                      style={{
+                        cursor: deletingVaultIds.has(vault.id)
+                          ? "default"
+                          : "pointer",
+                      }}
+                    >
+                      {deletingVaultIds.has(vault.id) ? (
+                        <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                      ) : (
+                        <SVGIcon name="trash" size={16} color="red" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-4 max-w-240 overflow-x-auto p-2">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="shrink-0 w-52">
+                        <DocumentCard
+                          doc={doc}
+                          courseLabel={vault.courseName ?? vault.name}
+                          isDeleting={deletingIds.has(doc.id)}
+                          onDelete={() =>
+                            requestDeleteDocument(doc.id, doc.filename)
+                          }
+                        />
+                      </div>
+                    ))}
+                    <div className="flex shrink-0 w-52">
+                      <AddDocumentCard
+                        isUploading={uploadingVaultIds.has(vault.id)}
+                        onFiles={(files) =>
+                          handleAddToVault(
+                            vault.id,
+                            files,
+                            vault.courseName ?? vault.name,
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+        <div className="border border-(--secondary-color) bg-white rounded-lg p-8 min-w-100">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
+            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border">
+              {USAGE_LIMITS.plan}
+            </span>
+          </div>
+
+          {items.map(({ label, used, max }) => {
+            const pct = Math.round((Math.min(used, max) / max) * 100);
+            return (
+              <div key={label} className="mb-3.5 last:mb-0">
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-xs">{label}</span>
+                  <span className="text-xs">
+                    {used} / {max}
+                  </span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-accent rounded-full transition-[width] duration-600"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>{" "}
+      </div>
+    </main>
   );
 }
 
