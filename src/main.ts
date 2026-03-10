@@ -15,7 +15,8 @@ export type Context = {
 }
 
 export function createContext({ req, res }: CreateExpressContextOptions): Context {
-  const userId = req.signedCookies?.session
+  const raw = req.signedCookies?.session
+  const userId = typeof raw === "string" && raw.length > 0 ? raw : null
   return { req, res, userId }
 }
 

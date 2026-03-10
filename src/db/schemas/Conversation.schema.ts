@@ -6,7 +6,6 @@ import { vaults } from "./Vault.schema"
 import type { IModelConfig } from "../types/model-config"
 
 // ── Table ─────────────────────────────────────────────────────────────────────
-
 export const conversations = pgTable("conversations", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
@@ -19,12 +18,10 @@ export const conversations = pgTable("conversations", {
 })
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
-
 export type Conversation = typeof conversations.$inferSelect
 export type NewConversation = typeof conversations.$inferInsert
 
 // ── Domain interface ─────────────────────────────────────────────────────────
-
 export interface IConversationSchema {
   id: string
   userId: string
@@ -35,7 +32,6 @@ export interface IConversationSchema {
 }
 
 // ── Validators ───────────────────────────────────────────────────────────────
-
 export const CreateConversationInput = type({
   userId: "string",
   "vaultId?": "string",

@@ -1,5 +1,23 @@
 import { useRef } from "react";
 import SVGIcon from "./SVGIcon";
+import { useToast } from "../hooks/useToast";
+
+const ALLOWED_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "video/mp4",
+  "application/pdf",
+]);
+
+const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".mp4", ".pdf"]);
+
+function isAllowed(file: File): boolean {
+  if (ALLOWED_TYPES.has(file.type) === true) {
+    return true;
+  }
+  const ext = "." + file.name.split(".").pop()?.toLowerCase();
+  return ALLOWED_EXTENSIONS.has(ext);
+}
 
 function FileBadge({ icon, label }: { icon: string; label: string }) {
   return (
@@ -17,14 +35,26 @@ interface UploadDropzoneProps {
 }
 
 export function UploadDropzone(props: UploadDropzoneProps) {
-  const { onFiles, disabled, onDisabledClick } = props;
+  const toast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { onFiles, disabled, onDisabledClick } = props;
 
   const handleFileList = (list: FileList | null) => {
     if (list?.[0] == null) {
       return;
     }
-    onFiles(Array.from(list));
+    const all = Array.from(list);
+    const valid = all.filter(isAllowed);
+    const rejected = all.filter((f) => !isAllowed(f));
+    if (rejected.length > 0) {
+      const names = rejected.map((f) => f.name).join(", ");
+      toast.error(
+        `Unsupported file${rejected.length > 1 ? "s" : ""} removed: ${names}. Only PNG, JPG, MP4, and PDF are supported.`,
+      );
+    }
+    if (valid.length > 0) {
+      onFiles(valid);
+    }
   };
 
   const handleClick = () => {
@@ -53,7 +83,7 @@ export function UploadDropzone(props: UploadDropzoneProps) {
         ref={inputRef}
         type="file"
         hidden
-        accept=".pdf,.docx,.mp4,.png,.jpg,.jpeg"
+        accept=".pdf,.mp4,.png,.jpg,.jpeg"
         multiple
         onChange={(e) => handleFileList(e.target.files)}
       />
@@ -70,8 +100,8 @@ export function UploadDropzone(props: UploadDropzoneProps) {
       </div>
 
       <div className="flex items-center justify-center gap-4">
-        <FileBadge icon="📄" label="PNG" />
-        <FileBadge icon="📝" label="PDF" />
+        <FileBadge icon="🖼️" label="PNG-JPG" />
+        <FileBadge icon="📄" label="PDF" />
         <FileBadge icon="🎬" label="MP4" />
         <span className="pl-3 border-l">Max 500 MB</span>
       </div>

@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server"
 
 import VaultModel from "../db/models/Vault"
 import DocumentModel from "../db/models/Document"
+import { deleteConversationsByVaultId } from "./conversation.controller"
 import type { IVaultSchema, CreateVaultInput, UpdateVaultInput } from "../db/schemas/Vault.schema"
 
 // ── Vault CRUD ────────────────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ export async function updateVault(id: string, input: UpdateVaultInput): Promise<
 }
 
 export async function deleteVault(id: string): Promise<{ id: string }> {
+  await deleteConversationsByVaultId(id)
   await DocumentModel.deleteByVaultId(id)
   const deletedId = await VaultModel.deleteById(id)
   if (deletedId == null) {

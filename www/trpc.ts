@@ -14,3 +14,4 @@ export const trpc = createTRPCClient<AppRouter>({
 
 export const userApi = trpc.user;
 export const vaultApi = trpc.vault;
+export const conversationApi = trpc.conversation;

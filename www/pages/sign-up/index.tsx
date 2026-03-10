@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 
 import { userApi } from "../../trpc";
 import Button from "../../components/Button";
+import { useToast } from "../../hooks/useToast";
 import AuthCard from "../../components/AuthCard";
 import FormField from "../../components/FormField";
 
@@ -18,6 +19,7 @@ export type SignUpData = typeof SignUpSchema.infer;
 type FieldErrors = Partial<Record<keyof SignUpData, string>>;
 
 function SignUpPage() {
+  const toast = useToast();
   const navigate = useNavigate();
   const [fields, setFields] = useState<SignUpData>({
     name: "",
@@ -26,7 +28,6 @@ function SignUpPage() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -35,7 +36,6 @@ function SignUpPage() {
     if (errors[name as keyof SignUpData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-    setFormError("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -67,9 +67,10 @@ function SignUpPage() {
         email: fields.email,
         password: fields.password,
       });
+      toast.success("Account created successfully!");
       navigate("/");
     } catch (err: any) {
-      setFormError(err?.message ?? "Sign up failed");
+      toast.error(err?.message ?? "Sign up failed");
     } finally {
       setLoading(false);
     }
@@ -137,10 +138,6 @@ function SignUpPage() {
         >
           {loading ? "Creating account…" : "Create Account"}
         </Button>
-
-        {formError && (
-          <p className="text-red-500 text-sm text-center mt-1">{formError}</p>
-        )}
       </form>
     </AuthCard>
   );

@@ -20,13 +20,13 @@ function HeaderLink(props: HeaderLinkProps) {
   return (
     <Link
       to={href}
-      className={`no-underline items-center gap-1.5 h-1/2 transition-colors border-b-2 ${
+      className={`no-underline items-center gap-1.5 h-1/2 transition-colors border-b-2 text-sm font-medium ${
         active
           ? "text-accent border-accent"
           : "text-text-secondary border-transparent hover:text-text"
       }`}
     >
-      <span>{icon}</span>
+      {icon.length > 0 && <span>{icon}</span>}
       {label}
     </Link>
   );
@@ -41,7 +41,10 @@ function Header({ user = null }: NavbarProps) {
   }
 
   return (
-    <nav className="border-b border-(--secondary-color) ">
+    <nav
+      className="animate-slide-down border-b border-(--secondary-color)"
+      style={{ backdropFilter: "blur(8px)" }}
+    >
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -57,12 +60,21 @@ function Header({ user = null }: NavbarProps) {
           </span>
         </Link>
 
-        {/* Nav links */}
-        <div className="flex items-center gap-10 h-full">
-          <HeaderLink label="Dashboard" icon="🗂️" href="/" />
-          <HeaderLink label="AI Tutor" icon="💬" href="/ai-tutor" />
-          {/* <HeaderLink label="Voice Study" icon="🎙️" href="/voice-study" /> */}
-        </div>
+        {/* Nav links — signed in */}
+        {user != null ? (
+          <div className="flex items-center gap-10 h-full">
+            <HeaderLink label="Dashboard" icon="" href="/dashboard" />
+            <HeaderLink label="AI Tutor" icon="" href="/ai-tutor" />
+          </div>
+        ) : (
+          /* Nav links — signed out */
+          <div className="flex items-center gap-8 h-full">
+            <HeaderLink label="Home" icon="" href="/" />
+            <HeaderLink label="Features" icon="" href="/features" />
+            <HeaderLink label="About" icon="" href="/about" />
+            <HeaderLink label="Contact" icon="" href="/contact" />
+          </div>
+        )}
 
         {/* Auth slot */}
         {user != null ? (
@@ -79,13 +91,26 @@ function Header({ user = null }: NavbarProps) {
             </div>
           </div>
         ) : (
-          <Link
-            to="/sign-in"
-            className="text-sm font-medium text-text-secondary hover:text-text transition-colors border border-border hover:border-border-focus rounded-lg px-4 py-1.5"
-            style={{ textDecoration: "none" }}
-          >
-            Sign In
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/sign-in"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors border border-border hover:border-border-focus rounded-lg px-4 py-1.5"
+              style={{ textDecoration: "none" }}
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/sign-up"
+              className="text-sm font-semibold rounded-lg px-4 py-1.5 transition-all duration-200 hover:opacity-90"
+              style={{
+                background: "var(--color-primary)",
+                color: "#fff",
+                textDecoration: "none",
+              }}
+            >
+              Get Started
+            </Link>
+          </div>
         )}
       </div>
     </nav>

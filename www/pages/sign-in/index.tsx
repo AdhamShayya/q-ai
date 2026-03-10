@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { type } from "arktype";
+
+import { userApi } from "../../trpc";
+import Button from "../../components/Button";
+import { useToast } from "../../hooks/useToast";
 import AuthCard from "../../components/AuthCard";
 import FormField from "../../components/FormField";
-import Button from "../../components/Button";
-import { userApi } from "../../trpc";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 type FieldErrors = Partial<Record<keyof SignInData, string>>;
 
@@ -17,12 +17,11 @@ export const SignInSchema = type({
 export type SignInData = typeof SignInSchema.infer;
 
 // ── Component ─────────────────────────────────────────────────────────────────
-
 function SignInPage() {
+  const toast = useToast();
   const navigate = useNavigate();
   const [fields, setFields] = useState<SignInData>({ email: "", password: "" });
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -31,7 +30,6 @@ function SignInPage() {
     if (errors[name as keyof SignInData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-    setFormError("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -51,9 +49,10 @@ function SignInPage() {
     setLoading(true);
     try {
       await userApi.signIn.mutate(fields);
+      toast.success("Signed in successfully!");
       navigate("/");
     } catch (err: any) {
-      setFormError(err?.message ?? "Sign in failed");
+      toast.error(err?.message ?? "Sign in failed");
     } finally {
       setLoading(false);
     }
@@ -109,10 +108,6 @@ function SignInPage() {
         >
           {loading ? "Signing in…" : "Sign In"}
         </Button>
-
-        {formError && (
-          <p className="text-red-500 text-sm text-center mt-1">{formError}</p>
-        )}
       </form>
     </AuthCard>
   );

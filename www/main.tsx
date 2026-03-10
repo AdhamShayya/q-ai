@@ -1,6 +1,8 @@
 ﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ToastContainer } from "react-toastify";
 
+import "react-toastify/dist/ReactToastify.css";
 import "./tailwind.css";
 import "./styles/index.scss";
 
@@ -16,7 +18,11 @@ import { userApi } from "./trpc";
 import SignInPage from "./pages/sign-in";
 import SignUpPage from "./pages/sign-up";
 import Header from "./components/Navbar";
-import HomePage, { loader as homeLoader } from "./pages";
+import LandingPage, { loader as landingLoader } from "./pages";
+import DashboardPage, { loader as dashboardLoader } from "./pages/dashboard";
+import FeaturesPage from "./pages/features";
+import AboutPage from "./pages/about";
+import ContactPage from "./pages/contact";
 import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
 // import VoiceStudyPage from "./pages/voice-study";
@@ -45,8 +51,25 @@ export const router = createBrowserRouter([
     children: [
       {
         path: href("/"),
-        element: <HomePage />,
-        loader: homeLoader,
+        element: <LandingPage />,
+        loader: landingLoader,
+      },
+      {
+        path: href("/dashboard"),
+        element: <DashboardPage />,
+        loader: dashboardLoader,
+      },
+      {
+        path: href("/features"),
+        element: <FeaturesPage />,
+      },
+      {
+        path: href("/about"),
+        element: <AboutPage />,
+      },
+      {
+        path: href("/contact"),
+        element: <ContactPage />,
       },
       {
         path: href("/users"),
@@ -83,14 +106,15 @@ const root = createRoot(rootElement);
 root.render(
   <StrictMode>
     <RouterProvider router={router} />
+    <ToastContainer position="bottom-right" autoClose={4000} />
   </StrictMode>,
 );
 
 // Properly unmount the React root before HMR replaces this module.
 // Without this, every hot update re-executes createRoot() on the same
 // DOM node and the old root is never cleaned up, causing duplications.
-if (import.meta.hot) {
-  import.meta.hot.dispose(() => {
+if ((import.meta as any).hot) {
+  (import.meta as any).hot.dispose(() => {
     root.unmount();
   });
 }
