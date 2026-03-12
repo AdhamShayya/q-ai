@@ -60,22 +60,21 @@ function Header({ user = null }: NavbarProps) {
           </span>
         </Link>
 
-        {/* Nav links — signed in */}
-        {user != null ? (
-          <div className="flex items-center gap-10 h-full">
-            <HeaderLink label="Dashboard" icon="" href="/dashboard" />
-            <HeaderLink label="AI Tutor" icon="" href="/ai-tutor" />
-          </div>
-        ) : (
-          /* Nav links — signed out */
-          <div className="flex items-center gap-8 h-full">
-            <HeaderLink label="Home" icon="" href="/" />
-            <HeaderLink label="Features" icon="" href="/features" />
-            <HeaderLink label="About" icon="" href="/about" />
-            <HeaderLink label="Contact" icon="" href="/contact" />
-          </div>
-        )}
+        <div className="flex items-center gap-8 h-full">
+          <HeaderLink label="Home" icon="" href="/" />
+          <HeaderLink label="Features" icon="" href="/features" />
+          <HeaderLink label="About" icon="" href="/about" />
+          <HeaderLink label="Contact" icon="" href="/contact" />
 
+          {/* Nav links — signed in */}
+          {user != null && (
+            <div className="flex items-center gap-10 h-full">
+              <HeaderLink label="Dashboard" icon="" href="/dashboard" />
+              <HeaderLink label="AI Tutor" icon="" href="/ai-tutor" />
+              <HeaderLink label="Settings" icon="" href="/settings" />
+            </div>
+          )}
+        </div>
         {/* Auth slot */}
         {user != null ? (
           <div className="flex items-center gap-2.5">

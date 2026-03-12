@@ -87,15 +87,6 @@ function SignInPage() {
           error={errors.password}
           onChange={handleChange}
           autoComplete="current-password"
-          labelRight={
-            <Link
-              to="/forgot-password"
-              className="text-xs text-accent hover:text-accent-dark transition-colors"
-              style={{ textDecoration: "none" }}
-            >
-              Forgot password?
-            </Link>
-          }
         />
 
         <Button

@@ -25,6 +25,10 @@ import AboutPage from "./pages/about";
 import ContactPage from "./pages/contact";
 import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
+import SettingsPage, { loader as settingsLoader } from "./pages/settings";
+import PersonaQuizPage, {
+  loader as personaQuizLoader,
+} from "./pages/persona-quiz";
 // import VoiceStudyPage from "./pages/voice-study";
 
 async function rootLoader() {
@@ -80,6 +84,16 @@ export const router = createBrowserRouter([
         path: href("/ai-tutor"),
         element: <AiTutorPage />,
         loader: aiTutorLoader,
+      },
+      {
+        path: href("/settings"),
+        element: <SettingsPage />,
+        loader: settingsLoader,
+      },
+      {
+        path: href("/persona-quiz"),
+        element: <PersonaQuizPage />,
+        loader: personaQuizLoader,
       },
       // {
       //   path: href("/voice-study"),

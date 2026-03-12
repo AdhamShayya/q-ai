@@ -1,5 +1,9 @@
-import "dotenv/config"
+import * as path from "path"
+import * as dotenv from "dotenv"
 import { defineConfig } from "drizzle-kit"
+
+// Load .env from the same directory as this config file, regardless of cwd
+dotenv.config({ path: path.join(__dirname, ".env") })
 
 const databaseUrl = process.env["DATABASE_URL"]
 if (databaseUrl == null) {
@@ -7,7 +11,7 @@ if (databaseUrl == null) {
 }
 
 export default defineConfig({
-  schema: "./src/db/schemas/*.schema.ts",
+  schema: "./db/schemas/*.schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {

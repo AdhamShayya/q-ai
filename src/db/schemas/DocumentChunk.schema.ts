@@ -24,10 +24,8 @@ export const documentChunks = pgTable("document_chunks", {
   documentId: uuid("document_id")
     .notNull()
     .references(() => documents.id),
-  chunkText: text("chunk_text").notNull(),
-  chunkIndex: integer("chunk_index").notNull(),
-  embeddingsVector: vector("embeddings_vector"),
-  metadataJson: jsonb("metadata_json").default({}),
+  embedding: vector("embedding"),
+  metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })
 
@@ -41,10 +39,9 @@ export type NewDocumentChunk = typeof documentChunks.$inferInsert
 export interface IDocumentChunkSchema {
   id: string
   documentId: string
-  chunkText: string
-  chunkIndex: number
-  embeddingsVector: number[] | null
-  metadataJson: Record<string, unknown> | null
+  content: string
+  embedding: number[] | null
+  metadata: Record<string, unknown> | null
   createdAt: Date | null
 }
 
@@ -52,10 +49,9 @@ export interface IDocumentChunkSchema {
 
 export const CreateDocumentChunkInput = type({
   documentId: "string",
-  chunkText: "string >= 1",
-  chunkIndex: "number.integer >= 0",
-  "embeddingsVector?": "number[]",
-  "metadataJson?": "object",
+  "embedding?": "number[]",
+  content: "string",
+  "metadata?": "object",
 })
 
 export type CreateDocumentChunkInput = typeof CreateDocumentChunkInput.infer
@@ -67,11 +63,10 @@ export const DocumentChunkModelConfig: IModelConfig = {
   primaryKeyType: "uuid",
   properties: {
     id: { type: "string", label: "ID", isRequired: true },
+    content: { type: "string", label: "Content", isRequired: true },
     documentId: { type: "string", label: "Document ID", isRequired: true },
-    chunkText: { type: "string", label: "Chunk Text", isRequired: true },
-    chunkIndex: { type: "number", label: "Chunk Index", isRequired: true },
-    embeddingsVector: { type: "array", label: "Embeddings Vector", isRequired: false },
-    metadataJson: { type: "object", label: "Metadata JSON", isRequired: false },
+    embedding: { type: "array", label: "Embedding", isRequired: false },
+    metadata: { type: "object", label: "Metadata", isRequired: false },
     createdAt: { type: "Date", label: "Created At", isRequired: false },
   },
 }

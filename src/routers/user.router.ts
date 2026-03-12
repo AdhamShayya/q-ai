@@ -2,6 +2,7 @@
 
 import { ark } from "../utils/ark"
 import { router, publicProcedure } from "../trpc"
+import UserModel from "../db/models/User"
 import {
   getUserById,
   getAllUsers,
@@ -49,7 +50,8 @@ export const userRouter = router({
     if (ctx.userId == null) {
       return null
     }
-    return await getUserById(ctx.userId)
+    const user = await UserModel.findById(ctx.userId)
+    return user != null ? UserModel.toPublic(user) : null
   }),
 
   getAllUsers: publicProcedure.query(() => getAllUsers()),

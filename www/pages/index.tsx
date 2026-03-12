@@ -5,10 +5,6 @@ import SVGIcon from "../components/SVGIcon";
 import { useInView } from "../hooks/useInView";
 
 export async function loader() {
-  const user = await userApi.me.query();
-  if (user != null) {
-    return Response.redirect("/dashboard");
-  }
   return null;
 }
 
@@ -46,6 +42,7 @@ function LandingPage() {
   const featuresSection = useInView();
   const cardsSection = useInView();
   const sampleSection = useInView();
+  const dnaSection = useInView();
   const ctaSection = useInView();
 
   return (
@@ -105,6 +102,155 @@ function LandingPage() {
           >
             No credit card required Free plan available
           </p>
+        </div>
+      </section>
+
+      <div className="h-px" style={{ background: "var(--color-border)" }} />
+
+      {/*  Dual Personalization  */}
+      <section className="py-24 container">
+        <div
+          ref={dnaSection.ref}
+          className={`text-center mb-14 ${dnaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+        >
+          <span
+            className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6"
+            style={{
+              background: "rgba(139,158,108,0.12)",
+              color: "var(--color-accent-dark)",
+            }}
+          >
+            Personalized to the core
+          </span>
+          <h2 className="font-serif text-3xl md:text-4xl mb-4">
+            Every Answer Is Shaped By Two Things
+          </h2>
+          <p className="text-base max-w-xl mx-auto">
+            Q-Ai doesn't just look up answers — it adapts <em>how</em> it
+            teaches based on who you are and what you're studying.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
+          {/* Pillar 1: Learning DNA */}
+          <div
+            className={`rounded-2xl p-8 flex flex-col gap-5 ${dnaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+            style={{
+              border: "1px solid var(--color-border)",
+              borderTop: "3px solid var(--color-accent)",
+              background: "var(--color-bg-card)",
+              boxShadow: "var(--shadow-sm)",
+              animationDelay: dnaSection.inView ? "100ms" : "0ms",
+            }}
+          >
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(139,158,108,0.12)" }}
+            >
+              <SVGIcon
+                name="dna"
+                size={22}
+                color="var(--color-accent-dark)"
+                strokeWidth={1.75}
+              />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Your Learning DNA</h3>
+              <p
+                className="leading-relaxed text-sm"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                A 2-minute quiz maps how your brain processes information —
+                visual or verbal, big-picture or detail-first, Socratic or
+                direct. Q-Ai adjusts its tone, analogies, and depth to match
+                your exact cognitive style.
+              </p>
+            </div>
+            <Link
+              to="/sign-up"
+              className="inline-flex items-center gap-2 text-sm font-semibold no-underline mt-auto"
+              style={{ color: "var(--color-accent-dark)" }}
+            >
+              Take the Learning DNA Quiz
+              <SVGIcon name="arrow-right" size={14} strokeWidth={2.5} />
+            </Link>
+          </div>
+
+          {/* Pillar 2: Course Documents */}
+          <div
+            className={`rounded-2xl p-8 flex flex-col gap-5 ${dnaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+            style={{
+              border: "1px solid var(--color-border)",
+              borderTop: "3px solid var(--color-warning)",
+              background: "var(--color-bg-card)",
+              boxShadow: "var(--shadow-sm)",
+              animationDelay: dnaSection.inView ? "220ms" : "0ms",
+            }}
+          >
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(212,168,67,0.12)" }}
+            >
+              <SVGIcon
+                name="book"
+                size={22}
+                color="#b8893a"
+                strokeWidth={1.75}
+              />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">
+                Your Course Materials
+              </h3>
+              <p
+                className="leading-relaxed text-sm"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                Every answer is pulled exclusively from your uploaded documents
+                — your professor's slides, textbooks, and notes. Q-Ai never
+                guesses or invents; it teaches from your source of truth.
+              </p>
+            </div>
+            <Link
+              to="/sign-up"
+              className="inline-flex items-center gap-2 text-sm font-semibold no-underline mt-auto"
+              style={{ color: "#b8893a" }}
+            >
+              Upload Your First Vault
+              <SVGIcon name="arrow-right" size={14} strokeWidth={2.5} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Quiz CTA strip */}
+        <div
+          className={`rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-center gap-5 max-w-3xl mx-auto ${dnaSection.inView ? "animate-scale-in" : "opacity-0"}`}
+          style={{
+            background: "rgba(139,158,108,0.08)",
+            border: "1px dashed var(--color-accent)",
+            animationDelay: dnaSection.inView ? "350ms" : "0ms",
+          }}
+        >
+          <div className="flex-1 text-center sm:text-left">
+            <p className="font-semibold text-text mb-1">
+              Discover how you learn best — in 2 minutes.
+            </p>
+            <p
+              className="text-sm"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              The Learning DNA quiz is the first thing you do after signing up.
+              No right or wrong answers — just your natural preferences.
+            </p>
+          </div>
+          <Link
+            to="/sign-up"
+            className="btn-glow shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white no-underline transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+            style={{ background: "var(--color-accent)" }}
+          >
+            Start the Quiz
+            <SVGIcon name="arrow-right" size={14} strokeWidth={2.5} />
+          </Link>
         </div>
       </section>
 

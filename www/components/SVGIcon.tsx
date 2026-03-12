@@ -23,7 +23,10 @@ type IconName =
   | "logout"
   | "check"
   | "message-square"
-  | "arrow-right";
+  | "arrow-right"
+  | "user"
+  | "zap"
+  | "dna";
 
 interface SVGIconProps {
   name: IconName;
@@ -215,6 +218,29 @@ function IconPaths({
       );
     case "arrow-right":
       return <path d="M5 12h14M12 5l7 7-7 7" />;
+    case "user":
+      return (
+        <>
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </>
+      );
+    case "zap":
+      return <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />;
+    case "dna":
+      return (
+        <>
+          <path d="M2 15c6.667-6 13.333 0 20-6" />
+          <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993" />
+          <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993" />
+          <path d="m17 6-2.5-2.5" />
+          <path d="m14 8-1-1" />
+          <path d="m7 18 2.5 2.5" />
+          <path d="m3.5 14.5.5.5" />
+          <path d="m10 16 1 1" />
+          <path d="M2 9c6.667 6 13.333 0 20 6" />
+        </>
+      );
     case "check":
       return (
         <>
