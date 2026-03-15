@@ -198,19 +198,6 @@ function ChatInput(props: {
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      {/* Action pills */}
-      <div className="flex gap-3">
-        {ACTION_PILLS.map((p) => (
-          <Button
-            variant="outline"
-            leftIcon={p.icon}
-            onClick={() => onChange(value + p.label + "")}
-          >
-            {p.label}
-          </Button>
-        ))}
-      </div>
-
       {/* Textarea box */}
       <div
         className="flex flex-end gap-2 px-4 py-2 rounded-full border-2 border-border items-center shadow-md"
@@ -581,10 +568,6 @@ function ChatArea({
           <h5>{conversationTitle}</h5>
           <p>AI Tutor Conversation</p>
         </div>
-
-        <Button variant="outline" size="sm">
-          + New
-        </Button>
       </div>
       <div
         style={{

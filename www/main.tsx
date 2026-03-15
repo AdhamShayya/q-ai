@@ -15,17 +15,18 @@ import {
 } from "react-router";
 
 import { userApi } from "./trpc";
-import SignInPage from "./pages/sign-in";
-import SignUpPage from "./pages/sign-up";
-import Header from "./components/Navbar";
-import LandingPage, { loader as landingLoader } from "./pages";
-import DashboardPage, { loader as dashboardLoader } from "./pages/dashboard";
-import FeaturesPage from "./pages/features";
+import LandingPage from "./pages";
 import AboutPage from "./pages/about";
+import Header from "./components/Navbar";
+import SignInPage from "./pages/sign-in";
+import Footer from "./components/Footer";
+import SignUpPage from "./pages/sign-up";
 import ContactPage from "./pages/contact";
+import FeaturesPage from "./pages/features";
 import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
 import SettingsPage, { loader as settingsLoader } from "./pages/settings";
+import DashboardPage, { loader as dashboardLoader } from "./pages/dashboard";
 import PersonaQuizPage, {
   loader as personaQuizLoader,
 } from "./pages/persona-quiz";
@@ -42,6 +43,7 @@ function RootLayout() {
     <>
       <Header user={user} />
       <Outlet />
+      {window.location.pathname !== href("/ai-tutor") && <Footer />}
     </>
   );
 }
@@ -56,7 +58,6 @@ export const router = createBrowserRouter([
       {
         path: href("/"),
         element: <LandingPage />,
-        loader: landingLoader,
       },
       {
         path: href("/dashboard"),

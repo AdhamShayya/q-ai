@@ -41,7 +41,7 @@ function ContactPage() {
 
   return (
     <div
-      className="flex flex-col min-h-screen w-full items-center py-20 space-y-20"
+      className="flex flex-col w-full items-center py-10 space-y-10"
       style={{ background: "var(--color-bg)" }}
     >
       {/* Page hero */}

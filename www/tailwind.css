@@ -139,18 +139,6 @@
   }
 }
 
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 /* ── Animation utility classes ── */
 .animate-fade-in-up {
   animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -168,6 +156,20 @@
   animation: scaleIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-warning) 60%,
+    var(--color-info) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 /* ── Card lift on hover ── */
 .card-lift {
   transition:
@@ -177,21 +179,6 @@
 .card-lift:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 32px rgba(26, 35, 50, 0.13);
-}
-
-/* ── Animated accent gradient text ── */
-.gradient-text {
-  background: linear-gradient(
-    120deg,
-    var(--color-accent),
-    var(--color-warning),
-    var(--color-accent-light)
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientShift 4s ease infinite;
 }
 
 /* ── Soft glow pulse on CTA buttons ── */
@@ -206,4 +193,191 @@
 }
 .btn-glow {
   animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+/* ── Letter-drop hero title animation ── */
+@keyframes letterDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.9) rotate(-1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+.animate-letter-drop {
+  animation: letterDrop 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: inline-block;
+}
+
+/* ── Particle rise ── */
+@keyframes particleRise {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.75;
+  }
+  40% {
+    transform: translateY(-50px) translateX(8px) scale(1.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-120px) translateX(-8px) scale(0.15);
+    opacity: 0;
+  }
+}
+
+/* ── Marquee horizontal scroll ── */
+@keyframes marqueeScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marqueeScroll 30s linear infinite;
+  will-change: transform;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ── Orbital spin ── */
+@keyframes spinOrbitCW {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinOrbitCCW {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* ── Stagger delay helpers ── */
+.delay-0 {
+  animation-delay: 0ms;
+}
+@keyframes orbPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+}
+.animate-orb-pulse {
+  animation: orbPulse 7s ease-in-out infinite;
+}
+
+/* ── Counter pop-in ── */
+@keyframes counterPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-counter-pop {
+  animation: counterPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Slide in from left / right ── */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Slide in from left / right ── */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Orb pulse for background blobs ── */
+@keyframes orbPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+}
+.animate-orb-pulse {
+  animation: orbPulse 7s ease-in-out infinite;
+}
+/* ── Counter pop-in ── */
+@keyframes counterPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-counter-pop {
+  animation: counterPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
