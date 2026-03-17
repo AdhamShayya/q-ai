@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import SVGIcon from "../../components/SVGIcon";
-import { vaultApi, userApi } from "../../trpc";
+import { vaultApi, userApi, personaApi } from "../../trpc";
 import { UploadForm } from "../../components/UploadForm";
 import UpgradeModal from "../../components/UpgradeModal";
 import { PendingUpload, Serialised } from "../../shared";
@@ -16,10 +16,9 @@ import ConfirmModal, { ConfirmModalProps } from "../../components/ConfirmModal";
 // backend
 export async function loader() {
   const user = await userApi.me.query();
-  if (user == null) {
-    // Not signed in — redirect to sign-in
-    return Response.redirect("/sign-in");
-  }
+  if (user == null) return Response.redirect("/sign-in");
+  const persona = await personaApi.get.query().catch(() => null);
+  if (persona == null) return Response.redirect("/onboarding");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
 }
@@ -75,9 +74,9 @@ async function sendFileToWebhook(props: {
 // ── Page ────────────────────────────────────────────────────────────────────
 
 function DashboardPage() {
-  const { userId, vaults } = useLoaderData<typeof loader>();
   const [docsLoading, setDocsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const { userId, vaults } = useLoaderData<typeof loader>();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -175,7 +174,7 @@ function DashboardPage() {
             fileType: file.name.split(".").pop()?.toUpperCase() ?? "FILE",
             fileSize: file.size,
             mimeType: file.type || undefined,
-            courseVault: courseName,
+            courseVault: courseName || vaultName,
           }),
         ),
       );
@@ -309,7 +308,7 @@ function DashboardPage() {
   }
 
   return (
-    <main className="flex flex-col container w-full py-10">
+    <main className="flex flex-col container w-full py-4">
       <h3>Knowledge Vault</h3>
       <p className="pt-2 mb-6">
         Your personal library of study materials, powered by AI
@@ -415,7 +414,7 @@ function DashboardPage() {
                     <span className="text-base font-semibold">
                       {vault.name}
                     </span>
-                    {vault.courseName != null && (
+                    {vault.courseName?.[0] != null && (
                       <span className="text-xs px-2 py-0.5 rounded-full border">
                         {vault.courseName}
                       </span>

@@ -41,7 +41,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col bg-bg">
       {/* -- HERO --------------------------------------------------------------- */}
-      <section className="relative flex items-center justify-center overflow-hidden min-h-[88vh] md:min-h-screen">
+      <section className="relative flex items-center justify-center overflow-hidden min-h-[88vh] py-18">
         {/* Dot grid */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -184,7 +184,7 @@ export default function LandingPage() {
         />
 
         {/* Content */}
-        <div className="container relative z-10 max-w-4xl mx-auto px-6 flex flex-col items-center text-center py-20 md:py-36">
+        <div className="container relative z-10 mx-auto px-6 flex flex-col items-center text-center">
           <SectionBadge
             icon="sparkles"
             className="mb-8 animate-fade-in delay-75"
@@ -298,7 +298,7 @@ export default function LandingPage() {
       <div className="h-px bg-border" />
 
       {/* -- PERSONALIZATION ---------------------------------------------------- */}
-      <section className="py-14 md:py-24 container">
+      <section className="py-14 container">
         <div
           ref={dnaSection.ref}
           className={`text-center mb-14 ${dnaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
@@ -376,7 +376,7 @@ export default function LandingPage() {
         </div>
       </section>
       {/* -- EDITORIAL: AI IN EDUCATION ----------------------------------------- */}
-      <section ref={pressSection.ref} className="py-14 md:py-24 container">
+      <section ref={pressSection.ref} className="py-14 container">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: image */}
           <div
@@ -460,7 +460,7 @@ export default function LandingPage() {
       <div className="h-px bg-border" />
 
       {/* -- HOW Q-AI HELPS ----------------------------------------------------- */}
-      <section className="py-14 md:py-24 container">
+      <section className="py-14 container">
         <div
           ref={featuresSection.ref}
           className={`text-center mb-16 ${featuresSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
@@ -534,7 +534,7 @@ export default function LandingPage() {
       <div className="h-px bg-border" />
 
       {/* -- HOW IT WORKS ------------------------------------------------------- */}
-      <section className="py-14 md:py-24 container">
+      <section className="py-14 container">
         <div
           ref={stepsSection.ref}
           className={`text-center mb-16 ${stepsSection.inView ? "animate-fade-in-up" : "opacity-0"}`}

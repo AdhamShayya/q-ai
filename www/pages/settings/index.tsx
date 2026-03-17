@@ -115,7 +115,7 @@ function SettingsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--color-bg)" }}>
-      <div className="container mx-auto px-6 py-12 max-w-3xl space-y-8">
+      <div className="container mx-auto px-6 py-4 max-w-3xl space-y-8">
         {/* Header */}
         <div
           ref={headerSection.ref}
@@ -232,19 +232,19 @@ function SettingsPage() {
                 },
                 {
                   label: "Info Intake",
-                  value: persona.infoEntry ?? "—",
+                  value: persona.infoEntry?.answer ?? "—",
                 },
                 {
                   label: "Processing Method",
-                  value: persona.processingMethod ?? "—",
+                  value: persona.processingMethod?.answer ?? "—",
                 },
                 {
                   label: "Logic Structure",
-                  value: persona.logicStructure ?? "—",
+                  value: persona.logicStructure?.answer ?? "—",
                 },
                 {
                   label: "Output Preference",
-                  value: persona.outputPreference ?? "—",
+                  value: persona.outputPreference?.answer ?? "—",
                 },
               ].map(({ label, value }) => (
                 <div

@@ -41,7 +41,7 @@ function ContactPage() {
 
   return (
     <div
-      className="flex flex-col w-full items-center py-10 space-y-10"
+      className="container flex flex-col w-full items-center py-6 space-y-5"
       style={{ background: "var(--color-bg)" }}
     >
       {/* Page hero */}
@@ -75,7 +75,7 @@ function ContactPage() {
       </div>
 
       {/* Contact section */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-12 max-w-4xl mx-auto items-start">
+      <div className="container grid grid-cols-1 md:grid-cols-5 gap-12 max-w-4xl mx-auto items-start">
         {/* Left info column */}
         <div
           ref={infoSection.ref}
@@ -163,7 +163,7 @@ function ContactPage() {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="bg-white rounded-2xl p-8 flex flex-col gap-5"
+              className="bg-white rounded-2xl p-4 flex flex-col gap-3"
               style={{
                 border: "1px solid var(--color-border)",
                 boxShadow: "var(--shadow-md)",

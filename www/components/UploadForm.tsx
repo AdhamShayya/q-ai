@@ -27,8 +27,10 @@ export function UploadForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vaultName.trim()) return;
-    onSubmit(vaultName.trim(), courseName.trim() || vaultName.trim());
+    if (!vaultName.trim()) {
+      return;
+    }
+    onSubmit(vaultName.trim(), courseName.trim());
   };
 
   return (

@@ -17,16 +17,15 @@ import {
 } from "../../animations/features.data";
 
 // -- Page ---------------------------------------------------------------------
-
 function FeaturesPage() {
-  const heroSection = useInView();
-  const statsSection = useInView();
-  const pillarsHeader = useInView();
-  const pillarsCards = useInView();
   const scrollY = useParallax();
-  const coreHeader = useInView();
   const coreCards = useInView();
   const ctaSection = useInView();
+  const coreHeader = useInView();
+  const heroSection = useInView();
+  const statsSection = useInView();
+  const pillarsCards = useInView();
+  const pillarsHeader = useInView();
   const standoutCards = useInView();
   const standoutHeader = useInView();
 
@@ -35,7 +34,7 @@ function FeaturesPage() {
       {/* -- HERO ---------------------------------------------------------------- */}
       <section
         ref={heroSection.ref}
-        className="relative flex flex-col justify-center overflow-hidden py-24 md:py-32"
+        className="relative flex flex-col justify-center overflow-hidden py-10"
       >
         {/* Dot grid */}
         <div
@@ -159,7 +158,7 @@ function FeaturesPage() {
                 style={{ animationDelay: "220ms" }}
               >
                 Q-Ai is built from the ground up for students who want to truly
-                understand their material — not just pass the test.
+                understand their material not just pass the test.
               </p>
 
               <div

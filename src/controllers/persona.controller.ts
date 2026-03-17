@@ -6,18 +6,20 @@ export async function getPersona(userId: string): Promise<ILearningPersonaSchema
   return LearningPersonaModel.findByUserId(userId)
 }
 
+type QuizAnswer = { question: string; answer: string }
+
 type UpsertInput = {
   userId: string
-  preferencesJson: object
-  problemSolving: "guided" | "direct"
-  reviewStyle: "detailed" | "summary"
-  processingMethod: "verbal" | "visual"
-  logicStructure: "global" | "sequential"
-  socialEnvironment: "social" | "solitary"
-  infoEntry: "visual" | "auditory" | "text"
-  abstractionLevel: "abstract" | "concrete"
-  outputPreference: "essay" | "model" | "presentation"
-  errorCorrection: "example" | "explanation" | "retry"
+  preferencesJson?: object
+  problemSolving?: "guided" | "direct"
+  reviewStyle?: "detailed" | "summary"
+  processingMethod?: QuizAnswer
+  logicStructure?: QuizAnswer
+  socialEnvironment?: QuizAnswer
+  infoEntry?: QuizAnswer
+  abstractionLevel?: QuizAnswer
+  outputPreference?: QuizAnswer
+  errorCorrection?: QuizAnswer
   learningStyle: "analogies" | "logic" | "visual" | "mixed"
 }
 

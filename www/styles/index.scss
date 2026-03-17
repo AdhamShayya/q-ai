@@ -251,17 +251,15 @@
   }
 
   // ─── 13. Images & Media ─────────────────────────────────────
-
   img,
   video {
     max-width: 100%;
     height: auto;
     display: block;
   }
-} // end @layer base
+}
 
 // ─── 14. Utility classes ────────────────────────────────────
-
 .text-primary {
   color: var(--color-primary) !important;
 }

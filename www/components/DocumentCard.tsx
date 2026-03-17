@@ -26,7 +26,7 @@ export function DocumentCard(props: DocumentCardProps) {
 
       <div className="px-4 py-3 space-y-1.5 bg-white">
         <p className="text-sm font-medium leading-snug truncate flex justify-between items-center">
-          {_.truncate(doc.filename, { length: 24 })}
+          {_.truncate(doc.filename, { length: 22 })}
           <div
             onClick={(e) => {
               if (isDeleting === true) {

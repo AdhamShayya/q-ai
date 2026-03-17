@@ -4,8 +4,6 @@ import { ORM } from "../db/orm"
 import type { IDocumentSchema } from "../db/schemas/Document.schema"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-
-/** Matches the RAG system ingestion contract */
 export type InputType = "file" | "img" | "vid"
 
 export interface RagPayload {

@@ -4,10 +4,12 @@ import ReactMarkdown from "react-markdown";
 import { useLoaderData } from "react-router";
 import Button from "../../components/Button";
 import SVGIcon from "../../components/SVGIcon";
-import { vaultApi, userApi, conversationApi } from "../../trpc";
+import { vaultApi, userApi, conversationApi, personaApi } from "../../trpc";
 import type { Serialised } from "../../shared";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
+import { truncate } from "fs/promises";
+import _ from "lodash";
 
 const CHAT_WEBHOOK_URL = "https://techflow12.app.n8n.cloud/webhook/chat-tutor";
 
@@ -70,6 +72,8 @@ interface ActionPillData {
 export async function loader() {
   const user = await userApi.me.query();
   if (!user) return Response.redirect("/sign-in");
+  const persona = await personaApi.get.query().catch(() => null);
+  if (persona == null) return Response.redirect("/onboarding");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
 }
@@ -200,7 +204,7 @@ function ChatInput(props: {
     <div className="flex flex-col gap-3 p-3">
       {/* Textarea box */}
       <div
-        className="flex flex-end gap-2 px-4 py-2 rounded-full border-2 border-border items-center shadow-md"
+        className="flex gap-2 px-4 py-2 rounded-2xl border-2 border-border items-end shadow-md"
         style={{
           transition: "border-color var(--transition-fast)",
         }}
@@ -707,12 +711,12 @@ function DocumentRow({ doc }: { doc: Serialised<IDocumentSchema> }) {
   const status =
     STATUS_DOT[doc.processingStatus ?? "pending"] ?? STATUS_DOT.pending;
   return (
-    <div className="flex items-center gap-4 p-2 rounded-md bg-(--color-bg) border border-gray-300">
+    <div className="flex items-center gap-4 p-2 rounded-md bg-(--color-bg) border border-gray-300 overflow-hidden">
       <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>
         {fileTypeIcon(doc.mimeType, doc.fileType)}
       </span>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <p>{doc.filename}</p>
+        <p>{_.truncate(doc.filename, { length: 26 })}</p>
         <p
           style={{
             fontSize: 11,

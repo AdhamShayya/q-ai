@@ -68,7 +68,7 @@ function SignUpPage() {
         password: fields.password,
       });
       toast.success("Account created successfully!");
-      navigate("/");
+      navigate("/onboarding");
     } catch (err: any) {
       toast.error(err?.message ?? "Sign up failed");
     } finally {

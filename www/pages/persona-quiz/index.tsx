@@ -43,7 +43,6 @@ type Question = {
 };
 
 // ── Questions data ─────────────────────────────────────────────────────────────
-
 const QUESTIONS: Question[] = [
   {
     key: "info_entry",
@@ -193,7 +192,6 @@ const QUESTIONS: Question[] = [
 ];
 
 // ── Mapping logic ─────────────────────────────────────────────────────────────
-
 function mapToPersona(answers: Required<QuizAnswers>) {
   let learningStyle: "analogies" | "logic" | "visual" | "mixed" = "mixed";
   if (
@@ -296,16 +294,8 @@ function PersonaQuizPage() {
   };
 
   const initialAnswers: QuizAnswers =
-    persona != null
-      ? {
-          info_entry: persona.infoEntry ?? undefined,
-          processing_method: persona.processingMethod ?? undefined,
-          logic_structure: persona.logicStructure ?? undefined,
-          output_preference: persona.outputPreference ?? undefined,
-          social_environment: persona.socialEnvironment ?? undefined,
-          abstraction_level: persona.abstractionLevel ?? undefined,
-          error_correction: persona.errorCorrection ?? undefined,
-        }
+    persona?.preferencesJson != null
+      ? (persona.preferencesJson as QuizAnswers)
       : {};
 
   const [answers, setAnswers] = useState<QuizAnswers>(initialAnswers);
@@ -336,23 +326,24 @@ function PersonaQuizPage() {
         answers as Required<QuizAnswers>,
       );
 
+      function qa(questionKey: string) {
+        const q = QUESTIONS.find((q) => q.key === questionKey)!;
+        const val = answers[questionKey as keyof QuizAnswers]!;
+        const opt = q.options.find((o) => o.value === val)!;
+        return { question: q.title, answer: opt.label };
+      }
+
       await personaApi.upsert.mutate({
         learningStyle,
         problemSolving,
         reviewStyle,
-        infoEntry: answers.info_entry as "visual" | "auditory" | "text",
-        processingMethod: answers.processing_method as "verbal" | "visual",
-        logicStructure: answers.logic_structure as "global" | "sequential",
-        outputPreference: answers.output_preference as
-          | "essay"
-          | "model"
-          | "presentation",
-        socialEnvironment: answers.social_environment as "social" | "solitary",
-        abstractionLevel: answers.abstraction_level as "abstract" | "concrete",
-        errorCorrection: answers.error_correction as
-          | "example"
-          | "explanation"
-          | "retry",
+        infoEntry: qa("info_entry"),
+        processingMethod: qa("processing_method"),
+        logicStructure: qa("logic_structure"),
+        outputPreference: qa("output_preference"),
+        socialEnvironment: qa("social_environment"),
+        abstractionLevel: qa("abstraction_level"),
+        errorCorrection: qa("error_correction"),
         preferencesJson: answers,
       });
 

@@ -21,7 +21,7 @@ function AboutPage() {
       {/* HERO */}
       <section
         ref={heroSection.ref}
-        className="relative py-20 md:py-28 flex flex-col items-center text-center overflow-hidden"
+        className="relative pt-4 pb-10 flex flex-col items-center text-center overflow-hidden"
       >
         <GlowOrb
           color="accent"
@@ -69,20 +69,21 @@ function AboutPage() {
             backgroundSize: "32px 32px",
           }}
         />
-        <div className="container relative z-10 max-w-4xl mx-auto px-6">
+        <div className="container relative z-10 max-w-4xl mx-auto px-6 py-24">
           <SectionBadge
             icon="sparkles"
             className={`mb-8 ${heroSection.inView ? "animate-fade-in" : "opacity-0"}`}
           >
             Our Story
           </SectionBadge>
-          <h1
-            className={`font-serif text-5xl md:text-6xl lg:text-7xl leading-tight mb-7 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
-            style={{ animationDelay: "100ms" }}
-          >
-            We believe learning should feel like a{" "}
-            <span className="gradient-text">Breakthrough</span>,
-            <br className="hidden md:block" /> not a battle.
+          <h1 className="animate-fade-in-up delay-150 font-serif text-4xl md:text-5xl mb-5">
+            Built for Students,
+            <br />
+            <span className="gradient-text">
+              {" "}
+              By People Who Remember the
+            </span>{" "}
+            Struggle
           </h1>
           <p
             className={`text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}

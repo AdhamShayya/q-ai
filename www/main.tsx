@@ -30,6 +30,7 @@ import DashboardPage, { loader as dashboardLoader } from "./pages/dashboard";
 import PersonaQuizPage, {
   loader as personaQuizLoader,
 } from "./pages/persona-quiz";
+import OnboardingPage, { loader as onboardingLoader } from "./pages/onboarding";
 // import VoiceStudyPage from "./pages/voice-study";
 
 async function rootLoader() {
@@ -95,6 +96,11 @@ export const router = createBrowserRouter([
         path: href("/persona-quiz"),
         element: <PersonaQuizPage />,
         loader: personaQuizLoader,
+      },
+      {
+        path: href("/onboarding"),
+        element: <OnboardingPage />,
+        loader: onboardingLoader,
       },
       // {
       //   path: href("/voice-study"),

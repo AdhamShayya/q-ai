@@ -78,7 +78,7 @@ export const pillars = [
     number: "01",
     title: "The Knowledge Vault",
     description:
-      "A RAG-driven system where the AI's intelligence is tethered strictly to your uploaded materials. It doesn't just give general facts — it gives your professor's facts.",
+      "A system where the AI's intelligence is tethered strictly to your uploaded materials. It doesn't just give general facts — it gives your professor's facts.",
     bullets: [
       "Upload PDFs, documents, and lecture videos",
       "Private, secure storage per course",

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { type } from "arktype";
 
-import { userApi } from "../../trpc";
+import { userApi, personaApi } from "../../trpc";
 import Button from "../../components/Button";
 import { useToast } from "../../hooks/useToast";
 import AuthCard from "../../components/AuthCard";
@@ -50,7 +50,8 @@ function SignInPage() {
     try {
       await userApi.signIn.mutate(fields);
       toast.success("Signed in successfully!");
-      navigate("/");
+      const persona = await personaApi.get.query().catch(() => null);
+      navigate(persona == null ? "/onboarding" : "/dashboard");
     } catch (err: any) {
       toast.error(err?.message ?? "Sign in failed");
     } finally {
