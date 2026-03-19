@@ -98,22 +98,6 @@ function SettingsPage() {
     }
   }
 
-  async function handleDeleteAccount() {
-    const confirmed = window.confirm(
-      "This will permanently delete your account and all data. This cannot be undone. Continue?",
-    );
-    if (confirmed === false) {
-      return;
-    }
-    try {
-      await userApi.deleteUser.mutate({ id: user.id });
-      await userApi.signOut.mutate();
-      navigate("/");
-    } catch {
-      toast.error("Failed to delete account");
-    }
-  }
-
   const isPremium = user.subscriptionTier === "premium";
 
   return (
@@ -395,34 +379,6 @@ function SettingsPage() {
               </div>
               <Button variant="outline-accent" size="sm">
                 Download
-              </Button>
-            </div>
-
-            <div
-              className="flex items-center justify-between rounded-lg px-4 py-3"
-              style={{
-                background: "rgba(239,68,68,0.05)",
-                border: "1px solid rgba(239,68,68,0.2)",
-              }}
-            >
-              <div>
-                <p className="text-sm font-medium" style={{ color: "#b91c1c" }}>
-                  Delete Account
-                </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{ color: "rgba(185,28,28,0.7)" }}
-                >
-                  Permanently delete your account and all data
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDeleteAccount}
-                style={{ color: "#dc2626", borderColor: "rgba(220,38,38,0.4)" }}
-              >
-                Delete
               </Button>
             </div>
           </div>

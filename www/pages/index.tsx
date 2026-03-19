@@ -602,10 +602,10 @@ export default function LandingPage() {
       <div className="h-px bg-border" />
 
       {/* -- CTA ---------------------------------------------------------------- */}
-      <section className="container py-14 md:py-24">
+      <section className="container py-14 md:py-24 ">
         <div
           ref={ctaSection.ref}
-          className={`container rounded-3xl px-10 py-16 flex flex-col items-center text-center max-w-2xl mx-auto relative overflow-hidden bg-primary shadow-xl ${ctaSection.inView ? "animate-scale-in" : "opacity-0"}`}
+          className={`container rounded-3xl px-10 py-16 flex flex-col items-center text-center max-w-2xl mx-auto relative overflow-hidden bg-(--color-bg-card) shadow-xl ${ctaSection.inView ? "animate-scale-in" : "opacity-0"}`}
         >
           <GlowOrb
             color="accent"
@@ -625,16 +625,16 @@ export default function LandingPage() {
           />
 
           <div className="relative z-10 flex flex-col items-center">
-            <h2 className="font-serif text-3xl md:text-4xl text-white mb-4">
+            <h2 className="font-serif text-3xl md:text-4xl text-info mb-4">
               Ready to Transform Your Learning?
             </h2>
-            <p className="text-base mb-10 text-white/70">
+            <p className="text-base mb-10 text-text-secondary">
               Let's start your personalized learning journey together. Upload
               your materials and experience the difference.
             </p>
             <Link
               to="/sign-up"
-              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-(--ai-accent) no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
+              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-(--color-info) no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
             >
               Get Started Free
               <SVGIcon name="arrow-right" size={16} strokeWidth={2.5} />

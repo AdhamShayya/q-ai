@@ -511,21 +511,14 @@ function FeaturesPage() {
         className="py-16 md:py-28 relative overflow-hidden"
       >
         <GlowOrb
-          color="accent"
-          size={1000}
+          color="info"
+          size={2000}
           opacity={0.2}
           blur={0}
-          style={{ top: "-200px", right: "270px" }}
+          style={{ top: "-500px", right: "-90px" }}
           animation="floatY 10s ease-in-out infinite"
         />
-        <GlowOrb
-          color="warning"
-          size={350}
-          opacity={0.12}
-          blur={0}
-          style={{ bottom: "-100px", left: "5%" }}
-          animation="floatY 8s ease-in-out 2s infinite reverse"
-        />
+
         <div className="container relative z-10 max-w-3xl mx-auto text-center px-6">
           <div
             className={`flex items-center justify-center mb-8 ${ctaSection.inView ? "animate-fade-in" : "opacity-0"}`}

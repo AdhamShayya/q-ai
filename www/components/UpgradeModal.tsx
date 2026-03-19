@@ -1,11 +1,6 @@
 ﻿import React from "react";
 import SVGIcon from "./SVGIcon";
-
-const USAGE_LIMITS = {
-  plan: "Free Plan",
-  studyMaterials: { max: 5 },
-  aiConversations: { used: 7, max: 10 },
-};
+import { USAGE_LIMITS } from "../pages/dashboard";
 
 function UpgradeModal({ onClose }: { onClose: () => void }) {
   return (

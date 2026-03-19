@@ -26,7 +26,7 @@ export async function loader() {
   return { userId: user.id, vaults };
 }
 
-const USAGE_LIMITS = {
+export const USAGE_LIMITS = {
   plan: "Free Plan",
   studyMaterials: { max: 5 },
   aiConversations: { used: 7, max: 10 },
