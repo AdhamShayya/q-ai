@@ -134,12 +134,13 @@ function FeaturesPage() {
         />
 
         {/* Content */}
-        <div className="container relative z-10 max-w-7xl mx-auto px-6">
+        <div className="container relative z-10 px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
             {/* Left: copy */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <SectionBadge
                 icon="sparkles"
+                color="info"
                 className={`mb-8 ${heroSection.inView ? "animate-fade-in delay-75" : "opacity-0"}`}
               >
                 Platform Features
@@ -300,7 +301,9 @@ function FeaturesPage() {
             ref={pillarsHeader.ref}
             className={`text-center mb-16 ${pillarsHeader.inView ? "animate-fade-in-up" : "opacity-0"}`}
           >
-            <SectionBadge className="mb-6">Core Architecture</SectionBadge>
+            <SectionBadge className="mb-6" color="info">
+              Core Architecture
+            </SectionBadge>
             <h2 className="font-serif text-3xl md:text-4xl mb-4">
               The Three Pillars
             </h2>
@@ -397,7 +400,7 @@ function FeaturesPage() {
 
           <div
             ref={standoutCards.ref}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
           >
             {standouts.map((item, i) => (
               <div
@@ -422,7 +425,12 @@ function FeaturesPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-base mb-2">{item.title}</h4>
+                  <h4
+                    className="font-semibold text-base mb-2"
+                    style={{ color: item.textColor }}
+                  >
+                    {item.title}
+                  </h4>
                   <p className="text-sm leading-relaxed text-text-secondary">
                     {item.description}
                   </p>
@@ -455,7 +463,7 @@ function FeaturesPage() {
 
           <div
             ref={coreCards.ref}
-            className="grid grid-cols-1 md:grid-cols-2 gap-7 max-w-4xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 gap-7"
           >
             {coreFeatures.map((feature, i) => (
               <div
@@ -480,7 +488,10 @@ function FeaturesPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-base mb-2">
+                  <h4
+                    className="font-semibold text-base mb-2"
+                    style={{ color: feature.textColor }}
+                  >
                     {feature.title}
                   </h4>
                   <p className="text-sm leading-relaxed text-text-secondary">
@@ -496,14 +507,14 @@ function FeaturesPage() {
       {/* -- DARK MANIFESTO / CTA ------------------------------------------------ */}
       <section
         ref={ctaSection.ref}
-        className="py-16 md:py-28 relative overflow-hidden bg-primary"
+        className="py-16 md:py-28 relative overflow-hidden"
       >
         <GlowOrb
           color="accent"
-          size={600}
+          size={1000}
           opacity={0.2}
           blur={0}
-          style={{ top: "-200px", right: "-100px" }}
+          style={{ top: "-200px", right: "270px" }}
           animation="floatY 10s ease-in-out infinite"
         />
         <GlowOrb
@@ -516,7 +527,7 @@ function FeaturesPage() {
         />
         <div className="container relative z-10 max-w-3xl mx-auto text-center px-6">
           <div
-            className={`mb-8 ${ctaSection.inView ? "animate-fade-in" : "opacity-0"}`}
+            className={`flex items-center justify-center mb-8 ${ctaSection.inView ? "animate-fade-in" : "opacity-0"}`}
           >
             <SVGIcon
               name="sparkles"
@@ -526,17 +537,14 @@ function FeaturesPage() {
             />
           </div>
           <h2
-            className={`font-serif text-4xl md:text-5xl text-white leading-tight mb-6 ${ctaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+            className={`font-serif text-4xl md:text-5xl text-info leading-tight mb-6 ${ctaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
             style={{ animationDelay: "100ms" }}
           >
-            Start learning smarter.{" "}
-            <span style={{ color: "var(--color-accent-light, #b5cc8e)" }}>
-              Today.
-            </span>
+            Start learning smarter. Today.
           </h2>
           <p
             className={`text-base leading-relaxed mb-10 ${ctaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
-            style={{ color: "rgba(255,255,255,0.65)", animationDelay: "200ms" }}
+            style={{ animationDelay: "200ms" }}
           >
             Upload your course materials, take the 30-second learning quiz, and
             experience the difference of a tutor that knows your material as
@@ -549,17 +557,16 @@ function FeaturesPage() {
             <Link
               to="/sign-up"
               className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white no-underline transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
-              style={{ background: "var(--color-accent)" }}
+              style={{ background: "var(--color-info)" }}
             >
               Get Started Free
               <SVGIcon name="rocket" size={16} strokeWidth={2} />
             </Link>
             <Link
               to="/about"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 text-white"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold no-underline transition-all duration-200 hover:-translate-y-0.5 text-(--color-primary)"
               style={{
                 borderColor: "rgba(255,255,255,0.2)",
-                background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.18)",
               }}
             >

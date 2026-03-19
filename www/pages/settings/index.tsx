@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router";
-import { userApi, personaApi } from "../../trpc";
-import SVGIcon from "../../components/SVGIcon";
+
 import Button from "../../components/Button";
-import FormField from "../../components/FormField";
+import SVGIcon from "../../components/SVGIcon";
 import { useToast } from "../../hooks/useToast";
-import type { ILearningPersonaSchema } from "@src/db/schemas/LearningPersona.schema";
-import type { IUserPublic } from "@src/db/schemas/User.schema";
+import { userApi, personaApi } from "../../trpc";
 import { useInView } from "../../hooks/useInView";
+import FormField from "../../components/FormField";
+import type { IUserPublic } from "@src/db/schemas/User.schema";
+import type { ILearningPersonaSchema } from "@src/db/schemas/LearningPersona.schema";
 
 // ── Loader ────────────────────────────────────────────────────────────────────
 
@@ -131,9 +132,7 @@ function SettingsPage() {
 
         {/* ── Account ───────────────────────────────────────────────────────── */}
         <SectionCard
-          icon={
-            <SVGIcon name="user" size={20} color="var(--color-accent-dark)" />
-          }
+          icon={<SVGIcon name="user" size={20} color="var(--color-info)" />}
           iconBg="rgba(139,158,108,0.13)"
           title="Account"
         >
@@ -161,9 +160,7 @@ function SettingsPage() {
 
         {/* ── Learning DNA ──────────────────────────────────────────────────── */}
         <SectionCard
-          icon={
-            <SVGIcon name="dna" size={20} color="var(--color-accent-dark)" />
-          }
+          icon={<SVGIcon name="dna" size={20} color="var(--color-info)" />}
           iconBg="rgba(139,158,108,0.13)"
           title="Learning DNA"
         >
@@ -185,11 +182,7 @@ function SettingsPage() {
                 className="w-12 h-12 rounded-full flex items-center justify-center"
                 style={{ background: "rgba(139,158,108,0.12)" }}
               >
-                <SVGIcon
-                  name="dna"
-                  size={22}
-                  color="var(--color-accent-dark)"
-                />
+                <SVGIcon name="dna" size={22} color="var(--color-info)" />
               </div>
               <div>
                 <p className="font-semibold text-text mb-1">
@@ -268,7 +261,7 @@ function SettingsPage() {
                 <Link
                   to="/persona-quiz"
                   className="text-sm font-medium no-underline"
-                  style={{ color: "var(--color-accent-dark)" }}
+                  style={{ color: "var(--color-info)" }}
                 >
                   Retake quiz →
                 </Link>
@@ -312,7 +305,7 @@ function SettingsPage() {
                   background: isPremium
                     ? "rgba(212,168,67,0.15)"
                     : "rgba(139,158,108,0.15)",
-                  color: isPremium ? "#b8893a" : "var(--color-accent-dark)",
+                  color: isPremium ? "#b8893a" : "var(--color-info)",
                 }}
               >
                 {isPremium ? "Premium" : "Free"}
@@ -338,11 +331,7 @@ function SettingsPage() {
                   className="flex items-center gap-2"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
-                  <SVGIcon
-                    name="check"
-                    size={14}
-                    color="var(--color-accent-dark)"
-                  />
+                  <SVGIcon name="check" size={14} color="var(--color-info)" />
                   {feat}
                 </div>
               ))}
@@ -358,9 +347,7 @@ function SettingsPage() {
 
         {/* ── Privacy & Security ────────────────────────────────────────────── */}
         <SectionCard
-          icon={
-            <SVGIcon name="shield" size={20} color="var(--color-accent-dark)" />
-          }
+          icon={<SVGIcon name="shield" size={20} color="var(--color-info)" />}
           iconBg="rgba(139,158,108,0.13)"
           title="Privacy & Security"
         >

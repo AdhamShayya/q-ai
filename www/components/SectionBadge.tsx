@@ -15,7 +15,7 @@ const COLORS = {
   },
   info: {
     bg: "rgba(74,127,165,0.12)",
-    text: "#4a7fa5",
+    text: "var(--color-info)",
     border: "rgba(74,127,165,0.18)",
   },
 } as const;

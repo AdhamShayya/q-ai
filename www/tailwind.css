@@ -7,7 +7,6 @@
 
   /* Accent */
   --color-accent: #8b9e6c;
-  --color-accent-light: #a8ba8a;
   --color-accent-dark: #6c7d50;
 
   /* Backgrounds */
@@ -27,10 +26,9 @@
   --color-text-inverse: #ffffff;
 
   /* Semantic */
-  --color-success: #8b9e6c;
   --color-warning: #d4a843;
   --color-error: #c0392b;
-  --color-info: #4a7fa5;
+  --color-info: #6c7d50;
 
   /* Font families */
   --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -64,14 +62,129 @@
     max-width: 768px;
   }
   @media (width >= 1024px) {
-    max-width: 1224px;
+    max-width: 1024px;
   }
   @media (width >= 1280px) {
-    max-width: 1480px;
+    max-width: 1180px;
   }
 }
 
 /* ── Waveform animation ── */
+/* ── Light theme defaults — AI Tutor page tokens ── */
+:root {
+  --ai-bg: #f5f4ef;
+  --ai-panel: #ffffff;
+  --ai-header-bg: rgba(245, 244, 239, 0.92);
+  --ai-input-area: rgba(26, 35, 50, 0.015);
+  --ai-surface: rgba(26, 35, 50, 0.06);
+  --ai-surface-subtle: rgba(26, 35, 50, 0.03);
+  --ai-border: rgba(26, 35, 50, 0.12);
+  --ai-border-faint: rgba(26, 35, 50, 0.07);
+  --ai-border-focus: rgba(108, 125, 80, 0.55);
+  --ai-focus-ring: rgba(108, 125, 80, 0.1);
+  --ai-text: rgba(26, 35, 50, 0.9);
+  --ai-text-secondary: rgba(26, 35, 50, 0.65);
+  --ai-text-muted: rgba(26, 35, 50, 0.45);
+  --ai-text-dim: rgba(26, 35, 50, 0.3);
+  --ai-accent: #6c7d50;
+  --ai-accent-gradient: linear-gradient(135deg, #8b9e6c 0%, #4a7fa5 100%);
+  --ai-heading-gradient: linear-gradient(
+    135deg,
+    #4a6a35 0%,
+    #8a5f20 50%,
+    #2d6080 100%
+  );
+  --ai-user-bubble: linear-gradient(135deg, #8b9e6c 0%, #4a7fa5 100%);
+  --ai-avatar-glow:
+    0 0 0 12px rgba(139, 158, 108, 0.1), 0 0 30px rgba(139, 158, 108, 0.22);
+  --ai-glow-sm:
+    0 0 0 3px rgba(108, 125, 80, 0.15), 0 4px 14px rgba(108, 125, 80, 0.22);
+  --ai-glow-lg:
+    0 4px 22px rgba(108, 125, 80, 0.28), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --ai-send-glow: 0 4px 14px rgba(108, 125, 80, 0.35);
+  --ai-hover-surface: rgba(108, 125, 80, 0.1);
+  --ai-hover-border: rgba(108, 125, 80, 0.3);
+  --ai-hover-glow: 0 0 24px rgba(108, 125, 80, 0.12);
+  --ai-hover-text: rgba(26, 35, 50, 0.92);
+  --ai-code-bg: rgba(26, 35, 50, 0.07);
+  --ai-code-color: #3a6020;
+  --ai-cursor-color: rgba(108, 125, 80, 0.85);
+  --ai-orb1: rgba(108, 125, 80, 0.09);
+  --ai-orb2: rgba(74, 127, 165, 0.07);
+  --ai-orb3: rgba(212, 168, 67, 0.07);
+  --ai-spinner: #8b9e6c;
+}
+
+/* ── Dark theme overrides ── */
+[data-theme="dark"] {
+  /* Site-wide */
+  --color-primary: #a78bfa;
+  --color-primary-hover: #9472f8;
+  --color-bg: #0c0e18;
+  --color-bg-card: #141720;
+  --color-bg-hover: #1e2130;
+  --color-bg-muted: #101318;
+  --color-border: #2d3148;
+  --color-border-focus: #a78bfa;
+  --color-info: #4a7fa5;
+  --color-text: #ddd9f5;
+  --color-text-secondary: #9490b8;
+  --color-text-muted: #55527a;
+  --color-text-inverse: #0c0e18;
+  --color-warning: rgba(212, 168, 67, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.6);
+  /* AI Tutor page */
+  --ai-bg: #080910;
+  --ai-panel: #0c0e18;
+  --ai-header-bg: rgba(8, 9, 16, 0.8);
+  --ai-input-area: rgba(255, 255, 255, 0.015);
+  --ai-surface: rgba(255, 255, 255, 0.055);
+  --ai-surface-subtle: rgba(255, 255, 255, 0.03);
+  --ai-border: rgba(255, 255, 255, 0.1);
+  --ai-border-faint: rgba(255, 255, 255, 0.07);
+  --ai-border-focus: rgba(124, 58, 237, 0.55);
+  --ai-focus-ring: rgba(124, 58, 237, 0.08);
+  --ai-text: rgba(255, 255, 255, 0.85);
+  --ai-text-secondary: rgba(255, 255, 255, 0.62);
+  --ai-text-muted: rgba(255, 255, 255, 0.35);
+  --ai-text-dim: rgba(255, 255, 255, 0.22);
+  --ai-accent: #7c3aed;
+  --ai-accent-gradient: linear-gradient(
+    135deg,
+    #7c3aed 0%,
+    #4f46e5 60%,
+    #06b6d4 100%
+  );
+  --ai-heading-gradient: linear-gradient(
+    135deg,
+    #c4b5fd 0%,
+    #818cf8 50%,
+    #67e8f9 100%
+  );
+  --ai-user-bubble: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  --ai-avatar-glow:
+    0 0 0 12px rgba(124, 58, 237, 0.1), 0 0 50px rgba(124, 58, 237, 0.3);
+  --ai-glow-sm:
+    0 0 0 3px rgba(124, 58, 237, 0.18), 0 4px 14px rgba(124, 58, 237, 0.32);
+  --ai-glow-lg:
+    0 4px 22px rgba(124, 58, 237, 0.38), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --ai-send-glow: 0 4px 14px rgba(124, 58, 237, 0.4);
+  --ai-hover-surface: rgba(124, 58, 237, 0.1);
+  --ai-hover-border: rgba(124, 58, 237, 0.32);
+  --ai-hover-glow: 0 0 24px rgba(124, 58, 237, 0.12);
+  --ai-hover-text: rgba(255, 255, 255, 0.9);
+  --ai-code-bg: rgba(255, 255, 255, 0.1);
+  --ai-code-color: #c4b5fd;
+  --ai-cursor-color: rgba(196, 181, 253, 0.8);
+  --ai-orb1: rgba(124, 58, 237, 0.1);
+  --ai-orb2: rgba(34, 211, 238, 0.07);
+  --ai-orb3: rgba(79, 70, 229, 0.08);
+  --ai-spinner: #7c3aed;
+}
+
 @keyframes waveform {
   0%,
   100% {

@@ -5,6 +5,7 @@ export interface FeatureCardData {
   icon: IconName;
   iconBg: string;
   iconColor: string;
+  textColor: string;
   accentColor: string;
   title: string;
   description: string;
@@ -17,6 +18,7 @@ export function FeatureCard(
     icon,
     iconBg,
     iconColor,
+    textColor,
     accentColor,
     title,
     description,
@@ -38,7 +40,12 @@ export function FeatureCard(
         <SVGIcon name={icon} size={22} color={iconColor} strokeWidth={1.75} />
       </div>
       <div>
-        <h3 className="font-semibold text-lg mb-2">{title}</h3>
+        <h3
+          className={`font-semibold text-lg mb-2`}
+          style={{ color: textColor }}
+        >
+          {title}
+        </h3>
         <p className="leading-relaxed text-text-secondary">{description}</p>
       </div>
     </div>

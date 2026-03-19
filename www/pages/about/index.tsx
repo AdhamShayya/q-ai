@@ -109,7 +109,7 @@ function AboutPage() {
             </Link>
             <Link
               to="/features"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold border border-border text-text no-underline transition-all duration-200 hover:bg-bg-card hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold  text-text no-underline transition-all duration-200 hover:bg-bg-card hover:-translate-y-0.5"
             >
               See Features
               <SVGIcon name="arrow-right" size={15} strokeWidth={2.5} />
@@ -292,7 +292,9 @@ function AboutPage() {
             ref={valuesSection.ref}
             className={`text-center mb-16 ${valuesSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
           >
-            <SectionBadge className="mb-6">What drives us</SectionBadge>
+            <SectionBadge className="mb-6" color="info">
+              What drives us
+            </SectionBadge>
             <h2 className="font-serif text-3xl md:text-4xl mb-4">
               Built on Three Beliefs
             </h2>
@@ -326,7 +328,12 @@ function AboutPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-2.5">{v.title}</h3>
+                  <h3
+                    className="font-semibold text-lg mb-2.5"
+                    style={{ color: v.textColor }}
+                  >
+                    {v.title}
+                  </h3>
                   <p className="leading-relaxed text-sm text-text-secondary">
                     {v.desc}
                   </p>
@@ -366,6 +373,7 @@ function AboutPage() {
                   background: a.bgGradient,
                   border: `1.5px solid ${a.borderColor}`,
                   boxShadow: "var(--shadow-sm)",
+                  color: a.textColor,
                   animationDelay: whoSection.inView ? `${i * 130}ms` : "0ms",
                 }}
               >
@@ -379,18 +387,21 @@ function AboutPage() {
                   <SVGIcon
                     name={a.icon}
                     size={22}
-                    color={a.accentColor}
+                    color={a.textColor}
                     strokeWidth={1.75}
                   />
                 </div>
                 <div>
                   <span
                     className="text-xs font-bold tracking-widest uppercase mb-2 block"
-                    style={{ color: a.accentColor }}
+                    style={{ color: a.textColor }}
                   >
                     {a.label}
                   </span>
-                  <h3 className="font-semibold text-lg mb-2 text-primary">
+                  <h3
+                    className="font-semibold text-lg mb-2"
+                    style={{ color: a.textColor }}
+                  >
                     {a.headline}
                   </h3>
                   <p className="text-sm leading-relaxed text-text-secondary">
@@ -421,19 +432,19 @@ function AboutPage() {
       {/* MANIFESTO DARK */}
       <section
         ref={manifestoSection.ref}
-        className="py-16 md:py-28 relative overflow-hidden bg-primary"
+        className="py-16 md:py-28 relative overflow-hidden"
       >
         <GlowOrb
           color="accent"
-          size={600}
+          size={1000}
           opacity={0.2}
           blur={0}
           style={{ top: "-200px", right: "-100px" }}
           animation="floatY 10s ease-in-out infinite"
         />
         <GlowOrb
-          color="warning"
-          size={350}
+          color="accent"
+          size={1000}
           opacity={0.12}
           blur={0}
           style={{ bottom: "-100px", left: "5%" }}
@@ -451,16 +462,18 @@ function AboutPage() {
             />
           </div>
           <p
-            className={`font-serif text-3xl md:text-4xl leading-tight text-white mb-8 ${manifestoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+            className={`font-serif text-3xl md:text-4xl leading-tight text-primary mb-8 ${manifestoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
             style={{ animationDelay: "100ms" }}
           >
             We do not just build AI. We build the{" "}
-            <span className="text-accent-light">confidence</span> students need
-            to walk into any exam and own it.
+            <span className="gradient-text">
+              confidence students need to walk into any
+            </span>{" "}
+            exam and own it.
           </p>
           <p
-            className={`text-base leading-relaxed mb-10 ${manifestoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
-            style={{ color: "rgba(255,255,255,0.6)", animationDelay: "200ms" }}
+            className={`text-base leading-relaxed mb-10 text-primary ${manifestoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+            style={{ animationDelay: "200ms" }}
           >
             Every student deserves to understand their material deeply not just
             scramble to memorize it the night before. That is why Q-Ai exists.
@@ -471,7 +484,7 @@ function AboutPage() {
           >
             <Link
               to="/sign-up"
-              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-accent no-underline transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-primary no-underline transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
             >
               Join Q-Ai Today
               <SVGIcon name="arrow-right" size={16} strokeWidth={2.5} />

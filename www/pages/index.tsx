@@ -21,18 +21,12 @@ import {
   TRUST_PILLS,
 } from "../animations/home.data";
 
-// --- Loader ------------------------------------------------------------------
-export async function loader() {
-  return null;
-}
-
 // --- Page ---------------------------------------------------------------------
 export default function LandingPage() {
   const scrollY = useParallax();
   const ctaSection = useInView();
   const dnaSection = useInView();
   const stepsSection = useInView();
-  const statsSection = useInView();
   const pressSection = useInView();
   const cardsSection = useInView();
   const sampleSection = useInView();
@@ -186,6 +180,7 @@ export default function LandingPage() {
         {/* Content */}
         <div className="container relative z-10 mx-auto px-6 flex flex-col items-center text-center">
           <SectionBadge
+            color="info"
             icon="sparkles"
             className="mb-8 animate-fade-in delay-75"
           >
@@ -247,7 +242,7 @@ export default function LandingPage() {
             {TRUST_PILLS.map((t) => (
               <span
                 key={t}
-                className="text-xs font-medium px-3 py-1 rounded-full text-accent-dark bg-[rgba(139,158,108,0.1)] border border-[rgba(139,158,108,0.18)]"
+                className="text-xs font-medium px-3 py-1 rounded-full text-info bg-[rgba(139,158,108,0.1)] border border-[rgba(139,158,108,0.18)]"
               >
                 {t}
               </span>
@@ -283,7 +278,7 @@ export default function LandingPage() {
               <SVGIcon
                 name={item.icon}
                 size={14}
-                color="var(--color-accent-dark)"
+                color="var(--color-info)"
                 strokeWidth={1.8}
               />
               <span className="text-sm font-medium whitespace-nowrap text-text-secondary">
@@ -303,7 +298,9 @@ export default function LandingPage() {
           ref={dnaSection.ref}
           className={`text-center mb-14 ${dnaSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
         >
-          <SectionBadge className="mb-6">Personalized to the core</SectionBadge>
+          <SectionBadge color="info" className="mb-6">
+            Personalized to the core
+          </SectionBadge>
           <h2 className="font-serif text-3xl md:text-4xl mb-4">
             Every Answer Is Shaped By Two Things
           </h2>
@@ -313,7 +310,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {DNA_PILLARS.map((card) => (
             <div
               key={card.title}
@@ -335,7 +332,12 @@ export default function LandingPage() {
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2">{card.title}</h3>
+                <h3
+                  className="font-semibold text-lg mb-2"
+                  style={{ color: card.accent }}
+                >
+                  {card.title}
+                </h3>
                 <p className="leading-relaxed text-sm text-text-secondary">
                   {card.desc}
                 </p>
@@ -354,7 +356,7 @@ export default function LandingPage() {
 
         {/* Quiz CTA strip */}
         <div
-          className={`rounded-2xl px-8 py-7 flex flex-col sm:flex-row items-center gap-5 max-w-5xl mx-auto bg-[rgba(139,158,108,0.08)] border border-dashed border-accent ${dnaSection.inView ? "animate-scale-in" : "opacity-0"}`}
+          className={`rounded-2xl container px-8 py-7 flex flex-col sm:flex-row items-center gap-5 bg-[rgba(139,158,108,0.08)] border border-dashed border-(--ai-accent) ${dnaSection.inView ? "animate-scale-in" : "opacity-0"}`}
           style={{ animationDelay: dnaSection.inView ? "350ms" : "0ms" }}
         >
           <div className="flex-1 text-center sm:text-left">
@@ -368,7 +370,7 @@ export default function LandingPage() {
           </div>
           <Link
             to="/sign-up"
-            className="btn-glow shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-accent no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
+            className="btn-glow shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-(--ai-accent) no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
           >
             Start the Quiz{" "}
             <SVGIcon name="arrow-right" size={14} strokeWidth={2.5} />
@@ -377,7 +379,7 @@ export default function LandingPage() {
       </section>
       {/* -- EDITORIAL: AI IN EDUCATION ----------------------------------------- */}
       <section ref={pressSection.ref} className="py-14 container">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Left: image */}
           <div
             className={`relative ${pressSection.inView ? "animate-slide-in-left" : "opacity-0"}`}
@@ -445,7 +447,7 @@ export default function LandingPage() {
                     <SVGIcon
                       name={item.icon}
                       size={15}
-                      color="var(--color-accent-dark)"
+                      color="var(--color-info)"
                       strokeWidth={1.75}
                     />
                   </div>
@@ -521,7 +523,7 @@ export default function LandingPage() {
                     : "0ms",
                 }}
               >
-                <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 text-accent-dark bg-[rgba(139,158,108,0.15)]">
+                <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 text-info bg-[rgba(139,158,108,0.15)]">
                   {i + 1}
                 </span>
                 {text}
@@ -582,7 +584,12 @@ export default function LandingPage() {
                 </span>
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
+                <h3
+                  className="font-semibold text-lg mb-2"
+                  style={{ color: step.textColor }}
+                >
+                  {step.title}
+                </h3>
                 <p className="leading-relaxed text-sm text-text-secondary">
                   {step.desc}
                 </p>
@@ -627,7 +634,7 @@ export default function LandingPage() {
             </p>
             <Link
               to="/sign-up"
-              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-accent no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
+              className="btn-glow inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white bg-(--ai-accent) no-underline transition-all hover:opacity-90 hover:-translate-y-0.5"
             >
               Get Started Free
               <SVGIcon name="arrow-right" size={16} strokeWidth={2.5} />

@@ -1,6 +1,7 @@
-﻿import { StrictMode } from "react";
+﻿import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { ToastContainer } from "react-toastify";
+import { useThemeStore } from "./store/theme";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./tailwind.css";
@@ -27,10 +28,10 @@ import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
 import SettingsPage, { loader as settingsLoader } from "./pages/settings";
 import DashboardPage, { loader as dashboardLoader } from "./pages/dashboard";
+import OnboardingPage, { loader as onboardingLoader } from "./pages/onboarding";
 import PersonaQuizPage, {
   loader as personaQuizLoader,
 } from "./pages/persona-quiz";
-import OnboardingPage, { loader as onboardingLoader } from "./pages/onboarding";
 // import VoiceStudyPage from "./pages/voice-study";
 
 async function rootLoader() {
@@ -38,10 +39,19 @@ async function rootLoader() {
   return { user };
 }
 
+function ThemeSync() {
+  const isDark = useThemeStore((s) => s.isDark);
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  }, [isDark]);
+  return null;
+}
+
 function RootLayout() {
   const { user } = useLoaderData<typeof rootLoader>();
   return (
     <>
+      <ThemeSync />
       <Header user={user} />
       <Outlet />
       {window.location.pathname !== href("/ai-tutor") && <Footer />}

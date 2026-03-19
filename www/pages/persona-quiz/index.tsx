@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, useLoaderData } from "react-router";
-import { userApi, personaApi } from "../../trpc";
-import SVGIcon from "../../components/SVGIcon";
+
 import Button from "../../components/Button";
+import SVGIcon from "../../components/SVGIcon";
 import { useToast } from "../../hooks/useToast";
+import { userApi, personaApi } from "../../trpc";
 import { useInView } from "../../hooks/useInView";
 
 // ── Loader ────────────────────────────────────────────────────────────────────
@@ -235,7 +236,7 @@ function OptionCard({
       onClick={onClick}
       className="w-full text-left rounded-xl p-4 border-2 transition-all duration-200 flex items-center gap-4 group"
       style={{
-        borderColor: selected ? "var(--color-accent)" : "var(--color-border)",
+        borderColor: selected ? "var(--color-info)" : "var(--color-border)",
         background: selected
           ? "rgba(139,158,108,0.09)"
           : "var(--color-bg-card)",
@@ -253,9 +254,7 @@ function OptionCard({
         <SVGIcon
           name={option.icon}
           size={18}
-          color={
-            selected ? "var(--color-accent-dark)" : "var(--color-text-muted)"
-          }
+          color={selected ? "var(--color-info)" : "var(--color-text-muted)"}
           strokeWidth={1.75}
         />
       </div>
@@ -273,8 +272,8 @@ function OptionCard({
       <div
         className="w-4 h-4 rounded-full border-2 shrink-0 transition-colors"
         style={{
-          borderColor: selected ? "var(--color-accent)" : "var(--color-border)",
-          background: selected ? "var(--color-accent)" : "transparent",
+          borderColor: selected ? "var(--color-info)" : "var(--color-border)",
+          background: selected ? "var(--color-info)" : "transparent",
         }}
       />
     </button>
@@ -375,7 +374,7 @@ function PersonaQuizPage() {
             <SVGIcon
               name="dna"
               size={28}
-              color="var(--color-accent-dark)"
+              color="var(--color-info)"
               strokeWidth={1.5}
             />
           </div>
@@ -383,7 +382,7 @@ function PersonaQuizPage() {
             className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5"
             style={{
               background: "rgba(139,158,108,0.12)",
-              color: "var(--color-accent-dark)",
+              color: "var(--color-info)",
             }}
           >
             {persona != null ? "Edit Your Profile" : "2-Minute Quiz"}
@@ -422,7 +421,7 @@ function PersonaQuizPage() {
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progressPct}%`,
-                background: "var(--color-accent)",
+                background: "var(--color-info)",
               }}
             />
           </div>
@@ -440,7 +439,7 @@ function PersonaQuizPage() {
                       ? "rgba(139,158,108,0.15)"
                       : "var(--color-border)",
                     color: answers[question.key]
-                      ? "var(--color-accent-dark)"
+                      ? "var(--color-info)"
                       : "var(--color-text-muted)",
                   }}
                 >

@@ -1,15 +1,14 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import _ from "lodash";
 import ReactMarkdown from "react-markdown";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useLoaderData } from "react-router";
-import Button from "../../components/Button";
 import SVGIcon from "../../components/SVGIcon";
-import { vaultApi, userApi, conversationApi, personaApi } from "../../trpc";
+import { useTypewriter } from "../../hooks/useTypewriter";
 import type { Serialised } from "../../shared";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
-import { truncate } from "fs/promises";
-import _ from "lodash";
+import { vaultApi, userApi, conversationApi, personaApi } from "../../trpc";
 
 const CHAT_WEBHOOK_URL = "https://techflow12.app.n8n.cloud/webhook/chat-tutor";
 
@@ -67,8 +66,6 @@ interface ActionPillData {
   label: string;
 }
 
-// ── Loader ────────────────────────────────────────────────────────────────────
-
 export async function loader() {
   const user = await userApi.me.query();
   if (!user) return Response.redirect("/sign-in");
@@ -80,7 +77,7 @@ export async function loader() {
 
 const ICON_STYLE_SUGGESTION = {
   flexShrink: 0 as const,
-  color: "var(--color-text-muted)",
+  color: "var(--ai-text-muted)",
 };
 const ICON_STYLE_PILL = { flexShrink: 0 as const };
 
@@ -136,45 +133,219 @@ function EmptyState({
   onSuggestionClick?: (text: string) => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-14">
-      <SVGIcon
-        name="sparkles"
-        size={40}
-        style={{ color: "var(--color-text-secondary)" }}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1.75rem",
+        padding: "3rem 2rem",
+        minHeight: "100%",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Ambient glow orbs */}
+      <div
+        style={{
+          position: "absolute",
+          top: "15%",
+          left: "15%",
+          width: 260,
+          height: 260,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, var(--ai-orb1) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20%",
+          right: "10%",
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, var(--ai-orb2) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          right: "20%",
+          width: 140,
+          height: 140,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, var(--ai-orb3) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
       />
 
-      <div className="text-center gap-3">
-        <h3>Start Your Learning Journey</h3>
-        <p>
+      {/* Glowing AI avatar */}
+      <div
+        style={{
+          width: 76,
+          height: 76,
+          borderRadius: "50%",
+          background: "var(--ai-accent-gradient)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "var(--ai-avatar-glow)",
+          animation: "pulse 3s ease-in-out infinite",
+          flexShrink: 0,
+        }}
+      >
+        <SVGIcon name="sparkles" size={32} style={{ color: "#fff" }} />
+      </div>
+
+      {/* Heading */}
+      <div style={{ textAlign: "center", maxWidth: 460 }}>
+        <h3
+          style={{
+            background: "var(--ai-heading-gradient)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            marginBottom: "0.65rem",
+            fontSize: "1.4rem",
+          }}
+        >
+          Start Your Learning Journey
+        </h3>
+        <p
+          style={{
+            color: "var(--ai-text-muted)",
+            fontSize: "0.87rem",
+            lineHeight: 1.7,
+          }}
+        >
           Ask me anything about your study materials. I'll help you understand
           complex concepts through personalized explanations.
         </p>
       </div>
 
-      <p>Try asking:</p>
+      {/* Divider with label */}
+      <div
+        style={{
+          display: "flex",
+          gap: "0.75rem",
+          width: "100%",
+        }}
+      >
+        <div
+          style={{ flex: 1, height: 1, background: "var(--ai-border-faint)" }}
+        />
+        <span
+          style={{
+            fontSize: "0.68rem",
+            color: "var(--ai-text-dim)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          Try asking
+        </span>
+        <div
+          style={{ flex: 1, height: 1, background: "var(--ai-border-faint)" }}
+        />
+      </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {/* Suggestion grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "0.75rem",
+          width: "100%",
+          justifyContent: "center",
+        }}
+      >
         {SUGGESTIONS.map((s) => (
-          <Button
-            variant="outline"
-            size="none"
-            fullWidth
+          <button
+            key={s.id}
             onClick={() => onSuggestionClick?.(s.text)}
-            className="flex justify-center items-center gap-4 whitespace-normal text-left rounded-(--radius-lg) py-4 px-4.5"
+            style={{
+              background: "var(--ai-surface-subtle)",
+              border: "1px solid var(--ai-border-faint)",
+              borderRadius: "0.875rem",
+              padding: "0.9rem 1rem",
+              textAlign: "left",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "0.75rem",
+              transition: "all 0.2s ease",
+              color: "var(--ai-text-secondary)",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget;
+              el.style.background = "var(--ai-hover-surface)";
+              el.style.borderColor = "var(--ai-hover-border)";
+              el.style.boxShadow = "var(--ai-hover-glow)";
+              el.style.color = "var(--ai-hover-text)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget;
+              el.style.background = "var(--ai-surface-subtle)";
+              el.style.borderColor = "var(--ai-border-faint)";
+              el.style.boxShadow = "none";
+              el.style.color = "var(--ai-text-secondary)";
+            }}
           >
-            {s.icon}
-            <p>{s.text}</p>
-          </Button>
+            <span style={{ marginTop: 2, flexShrink: 0 }}>{s.icon}</span>
+            <span
+              style={{
+                fontSize: "0.8rem",
+                lineHeight: 1.5,
+                fontFamily: "inherit",
+              }}
+            >
+              {s.text}
+            </span>
+          </button>
         ))}
       </div>
 
-      <div className="flex items-center gap-6 mt-4">
-        <span className="flex items-center gap-1.5 text-xs text-muted">
-          <SVGIcon name="lock" size={22} />
-          Privacy Protecte
+      {/* Footer trust badges */}
+      <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            fontSize: "0.68rem",
+            color: "var(--ai-text-dim)",
+          }}
+        >
+          <SVGIcon name="lock" size={12} />
+          Privacy Protected
         </span>
-        <span className="flex items-center gap-1.5 text-xs text-muted">
-          <SVGIcon name="shield" size={22} />
+        <span
+          style={{
+            width: 3,
+            height: 3,
+            borderRadius: "50%",
+            background: "var(--ai-border)",
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            fontSize: "0.68rem",
+            color: "var(--ai-text-dim)",
+          }}
+        >
+          <SVGIcon name="shield" size={12} />
           Academic Integrity
         </span>
       </div>
@@ -191,6 +362,7 @@ function ChatInput(props: {
   const { value, onChange, onSend, disabled } = props;
   const MAX = 2000;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [focused, setFocused] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value.slice(0, MAX));
@@ -200,20 +372,33 @@ function ChatInput(props: {
     el.style.height = Math.min(el.scrollHeight, 120) + "px";
   };
 
+  const canSend = !disabled && !!value.trim();
+
   return (
-    <div className="flex flex-col gap-3 p-3">
-      {/* Textarea box */}
+    <div
+      style={{
+        padding: "0.875rem 1.25rem 1rem",
+        background: "var(--ai-input-area)",
+        borderTop: "1px solid var(--ai-border-faint)",
+      }}
+    >
+      {/* Input box */}
       <div
-        className="flex gap-2 px-4 py-2 rounded-2xl border-2 border-border items-end shadow-md"
         style={{
-          transition: "border-color var(--transition-fast)",
+          display: "flex",
+          gap: "0.625rem",
+          padding: "0.5rem 0.875rem",
+          borderRadius: "1rem",
+          border: focused
+            ? "1.5px solid var(--ai-border-focus)"
+            : "1.5px solid var(--ai-border-faint)",
+          background: "var(--ai-surface-subtle)",
+          alignItems: "center",
+          transition: "border-color 0.2s, box-shadow 0.2s",
+          boxShadow: focused
+            ? "0 0 0 4px var(--ai-focus-ring), 0 4px 24px rgba(0,0,0,0.35)"
+            : "0 4px 20px rgba(0,0,0,0.15)",
         }}
-        onFocusCapture={(e) =>
-          (e.currentTarget.style.borderColor = "var(--color-border-focus)")
-        }
-        onBlurCapture={(e) =>
-          (e.currentTarget.style.borderColor = "var(--color-border)")
-        }
       >
         <textarea
           ref={textareaRef}
@@ -221,58 +406,81 @@ function ChatInput(props: {
           onChange={handleChange}
           placeholder="Ask a question about your study material..."
           rows={1}
-          className="focus:outline-none"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           style={{
             flex: 1,
             resize: "none",
             minHeight: "1.5rem",
             maxHeight: "7.5rem",
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: "var(--ai-text)",
+            fontSize: "0.875rem",
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              if (!disabled && value.trim()) {
-                onSend?.();
-              }
+              if (canSend) onSend?.();
             }
           }}
         />
-        <div className="flex items-center gap-2 pb-1">
-          <Button variant="ghost" size="icon">
-            <SVGIcon name="mic" size={17} />
-          </Button>
-          <Button
-            variant="solid"
-            size="icon"
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            paddingBottom: "0.1rem",
+          }}
+        >
+          <div
             onClick={() => {
-              if (!disabled && value.trim()) {
-                onSend?.();
-              }
+              if (canSend) onSend?.();
             }}
-            style={
-              !value.trim() || disabled
-                ? { background: "var(--color-text-muted)", cursor: "pointer" }
-                : undefined
-            }
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "var(--ai-surface-subtle)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: canSend ? "pointer" : "default",
+              transition: "all 0.2s",
+            }}
           >
-            <SVGIcon name="send" size={16} />
-          </Button>
+            <SVGIcon
+              name="send"
+              size={12}
+              style={{ color: canSend ? "black" : "var(--color-info)" }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Hint */}
-      <div className="flex items-center gap-3 px-2">
-        <p>Press Enter to send, Shift+Enter for new line</p>
-        <p
+      {/* Hint row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: "0.5rem",
+          padding: "0 0.25rem",
+        }}
+      >
+        <span style={{ fontSize: "0.68rem", color: "var(--ai-text-dim)" }}>
+          Enter to send · Shift+Enter for new line
+        </span>
+        <span
           style={{
-            color:
-              value.length > MAX * 0.9
-                ? "var(--color-warning)"
-                : "var(--color-text-muted)",
+            fontSize: "0.68rem",
+            color: value.length > MAX * 0.9 ? "#f59e0b" : "var(--ai-text-dim)",
           }}
         >
           {value.length}/{MAX}
-        </p>
+        </span>
       </div>
     </div>
   );
@@ -353,11 +561,12 @@ function renderMarkdown(content: string) {
         code: ({ children }) => (
           <code
             style={{
-              background: "var(--color-bg)",
-              padding: "0.1em 0.35em",
-              borderRadius: "0.25em",
+              background: "var(--ai-code-bg)",
+              padding: "0.1em 0.4em",
+              borderRadius: "0.3em",
               fontFamily: "monospace",
-              fontSize: "0.9em",
+              fontSize: "0.88em",
+              color: "var(--ai-code-color)",
             }}
           >
             {children}
@@ -366,12 +575,13 @@ function renderMarkdown(content: string) {
         pre: ({ children }) => (
           <pre
             style={{
-              background: "var(--color-bg)",
-              padding: "0.6em 0.8em",
-              borderRadius: "0.5em",
+              background: "var(--ai-surface-subtle)",
+              border: "1px solid var(--ai-border-faint)",
+              padding: "0.65em 0.9em",
+              borderRadius: "0.625em",
               overflowX: "auto",
               fontFamily: "monospace",
-              fontSize: "0.85em",
+              fontSize: "0.84em",
               margin: "0.4em 0",
             }}
           >
@@ -385,33 +595,92 @@ function renderMarkdown(content: string) {
   );
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function MessageBubble({
+  msg,
+  isStreaming,
+}: {
+  msg: ChatMessage;
+  isStreaming?: boolean;
+}) {
   const isUser = msg.role === "user";
+  const [typingDone, setTypingDone] = useState(!isStreaming);
+  const displayed = useTypewriter(
+    msg.content,
+    12,
+    !!isStreaming && !typingDone,
+    () => setTypingDone(true),
+  );
+  const showMarkdown = !isStreaming || typingDone;
+
   return (
     <div
       style={{
         display: "flex",
         justifyContent: isUser ? "flex-end" : "flex-start",
-        padding: "0.25rem 2rem",
+        padding: "0.5rem 1.5rem",
+        gap: "0.625rem",
+        alignItems: "flex-end",
+        animation: "fadeSlideIn 0.25s ease-out",
       }}
     >
+      {!isUser && (
+        <div
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: "50%",
+            flexShrink: 0,
+            background: "var(--ai-accent-gradient)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "var(--ai-glow-sm)",
+            marginBottom: 2,
+          }}
+        >
+          <SVGIcon name="sparkles" size={13} style={{ color: "#fff" }} />
+        </div>
+      )}
       <div
         style={{
-          maxWidth: "72%",
-          padding: "0.65rem 1rem",
+          maxWidth: "70%",
+          padding: "0.7rem 1.05rem",
           borderRadius: isUser
-            ? "1rem 1rem 0.25rem 1rem"
-            : "1rem 1rem 1rem 0.25rem",
-          background: isUser ? "var(--color-primary)" : "var(--color-bg-card)",
-          color: isUser ? "#fff" : "var(--color-text)",
-          fontSize: "var(--font-size-sm)",
-          lineHeight: "var(--line-height-normal)",
-          border: isUser ? "none" : "1.5px solid var(--color-border)",
+            ? "1.2rem 1.2rem 0.3rem 1.2rem"
+            : "0.3rem 1.2rem 1.2rem 1.2rem",
+          background: isUser ? "var(--ai-user-bubble)" : "var(--ai-surface)",
+          color: isUser ? "#fff" : "var(--ai-text)",
+          fontSize: "0.875rem",
+          lineHeight: 1.65,
+          border: isUser ? "none" : "1px solid var(--ai-border)",
           wordBreak: "break-word",
+          boxShadow: isUser
+            ? "var(--ai-glow-lg)"
+            : "0 2px 14px rgba(0,0,0,0.25)",
+          backdropFilter: isUser ? "none" : "blur(8px)",
           ...(isUser ? { whiteSpace: "pre-wrap" as const } : {}),
         }}
       >
-        {isUser ? msg.content : renderMarkdown(msg.content)}
+        {isUser ? (
+          displayed
+        ) : showMarkdown ? (
+          renderMarkdown(msg.content)
+        ) : (
+          <span style={{ whiteSpace: "pre-wrap" }}>
+            {displayed}
+            <span
+              style={{
+                display: "inline-block",
+                width: "2px",
+                height: "0.9em",
+                background: "var(--ai-cursor-color)",
+                marginLeft: "2px",
+                verticalAlign: "middle",
+                animation: "blink 0.65s step-end infinite",
+              }}
+            />
+          </span>
+        )}
       </div>
     </div>
   );
@@ -419,8 +688,43 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex justify-start py-1 px-4">
-      <div className="px-4 py-[0.65rem] rounded-[1rem_1rem_1rem_0.25rem] bg-[var(--color-bg-card)] border-[1.5px] border-[var(--color-border)] flex items-center gap-[0.3rem]">
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-start",
+        padding: "0.5rem 1.5rem",
+        gap: "0.625rem",
+        alignItems: "flex-end",
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: "var(--ai-accent-gradient)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "var(--ai-glow-sm)",
+          marginBottom: 2,
+        }}
+      >
+        <SVGIcon name="sparkles" size={13} style={{ color: "#fff" }} />
+      </div>
+      <div
+        style={{
+          padding: "0.7rem 1.1rem",
+          borderRadius: "0.3rem 1.2rem 1.2rem 1.2rem",
+          background: "var(--ai-surface)",
+          border: "1px solid var(--ai-border)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.35rem",
+          backdropFilter: "blur(8px)",
+        }}
+      >
         {[0, 1, 2].map((i) => (
           <span
             key={i}
@@ -428,7 +732,7 @@ function TypingIndicator() {
               width: 7,
               height: 7,
               borderRadius: "50%",
-              background: "var(--color-text-muted)",
+              background: "var(--ai-accent)",
               display: "inline-block",
               animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
             }}
@@ -453,6 +757,9 @@ function ChatArea({
   const [isLoading, setIsLoading] = useState(false);
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
+    null,
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load or create conversation + messages when vault changes
@@ -542,6 +849,7 @@ function ChatArea({
         content: replyText,
         timestamp: new Date(),
       };
+      setStreamingMessageId(aiMsg.id);
       setMessages((prev) => [...prev, aiMsg]);
 
       // Persist assistant message
@@ -566,13 +874,95 @@ function ChatArea({
   };
 
   return (
-    <div className="flex flex-col bg-(--color-bg) w-full">
-      <div className="flex items-center justify-between px-7.5 py-4 border-b border-(--color-border) bg-(--color-bg-card)">
-        <div>
-          <h5>{conversationTitle}</h5>
-          <p>AI Tutor Conversation</p>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        background: "var(--ai-bg)",
+        position: "relative",
+      }}
+    >
+      {/* Chat header */}
+      <div
+        style={{
+          borderBottom: "1px solid var(--ai-border-faint)",
+          background: "var(--ai-header-bg)",
+          flexShrink: 0,
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        {/* Gradient accent line */}
+        <div
+          style={{
+            height: 2,
+            background: "var(--ai-accent-gradient)",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0.875rem 1.5rem",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}
+          >
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                background: "var(--ai-accent-gradient)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "var(--ai-glow-sm)",
+                flexShrink: 0,
+              }}
+            >
+              <SVGIcon name="sparkles" size={17} style={{ color: "#fff" }} />
+            </div>
+            <div>
+              <p
+                style={{
+                  fontWeight: 600,
+                  fontSize: "0.92rem",
+                  color: "var(--ai-text)",
+                  marginBottom: 2,
+                }}
+              >
+                {conversationTitle}
+              </p>
+              <p style={{ fontSize: "0.72rem", color: "var(--ai-text-dim)" }}>
+                AI Tutor Conversation
+              </p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#10b981",
+                boxShadow: "0 0 10px rgba(16,185,129,0.65)",
+                animation: "statusPing 2s ease-in-out infinite",
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{ fontSize: "0.72rem", color: "#10b981", fontWeight: 500 }}
+            >
+              Online
+            </span>
+          </div>
         </div>
       </div>
+
+      {/* Messages area */}
       <div
         style={{
           flex: 1,
@@ -582,23 +972,29 @@ function ChatArea({
         }}
       >
         {isChatLoading ? (
-          <div className="flex flex-col items-center justify-center gap-3 h-full py-20">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem",
+              height: "100%",
+              padding: "5rem 0",
+            }}
+          >
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 borderRadius: "50%",
-                border: "3px solid var(--color-border)",
-                borderTopColor: "var(--color-primary)",
+                border: "2.5px solid var(--ai-border-faint)",
+                borderTopColor: "var(--ai-spinner)",
                 animation: "spin 0.8s linear infinite",
+                boxShadow: "0 0 16px rgba(124,58,237,0.3)",
               }}
             />
-            <p
-              style={{
-                color: "var(--color-text-muted)",
-                fontSize: "var(--font-size-sm)",
-              }}
-            >
+            <p style={{ color: "var(--ai-text-dim)", fontSize: "0.82rem" }}>
               Loading conversation…
             </p>
           </div>
@@ -607,7 +1003,11 @@ function ChatArea({
         ) : (
           <>
             {messages.map((msg) => (
-              <MessageBubble key={msg.id} msg={msg} />
+              <MessageBubble
+                key={msg.id}
+                msg={msg}
+                isStreaming={msg.id === streamingMessageId}
+              />
             ))}
             {isLoading && <TypingIndicator />}
             <div ref={bottomRef} />
@@ -631,47 +1031,110 @@ function VaultCard(props: {
   onClick: () => void;
 }) {
   const { vault, selected, onClick } = props;
-  const color = "var(--secondary-color)";
   return (
     <div
       onClick={onClick}
       style={{
-        background: selected ? "var(--color-bg)" : "var(--color-bg-card)",
+        background: selected
+          ? "var(--ai-hover-surface)"
+          : "var(--ai-surface-subtle)",
         border: selected
-          ? `1.5px solid ${color}`
-          : "1.5px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
+          ? "1.5px solid var(--ai-hover-border)"
+          : "1.5px solid var(--ai-border-faint)",
+        borderRadius: "0.875rem",
         overflow: "hidden",
         cursor: "pointer",
-        transition:
-          "box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast)",
-        boxShadow: selected ? `0 0 0 2px ${color}22` : "none",
+        transition: "all 0.2s ease",
+        boxShadow: selected ? "var(--ai-hover-glow)" : "none",
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) {
+          (e.currentTarget as HTMLDivElement).style.background =
+            "var(--ai-surface)";
+          (e.currentTarget as HTMLDivElement).style.borderColor =
+            "var(--ai-border)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) {
+          (e.currentTarget as HTMLDivElement).style.background =
+            "var(--ai-surface-subtle)";
+          (e.currentTarget as HTMLDivElement).style.borderColor =
+            "var(--ai-border-faint)";
+        }
       }}
     >
-      {/* Colour accent bar */}
-      <div style={{ height: 6, background: color }} />
-      <div className="flex p-4 gap-2 items-center">
-        <div className="rounded-full flex items-center justify-center text-white w-8 h-8 bg-(--secondary-color)">
+      {/* Gradient accent bar */}
+      <div
+        style={{
+          height: 3,
+          background: selected
+            ? "var(--ai-accent-gradient)"
+            : "var(--ai-border-faint)",
+          transition: "background 0.2s",
+        }}
+      />
+      <div
+        style={{
+          display: "flex",
+          padding: "0.5rem 1rem",
+          gap: "0.75rem",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: "50%",
+            flexShrink: 0,
+            background: selected
+              ? "var(--ai-user-bubble)"
+              : "var(--ai-surface)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--ai-text)",
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            boxShadow: selected ? "var(--ai-send-glow)" : "none",
+            transition: "all 0.2s",
+          }}
+        >
           {vault.name.charAt(0).toUpperCase()}
         </div>
-        <div style={{ minWidth: 0, gap: 0 }}>
-          <p>{vault.name}</p>
-          {vault.courseName != null && (
-            <p className="text-[12px]">{vault.courseName}</p>
-          )}
-        </div>
-        {selected === true && (
-          <span
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p
             style={{
-              marginLeft: "auto",
-              color,
-              flexShrink: 0,
-              fontSize: 14,
-              fontWeight: 700,
+              fontWeight: 500,
+              fontSize: "0.85rem",
+              color: "var(--ai-text)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
-            ✓
-          </span>
+            {vault.name}
+          </p>
+        </div>
+        {selected && (
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              background: "var(--ai-user-bubble)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "var(--ai-glow-sm)",
+            }}
+          >
+            <span style={{ color: "#fff", fontSize: 11, fontWeight: 700 }}>
+              ✓
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -711,16 +1174,47 @@ function DocumentRow({ doc }: { doc: Serialised<IDocumentSchema> }) {
   const status =
     STATUS_DOT[doc.processingStatus ?? "pending"] ?? STATUS_DOT.pending;
   return (
-    <div className="flex items-center gap-4 p-2 rounded-md bg-(--color-bg) border border-gray-300 overflow-hidden">
-      <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem",
+        padding: "0.6rem 0.75rem",
+        borderRadius: "0.625rem",
+        background: "var(--ai-surface-subtle)",
+        border: "1px solid var(--ai-border-faint)",
+        overflow: "hidden",
+        transition: "background 0.15s",
+        cursor: "default",
+      }}
+      onMouseEnter={(e) =>
+        ((e.currentTarget as HTMLDivElement).style.background =
+          "var(--ai-surface)")
+      }
+      onMouseLeave={(e) =>
+        ((e.currentTarget as HTMLDivElement).style.background =
+          "var(--ai-surface-subtle)")
+      }
+    >
+      <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>
         {fileTypeIcon(doc.mimeType, doc.fileType)}
       </span>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <p>{_.truncate(doc.filename, { length: 26 })}</p>
         <p
           style={{
-            fontSize: 11,
-            color: "var(--color-text-muted)",
+            fontSize: "0.8rem",
+            color: "var(--ai-text-secondary)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {_.truncate(doc.filename, { length: 26 })}
+        </p>
+        <p
+          style={{
+            fontSize: "0.68rem",
+            color: "var(--ai-text-dim)",
             marginTop: 1,
           }}
         >
@@ -734,7 +1228,7 @@ function DocumentRow({ doc }: { doc: Serialised<IDocumentSchema> }) {
           borderRadius: "50%",
           background: status?.color,
           flexShrink: 0,
-          boxShadow: `0 0 5px ${status?.color}88`,
+          boxShadow: `0 0 7px ${status?.color}`,
         }}
       />
     </div>
@@ -757,7 +1251,7 @@ function VaultContents({ vaultId }: { vaultId: string }) {
   return (
     <div
       style={{
-        borderTop: "1.5px solid var(--color-border)",
+        borderTop: "1px solid var(--ai-border-faint)",
         display: "flex",
         flexDirection: "column",
         flex: 1,
@@ -768,22 +1262,32 @@ function VaultContents({ vaultId }: { vaultId: string }) {
       {/* Section label */}
       <div
         style={{
-          padding: "0.625rem 1.25rem 0.375rem",
+          padding: "0.75rem 1.25rem 0.5rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        <p className="font-bold text-gray-600 text-[16px]">Contents</p>
-        {loading === false && (
+        <p
+          style={{
+            fontWeight: 600,
+            fontSize: "0.72rem",
+            letterSpacing: "0.09em",
+            textTransform: "uppercase",
+            color: "var(--ai-text-dim)",
+          }}
+        >
+          Contents
+        </p>
+        {!loading && (
           <span
             style={{
-              fontSize: 11,
-              color: "var(--color-text-muted)",
-              background: "var(--color-bg)",
-              border: "1px solid var(--color-border)",
+              fontSize: "0.68rem",
+              color: "var(--ai-text-dim)",
+              background: "var(--ai-surface-subtle)",
+              border: "1px solid var(--ai-border-faint)",
               borderRadius: 99,
-              padding: "1px 7px",
+              padding: "1px 8px",
             }}
           >
             {docs.length}
@@ -796,7 +1300,7 @@ function VaultContents({ vaultId }: { vaultId: string }) {
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "0.25rem 1.25rem 0.75rem",
+          padding: "0.25rem 1rem 1rem",
           display: "flex",
           flexDirection: "column",
           gap: "0.4rem",
@@ -805,8 +1309,8 @@ function VaultContents({ vaultId }: { vaultId: string }) {
         {loading ? (
           <p
             style={{
-              fontSize: "var(--font-size-xs)",
-              color: "var(--color-text-muted)",
+              fontSize: "0.75rem",
+              color: "var(--ai-text-dim)",
               paddingTop: "0.5rem",
             }}
           >
@@ -815,8 +1319,8 @@ function VaultContents({ vaultId }: { vaultId: string }) {
         ) : docs.length === 0 ? (
           <p
             style={{
-              fontSize: "var(--font-size-xs)",
-              color: "var(--color-text-muted)",
+              fontSize: "0.75rem",
+              color: "var(--ai-text-dim)",
               paddingTop: "0.5rem",
             }}
           >
@@ -838,25 +1342,86 @@ function StudyMaterialsSidebar(props: {
   const { vaults, selectedVaultId, onSelectVault } = props;
   return (
     <aside
-      className="flex flex-col bg-(--color-bg-card) border-l-2 border-border overflow-hidden"
       style={{
-        width: "300px",
-        minWidth: "280px",
-        maxWidth: "320px",
+        display: "flex",
+        flexDirection: "column",
+        width: 300,
+        minWidth: 280,
+        maxWidth: 320,
+        background: "var(--ai-panel)",
+        borderLeft: "1px solid var(--ai-border-faint)",
+        backdropFilter: "blur(16px)",
+        overflow: "hidden",
       }}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-300" style={{ flexShrink: 0 }}>
-        <h3 className="text-[20px]">Study Materials</h3>
-        <p className="text-gray-400 text-[12px]">
+      <div
+        style={{
+          padding: "1.25rem 1.25rem 1rem",
+          borderBottom: "1px solid var(--ai-border-faint)",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginBottom: "0.35rem",
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--ai-accent-gradient)",
+              boxShadow: "0 0 8px var(--ai-accent)",
+              flexShrink: 0,
+            }}
+          />
+          <p
+            style={{
+              fontWeight: 700,
+              fontSize: "0.92rem",
+              color: "var(--ai-text)",
+            }}
+          >
+            Study Materials
+          </p>
+        </div>
+        <p
+          style={{
+            fontSize: "0.72rem",
+            color: "var(--ai-text-dim)",
+            paddingLeft: "1.25rem",
+          }}
+        >
           Select a vault to link this chat
         </p>
       </div>
 
-      {/* Vault list – capped height so contents section is always visible */}
-      <div className="flex flex-col shrink-0 overflow-y-auto max-h-[60%] container py-4 gap-4">
+      {/* Vault list */}
+      <div
+        style={{
+          flexShrink: 0,
+          maxHeight: "60%",
+          overflowY: "auto",
+          padding: "1rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.625rem",
+        }}
+      >
         {vaults.length === 0 ? (
-          <p className="text-center text-gray-400 text-[12px]">
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "0.75rem",
+              color: "var(--ai-text-dim)",
+              padding: "0.5rem 0",
+            }}
+          >
             No vaults found. Create one on the home page.
           </p>
         ) : (
@@ -889,18 +1454,39 @@ function AiTutor() {
   const conversationTitle = selectedVault?.name ?? "AI Tutor";
 
   return (
-    <div className=" flex h-[calc(100vh-64px)]">
-      <ChatArea
-        conversationTitle={conversationTitle}
-        userId={userId}
-        vaultId={selectedVaultId}
-      />
-      <StudyMaterialsSidebar
-        vaults={vaults}
-        selectedVaultId={selectedVaultId}
-        onSelectVault={setSelectedVaultId}
-      />
-    </div>
+    <>
+      <style>{`
+        .ai-tutor-page textarea::placeholder { color: var(--ai-text-dim); }
+        .ai-tutor-page *::-webkit-scrollbar { width: 4px; height: 4px; }
+        .ai-tutor-page *::-webkit-scrollbar-track { background: transparent; }
+        .ai-tutor-page *::-webkit-scrollbar-thumb { background: var(--ai-border); border-radius: 999px; }
+        .ai-tutor-page *::-webkit-scrollbar-thumb:hover { background: var(--ai-accent); }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); box-shadow: var(--ai-avatar-glow); }
+          50% { transform: scale(1.03); }
+        }
+      `}</style>
+      <div
+        className="ai-tutor-page"
+        style={{
+          display: "flex",
+          height: "calc(100vh - 64px)",
+          background: "var(--ai-bg)",
+          overflow: "hidden",
+        }}
+      >
+        <StudyMaterialsSidebar
+          vaults={vaults}
+          selectedVaultId={selectedVaultId}
+          onSelectVault={setSelectedVaultId}
+        />
+        <ChatArea
+          conversationTitle={conversationTitle}
+          userId={userId}
+          vaultId={selectedVaultId}
+        />
+      </div>
+    </>
   );
 }
 

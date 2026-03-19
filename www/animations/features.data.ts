@@ -34,7 +34,7 @@ export const stats = [
   {
     icon: "users-group" as const,
     iconBg: "rgba(139,158,108,0.14)",
-    iconColor: "var(--color-accent-dark)",
+    iconColor: "var(--color-primary)",
     value: 12400,
     suffix: "+",
     label: "Students Helped",
@@ -70,7 +70,7 @@ export const stats = [
 export const pillars = [
   {
     icon: "shield" as const,
-    accentColor: "var(--color-accent-dark)",
+    accentColor: "var(--color-accent)",
     borderColor: "rgba(139,158,108,0.3)",
     bgGradient:
       "linear-gradient(140deg, rgba(139,158,108,0.1) 0%, rgba(139,158,108,0.02) 100%)",
@@ -87,8 +87,8 @@ export const pillars = [
   },
   {
     icon: "dna" as const,
-    accentColor: "#d4a843",
-    borderColor: "rgba(212,168,67,0.3)",
+    accentColor: "var(--color-warning)",
+    borderColor: "var(--color-warning)",
     bgGradient:
       "linear-gradient(140deg, rgba(212,168,67,0.1) 0%, rgba(212,168,67,0.02) 100%)",
     iconBg: "rgba(212,168,67,0.15)",
@@ -129,6 +129,7 @@ export const standouts = [
     accentColor: "var(--color-accent-dark)",
     iconBg: "rgba(139,158,108,0.12)",
     borderColor: "rgba(139,158,108,0.25)",
+    textColor: "var(--color-accent-dark)",
     title: "Specialization Over Generalization",
     description:
       "Focused on your specific course materials, not the entire internet. This means more accurate, relevant answers.",
@@ -137,7 +138,8 @@ export const standouts = [
     icon: "sparkles" as const,
     accentColor: "#d4a843",
     iconBg: "rgba(212,168,67,0.12)",
-    borderColor: "rgba(212,168,67,0.25)",
+    textColor: "var(--color-warning)",
+    borderColor: "var(--color-warning)",
     title: "Empathetic Expert Persona",
     description:
       "Think of Q-Ai as a patient older sibling — supportive, understanding, and always there when you need help studying.",
@@ -146,6 +148,7 @@ export const standouts = [
     icon: "shield" as const,
     accentColor: "#4a7fa5",
     iconBg: "rgba(74,127,165,0.12)",
+    textColor: "#4a7fa5",
     borderColor: "rgba(74,127,165,0.25)",
     title: "Privacy First",
     description:
@@ -154,6 +157,7 @@ export const standouts = [
   {
     icon: "book" as const,
     accentColor: "var(--color-accent-dark)",
+    textColor: "var(--color-accent-dark)",
     iconBg: "rgba(139,158,108,0.12)",
     borderColor: "rgba(139,158,108,0.25)",
     title: "Built for College Students",
@@ -169,6 +173,7 @@ export const coreFeatures = [
     icon: "analogy-cycle" as const,
     accentColor: "var(--color-accent-dark)",
     iconBg: "rgba(139,158,108,0.12)",
+    textColor: "var(--color-accent-dark)",
     borderColor: "rgba(139,158,108,0.25)",
     bgGradient:
       "linear-gradient(140deg, rgba(139,158,108,0.07) 0%, transparent 70%)",
@@ -178,9 +183,10 @@ export const coreFeatures = [
   },
   {
     icon: "mic" as const,
-    accentColor: "#d4a843",
+    accentColor: "var(--color-warning)",
     iconBg: "rgba(212,168,67,0.12)",
-    borderColor: "rgba(212,168,67,0.25)",
+    textColor: "var(--color-warning)",
+    borderColor: "var(--color-warning)",
     bgGradient:
       "linear-gradient(140deg, rgba(212,168,67,0.07) 0%, transparent 70%)",
     title: "Interactive Call Explanation",
@@ -191,6 +197,7 @@ export const coreFeatures = [
     icon: "file" as const,
     accentColor: "#4a7fa5",
     iconBg: "rgba(74,127,165,0.12)",
+    textColor: "#4a7fa5",
     borderColor: "rgba(74,127,165,0.25)",
     bgGradient:
       "linear-gradient(140deg, rgba(74,127,165,0.07) 0%, transparent 70%)",
@@ -202,6 +209,7 @@ export const coreFeatures = [
     icon: "check" as const,
     accentColor: "var(--color-accent-dark)",
     iconBg: "rgba(139,158,108,0.12)",
+    textColor: "var(--color-accent-dark)",
     borderColor: "rgba(139,158,108,0.25)",
     bgGradient:
       "linear-gradient(140deg, rgba(139,158,108,0.07) 0%, transparent 70%)",

@@ -378,17 +378,17 @@ function DashboardPage() {
               </div>
 
               <div className="flex gap-4 overflow-x-auto pb-2">
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
                     className="shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
                     style={{ borderColor: "var(--color-border)" }}
                   >
                     <div
-                      className="h-36"
+                      className="h-38"
                       style={{ background: "var(--color-bg-muted)" }}
                     />
-                    <div className="px-4 py-3 space-y-2 bg-white">
+                    <div className="px-4 py-8 space-y-2 bg-(--ai-surface)">
                       <div
                         className="h-3 rounded w-3/4"
                         style={{ background: "var(--color-bg-muted)" }}
@@ -472,7 +472,7 @@ function DashboardPage() {
             </div>
           )}
         </div>
-        <div className="border border-(--secondary-color) bg-white rounded-lg p-8 min-w-100">
+        <div className="border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8 min-w-100">
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
             <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border">
@@ -492,7 +492,7 @@ function DashboardPage() {
                 </div>
                 <div className="h-2 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-accent rounded-full transition-[width] duration-600"
+                    className="h-full bg-info rounded-full transition-[width] duration-600"
                     style={{ width: `${pct}%` }}
                   />
                 </div>

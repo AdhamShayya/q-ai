@@ -34,7 +34,7 @@ function ConfirmModal(props: ConfirmModalProps) {
       onClick={props.onCancel}
     >
       <div
-        className="bg-(--primary-color) rounded-2xl p-8 w-full max-w-sm mx-4 flex flex-col items-center gap-5 shadow-2xl"
+        className="bg-(--ai-surface) opacity-100 rounded-2xl p-8 w-full max-w-sm mx-4 flex flex-col items-center gap-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}

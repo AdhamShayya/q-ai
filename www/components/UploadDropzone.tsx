@@ -67,7 +67,7 @@ export function UploadDropzone(props: UploadDropzoneProps) {
 
   return (
     <div
-      className="border-[1.5px] bg-white border-(--secondary-color) border-dashed rounded-xl p-12 flex flex-col items-center gap-4 cursor-pointer transition-colors hover:border-accent"
+      className="border-[1.5px] bg-(--ai-surface) border-(--secondary-color) border-dashed rounded-xl p-12 flex flex-col items-center gap-4 cursor-pointer transition-colors hover:border-accent"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();

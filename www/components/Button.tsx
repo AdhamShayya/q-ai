@@ -34,7 +34,7 @@ const VARIANT: Record<ButtonVariant, string> = {
   outline:
     "bg-transparent text-text-secondary border-border hover:bg-bg-hover hover:border-border-focus hover:shadow-none",
   "outline-accent":
-    "bg-transparent text-accent border-border hover:border-border-focus hover:shadow-none",
+    "bg-transparent text-info border-border hover:border-border-focus hover:shadow-none",
   ghost:
     "bg-transparent text-text-muted border-transparent hover:bg-transparent hover:text-text-secondary hover:shadow-none",
   muted:

@@ -43,6 +43,7 @@ export const values = [
     iconBg: "rgba(239,68,68,0.1)",
     iconColor: "#ef4444",
     borderColor: "#ef4444",
+    textColor: "#ef4444",
     glowColor: "rgba(239,68,68,0.07)",
     title: "Student-First Design",
     desc: "Every decision starts with one question: does this help a student understand? No feature ships unless it serves genuine learning.",
@@ -51,6 +52,7 @@ export const values = [
     icon: "shield" as const,
     iconBg: "rgba(139,158,108,0.12)",
     iconColor: "var(--color-accent-dark)",
+    textColor: "var(--color-accent)",
     borderColor: "var(--color-accent)",
     glowColor: "rgba(139,158,108,0.06)",
     title: "Privacy by Default",
@@ -60,6 +62,7 @@ export const values = [
     icon: "brain" as const,
     iconBg: "rgba(74,127,165,0.12)",
     iconColor: "#4a7fa5",
+    textColor: "#4a7fa5",
     borderColor: "#4a7fa5",
     glowColor: "rgba(74,127,165,0.06)",
     title: "Genuine Understanding",
@@ -72,8 +75,9 @@ export const values = [
 export const audiences = [
   {
     icon: "cpu" as const,
-    accentColor: "#4a7fa5",
+    accentColor: "var(--color-info)",
     borderColor: "rgba(74,127,165,0.3)",
+    textColor: "var(--color-info)",
     bgGradient:
       "linear-gradient(140deg, rgba(74,127,165,0.1) 0%, rgba(74,127,165,0.02) 100%)",
     iconBg: "rgba(74,127,165,0.15)",
@@ -88,6 +92,7 @@ export const audiences = [
     borderColor: "rgba(212,168,67,0.3)",
     bgGradient:
       "linear-gradient(140deg, rgba(212,168,67,0.1) 0%, rgba(212,168,67,0.02) 100%)",
+    textColor: "#d4a843",
     iconBg: "rgba(212,168,67,0.15)",
     label: "Law Students",
     headline: "Cut through legal complexity",
@@ -97,6 +102,7 @@ export const audiences = [
   {
     icon: "heart" as const,
     accentColor: "#ef4444",
+    textColor: "#ef4444",
     borderColor: "rgba(239,68,68,0.25)",
     bgGradient:
       "linear-gradient(140deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%)",

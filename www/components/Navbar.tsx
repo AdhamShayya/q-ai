@@ -2,6 +2,7 @@
 import { Link, useLocation, useNavigate } from "react-router";
 import { userApi } from "../trpc";
 import SVGIcon from "./SVGIcon";
+import { useThemeStore } from "../store/theme";
 
 interface NavbarProps {
   user?: { name: string } | null;
@@ -24,7 +25,7 @@ function NavLink({
       onClick={onClick}
       className={`no-underline transition-colors text-sm font-medium border-b-2 pb-0.5 ${
         active
-          ? "text-accent border-accent"
+          ? "text-info border-info"
           : "text-text-secondary border-transparent hover:text-text"
       }`}
     >
@@ -37,6 +38,7 @@ function Header({ user = null }: NavbarProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const { isDark, toggle } = useThemeStore();
 
   // Close menu on route change
   useEffect(() => {
@@ -93,11 +95,23 @@ function Header({ user = null }: NavbarProps) {
 
         {/* Desktop auth slot + mobile hamburger row */}
         <div className="flex items-center gap-3">
+          {/* Theme toggle — always visible */}
+          <button
+            onClick={toggle}
+            aria-label="Toggle theme"
+            className="p-1.5 rounded-lg border border-border bg-transparent cursor-pointer transition-colors hover:bg-bg-hover"
+          >
+            <SVGIcon
+              name={isDark ? "sun" : "moon"}
+              size={17}
+              style={{ color: "var(--color-text-secondary)" }}
+            />
+          </button>
           {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-3">
             {user != null ? (
               <>
-                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-semibold select-none">
+                <div className="w-8 h-8 rounded-full bg-info flex items-center justify-center text-white text-sm font-semibold select-none">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm font-medium text-text max-w-35 truncate">

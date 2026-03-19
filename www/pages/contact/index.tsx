@@ -50,7 +50,7 @@ function ContactPage() {
           className="animate-fade-in delay-75 inline-flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6"
           style={{
             background: "rgba(139,158,108,0.12)",
-            color: "var(--color-accent-dark)",
+            color: "var(--color-info)",
           }}
         >
           ✦ Contact Us
@@ -163,7 +163,7 @@ function ContactPage() {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="bg-white rounded-2xl p-4 flex flex-col gap-3"
+              className="bg-(--ai-surface) rounded-2xl p-4 flex flex-col gap-3"
               style={{
                 border: "1px solid var(--color-border)",
                 boxShadow: "var(--shadow-md)",
