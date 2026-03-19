@@ -13,9 +13,11 @@ import type { ILearningPersonaSchema } from "@src/db/schemas/LearningPersona.sch
 // ── Loader ────────────────────────────────────────────────────────────────────
 
 export async function loader() {
-  const user = await userApi.me.query();
+  const [user, persona] = await Promise.all([
+    userApi.me.query(),
+    personaApi.get.query().catch(() => null),
+  ]);
   if (user == null) return Response.redirect("/sign-in");
-  const persona = await personaApi.get.query().catch(() => null);
   return { user, persona };
 }
 

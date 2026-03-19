@@ -13,6 +13,18 @@ export default defineConfig({
       "@src": path.resolve(__dirname, "../src"),
     },
   },
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router",
+      "@trpc/client",
+      "zustand",
+      "react-toastify",
+      "lodash",
+      "react-markdown",
+    ],
+  },
   build: {
     rollupOptions: {
       input: "index.html",

@@ -13,6 +13,7 @@ import {
   Outlet,
   RouterProvider,
   useLoaderData,
+  useLocation,
 } from "react-router";
 
 import { userApi } from "./trpc";
@@ -49,12 +50,13 @@ function ThemeSync() {
 
 function RootLayout() {
   const { user } = useLoaderData<typeof rootLoader>();
+  const { pathname } = useLocation();
   return (
     <>
       <ThemeSync />
       <Header user={user} />
       <Outlet />
-      {window.location.pathname !== href("/ai-tutor") && <Footer />}
+      {pathname !== href("/ai-tutor") && <Footer />}
     </>
   );
 }
@@ -65,6 +67,7 @@ export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     loader: rootLoader,
+    shouldRevalidate: () => false,
     children: [
       {
         path: href("/"),

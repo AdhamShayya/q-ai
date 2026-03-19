@@ -67,9 +67,11 @@ interface ActionPillData {
 }
 
 export async function loader() {
-  const user = await userApi.me.query();
+  const [user, persona] = await Promise.all([
+    userApi.me.query(),
+    personaApi.get.query().catch(() => null),
+  ]);
   if (!user) return Response.redirect("/sign-in");
-  const persona = await personaApi.get.query().catch(() => null);
   if (persona == null) return Response.redirect("/onboarding");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
@@ -761,6 +763,7 @@ function ChatArea({
     null,
   );
   const bottomRef = useRef<HTMLDivElement>(null);
+  const isInitialLoadRef = useRef(false);
 
   // Load or create conversation + messages when vault changes
   useEffect(() => {
@@ -772,6 +775,7 @@ function ChatArea({
       return;
     }
 
+    isInitialLoadRef.current = true;
     setIsChatLoading(true);
     conversationApi.getOrCreate
       .query({ userId, vaultId })
@@ -793,7 +797,13 @@ function ChatArea({
   }, [vaultId, userId]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (bottomRef.current == null) return;
+    if (messages.length === 0 && !isLoading) return;
+    const isInitial = isInitialLoadRef.current;
+    if (messages.length > 0) isInitialLoadRef.current = false;
+    bottomRef.current.scrollIntoView({
+      behavior: isInitial ? "instant" : "smooth",
+    });
   }, [messages, isLoading]);
 
   const sendMessage = async () => {
@@ -1035,6 +1045,7 @@ function VaultCard(props: {
     <div
       onClick={onClick}
       style={{
+        flexShrink: 0,
         background: selected
           ? "var(--ai-hover-surface)"
           : "var(--ai-surface-subtle)",
@@ -1176,6 +1187,8 @@ function DocumentRow({ doc }: { doc: Serialised<IDocumentSchema> }) {
   return (
     <div
       style={{
+        flexShrink: 0,
+
         display: "flex",
         alignItems: "center",
         gap: "0.75rem",
@@ -1405,7 +1418,7 @@ function StudyMaterialsSidebar(props: {
       <div
         style={{
           flexShrink: 0,
-          maxHeight: "60%",
+          maxHeight: "40%",
           overflowY: "auto",
           padding: "1rem",
           display: "flex",

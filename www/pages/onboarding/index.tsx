@@ -9,9 +9,11 @@ import Button from "../../components/Button";
 
 export async function loader() {
   try {
-    const user = await userApi.me.query();
+    const [user, persona] = await Promise.all([
+      userApi.me.query(),
+      personaApi.get.query().catch(() => null),
+    ]);
     if (user == null) return Response.redirect("/sign-in");
-    const persona = await personaApi.get.query().catch(() => null);
     if (persona != null) return Response.redirect("/dashboard");
     return null;
   } catch {

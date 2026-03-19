@@ -12,12 +12,15 @@ import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import { AddDocumentCard } from "../../components/AddDocumentCard";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
 import ConfirmModal, { ConfirmModalProps } from "../../components/ConfirmModal";
+import DuplicateVaultModal from "../../components/DuplicateVaultModal";
 
 // backend
 export async function loader() {
-  const user = await userApi.me.query();
+  const [user, persona] = await Promise.all([
+    userApi.me.query(),
+    personaApi.get.query().catch(() => null),
+  ]);
   if (user == null) return Response.redirect("/sign-in");
-  const persona = await personaApi.get.query().catch(() => null);
   if (persona == null) return Response.redirect("/onboarding");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
   return { userId: user.id, vaults };
@@ -107,6 +110,12 @@ function DashboardPage() {
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(
     null,
   );
+  const [duplicateVaultModal, setDuplicateVaultModal] = useState<{
+    vaultId: string;
+    vaultName: string;
+    courseName: string;
+  } | null>(null);
+  const [isAppending, setIsAppending] = useState(false);
   const allDocuments = vaultData?.flatMap((v) => v.documents) ?? [];
 
   async function loadDocuments() {
@@ -144,6 +153,19 @@ function DashboardPage() {
 
   async function handleUpload(vaultName: string, courseName: string) {
     if (pendingUpload == null) {
+      return;
+    }
+
+    // Check for duplicate vault name (case-insensitive)
+    const existingVault = vaultData?.find(
+      (v) => v.vault.name.toLowerCase() === vaultName.toLowerCase(),
+    );
+    if (existingVault != null) {
+      setDuplicateVaultModal({
+        vaultId: existingVault.vault.id,
+        vaultName: existingVault.vault.name,
+        courseName: existingVault.vault.courseName ?? courseName,
+      });
       return;
     }
 
@@ -327,6 +349,25 @@ function DashboardPage() {
         onCancel={closeConfirmModal}
       />
 
+      {duplicateVaultModal != null && (
+        <DuplicateVaultModal
+          vaultName={duplicateVaultModal.vaultName}
+          isAppending={isAppending}
+          onChangeName={() => !isAppending && setDuplicateVaultModal(null)}
+          onAppend={async () => {
+            const { vaultId, courseName } = duplicateVaultModal;
+            setIsAppending(true);
+            try {
+              await handleAddToVault(vaultId, pendingUpload!.files, courseName);
+              setPendingUpload(null);
+              setDuplicateVaultModal(null);
+            } finally {
+              setIsAppending(false);
+            }
+          }}
+        />
+      )}
+
       {/* Upload zone */}
       <div className="mb-10 py-10 space-y-4">
         {pendingUpload == null ? (
@@ -358,8 +399,8 @@ function DashboardPage() {
       </div>
 
       {/* Vault content */}
-      <div className="grid grid-cols-[1fr_auto] gap-8 items-start">
-        <div>
+      <div className="flex flex-col-reverse md:flex-row gap-8 items-start">
+        <div className="flex-4 min-w-0">
           <h5 className="text-lg font-bold text-primary mb-4">
             Your Materials ({allDocuments.length})
           </h5>
@@ -377,7 +418,7 @@ function DashboardPage() {
                 />
               </div>
 
-              <div className="flex gap-4 overflow-x-auto pb-2">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-themed">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
@@ -441,7 +482,7 @@ function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-4 max-w-240 overflow-x-auto py-2">
+                  <div className="flex gap-4 overflow-x-auto py-2 scrollbar-themed">
                     {documents.map((doc) => (
                       <div key={doc.id} className="shrink-0 w-52">
                         <DocumentCard
@@ -472,7 +513,7 @@ function DashboardPage() {
             </div>
           )}
         </div>
-        <div className="border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8 min-w-100">
+        <div className="flex flex-col w-full md:flex-1 border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8">
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
             <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border">

@@ -306,3 +306,21 @@
     opacity: 1;
   }
 }
+
+// ─── Themed scrollbar ────────────────────────────────────────
+.scrollbar-themed {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-info) transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-info);
+    border-radius: 9999px;
+  }
+}

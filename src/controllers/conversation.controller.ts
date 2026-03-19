@@ -30,7 +30,13 @@ export async function addMessage(
   if (conversation == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Conversation not found" })
   }
-  return MessageModel.create({ conversationId, role, content })
+  return MessageModel.create({
+    conversationId,
+    role,
+    content,
+    userId: conversation.userId,
+    vaultId: conversation.vaultId,
+  })
 }
 
 // ── Cascade helpers (used by vault deletion) ──────────────────────────────────

@@ -150,8 +150,9 @@ function FeaturesPage() {
                 className={`font-serif text-5xl md:text-6xl leading-tight mb-6 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
                 style={{ animationDelay: "100ms" }}
               >
-                Everything You Need to{" "}
-                <span className="gradient-text">Master Your Coursework</span>
+                Everything You{" "}
+                <span className="gradient-text"> Need to Master </span> Your
+                Coursework
               </h1>
 
               <p

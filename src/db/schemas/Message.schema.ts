@@ -1,6 +1,8 @@
 import { type } from "arktype"
 import { pgTable, uuid, text, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core"
 
+import { users } from "./User.schema"
+import { vaults } from "./Vault.schema"
 import { conversations } from "./Conversation.schema"
 import type { IModelConfig } from "../types/model-config"
 
@@ -15,6 +17,8 @@ export const messages = pgTable("messages", {
   conversationId: uuid("conversation_id")
     .notNull()
     .references(() => conversations.id),
+  userId: uuid("user_id").references(() => users.id),
+  vaultId: uuid("vault_id").references(() => vaults.id),
   role: messageRoleEnum("role").notNull(),
   content: text("content").notNull(),
   metadataJson: jsonb("metadata_json").default({}),
@@ -31,6 +35,8 @@ export type NewMessage = typeof messages.$inferInsert
 export interface IMessageSchema {
   id: string
   conversationId: string
+  userId: string | null
+  vaultId: string | null
   role: "user" | "assistant" | "system"
   content: string
   metadataJson: Record<string, unknown> | null
@@ -44,6 +50,8 @@ export const CreateMessageInput = type({
   role: "'user' | 'assistant' | 'system'",
   content: "string >= 1",
   "metadataJson?": "object",
+  "userId?": "string",
+  "vaultId?": "string",
 })
 
 export type CreateMessageInput = typeof CreateMessageInput.infer

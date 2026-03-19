@@ -150,18 +150,18 @@ function Header({ user = null }: NavbarProps) {
           </div>
 
           {/* Mobile hamburger */}
-          <button
-            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg border border-border bg-bg-card transition-colors hover:bg-bg-hover"
+          <div
+            className="md:hidden p-2 flex items-center justify-center rounded-md border border-border bg-bg-card transition-colors hover:bg-bg-hover"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
           >
             <SVGIcon
               name={open ? "x" : "menu"}
-              size={20}
-              color="black"
+              size={16}
+              color="white"
               strokeWidth={2}
             />
-          </button>
+          </div>
         </div>
       </div>
 
@@ -179,7 +179,7 @@ function Header({ user = null }: NavbarProps) {
 
           {user != null ? (
             <div className="flex items-center gap-3 pt-1">
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-semibold select-none shrink-0">
+              <div className="w-8 h-8 rounded-full bg-info flex items-center justify-center text-white text-sm font-semibold select-none shrink-0">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <span className="text-sm font-medium text-text flex-1 truncate">

@@ -55,7 +55,7 @@ function ConfirmModal(props: ConfirmModalProps) {
         {/* Actions */}
         <div className="flex gap-3 w-full">
           <button
-            className="flex-1 rounded-full py-2.5 text-sm font-semibold border border-(--secondary-color) hover:bg-gray-100 transition-colors"
+            className="flex-1 rounded-full bg-primary py-2.5 text-sm font-semibold  hover:bg-primary/80 transition-colors"
             onClick={props.onCancel}
           >
             {props.cancelLabel ?? "Cancel"}
