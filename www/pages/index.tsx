@@ -414,7 +414,7 @@ export default function LandingPage() {
             <SectionBadge color="warning" className="self-start">
               The conversation is changing
             </SectionBadge>
-            <h2 className="font-serif text-3xl md:text-4xl leading-tight">
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight max-md:text-center">
               AI is reshaping how students learn.
               <span className="gradient-text"> Q-Ai puts you in control.</span>
             </h2>

@@ -155,12 +155,7 @@ function Header({ user = null }: NavbarProps) {
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
           >
-            <SVGIcon
-              name={open ? "x" : "menu"}
-              size={16}
-              color="white"
-              strokeWidth={2}
-            />
+            <SVGIcon name={open ? "x" : "menu"} size={16} strokeWidth={2} />
           </div>
         </div>
       </div>

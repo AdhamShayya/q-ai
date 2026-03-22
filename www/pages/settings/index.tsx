@@ -228,15 +228,17 @@ function SettingsPage() {
               ].map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between rounded-lg px-4 py-3"
+                  className="flex max-md:flex-col md:items-center justify-between rounded-lg px-4 py-3"
                   style={{
                     background: "rgba(139,158,108,0.07)",
                     border: "1px solid var(--color-border)",
                   }}
                 >
-                  <span className="text-sm font-medium text-text">{label}</span>
+                  <span className="text-sm font-medium text-text">
+                    {label}:
+                  </span>
                   <span
-                    className="text-sm"
+                    className="text-[12px]"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
                     {value}
@@ -271,34 +273,7 @@ function SettingsPage() {
               border: `1px solid ${isPremium ? "rgba(212,168,67,0.3)" : "var(--color-border)"}`,
             }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-serif text-lg text-text mb-0.5">
-                  {isPremium ? "Premium Plan" : "Free Plan"}
-                </h3>
-                <p
-                  className="text-sm"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {isPremium
-                    ? "Unlimited vaults · Video processing · Voice study"
-                    : "2 Course Vaults · 50 MB limit · Text only"}
-                </p>
-              </div>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full"
-                style={{
-                  background: isPremium
-                    ? "rgba(212,168,67,0.15)"
-                    : "rgba(139,158,108,0.15)",
-                  color: isPremium ? "#b8893a" : "var(--color-info)",
-                }}
-              >
-                {isPremium ? "Premium" : "Free"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-sm mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-5">
               {(isPremium
                 ? [
                     "Unlimited Vaults",
@@ -314,7 +289,7 @@ function SettingsPage() {
               ).map((feat) => (
                 <div
                   key={feat}
-                  className="flex items-center gap-2"
+                  className="flex max-md:flex-col items-center gap-2"
                   style={{ color: "var(--color-text-secondary)" }}
                 >
                   <SVGIcon name="check" size={14} color="var(--color-info)" />
@@ -325,7 +300,7 @@ function SettingsPage() {
 
             {!isPremium && (
               <Button variant="solid" size="md" fullWidth>
-                Upgrade to Premium — $24.99/mo
+                Upgrade to Premium <br className="md:hidden " /> — $24.99/mo
               </Button>
             )}
           </div>

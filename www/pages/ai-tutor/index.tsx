@@ -261,16 +261,17 @@ function EmptyState({
 
       {/* Suggestion grid */}
       <div
+        className="ai-suggestions-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "0.75rem",
-          width: "100%",
+          width: "80",
           justifyContent: "center",
         }}
       >
         {SUGGESTIONS.map((s) => (
-          <button
+          <div
             key={s.id}
             onClick={() => onSuggestionClick?.(s.text)}
             style={{
@@ -311,7 +312,7 @@ function EmptyState({
             >
               {s.text}
             </span>
-          </button>
+          </div>
         ))}
       </div>
 
@@ -378,6 +379,7 @@ function ChatInput(props: {
 
   return (
     <div
+      className="ai-tutor-input-area"
       style={{
         padding: "0.875rem 1.25rem 1rem",
         background: "var(--ai-input-area)",
@@ -456,7 +458,9 @@ function ChatInput(props: {
             <SVGIcon
               name="send"
               size={12}
-              style={{ color: canSend ? "black" : "var(--color-info)" }}
+              style={{
+                color: canSend ? "var(--color-text)" : "var(--color-info)",
+              }}
             />
           </div>
         </div>
@@ -616,6 +620,7 @@ function MessageBubble({
 
   return (
     <div
+      className="ai-tutor-msg-row"
       style={{
         display: "flex",
         justifyContent: isUser ? "flex-end" : "flex-start",
@@ -644,6 +649,7 @@ function MessageBubble({
         </div>
       )}
       <div
+        className="ai-tutor-msg-bubble"
         style={{
           maxWidth: "70%",
           padding: "0.7rem 1.05rem",
@@ -691,6 +697,7 @@ function MessageBubble({
 function TypingIndicator() {
   return (
     <div
+      className="ai-tutor-msg-row"
       style={{
         display: "flex",
         justifyContent: "flex-start",
@@ -749,10 +756,12 @@ function ChatArea({
   conversationTitle,
   userId,
   vaultId,
+  onToggleSidebar,
 }: {
   conversationTitle?: string;
   userId: string;
   vaultId: string | null;
+  onToggleSidebar?: () => void;
 }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -920,6 +929,29 @@ function ChatArea({
           <div
             style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}
           >
+            {/* Mobile sidebar toggle */}
+            <div
+              className="ai-tutor-mobile-toggle"
+              onClick={onToggleSidebar}
+              style={{
+                display: "none",
+                width: 34,
+                height: 34,
+                borderRadius: "0.625rem",
+                background: "var(--ai-surface-subtle)",
+                border: "1px solid var(--ai-border-faint)",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <SVGIcon
+                name="list"
+                size={16}
+                style={{ color: "var(--ai-text)" }}
+              />
+            </div>
             <div
               style={{
                 width: 38,
@@ -1351,10 +1383,12 @@ function StudyMaterialsSidebar(props: {
   vaults: Serialised<IVaultSchema>[];
   selectedVaultId: string | null;
   onSelectVault: (id: string) => void;
+  isOpen: boolean;
 }) {
-  const { vaults, selectedVaultId, onSelectVault } = props;
+  const { vaults, selectedVaultId, onSelectVault, isOpen } = props;
   return (
     <aside
+      className={`ai-tutor-sidebar${isOpen ? " sidebar-open" : ""}`}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -1462,23 +1496,19 @@ function AiTutor() {
   const [selectedVaultId, setSelectedVaultId] = useState<string | null>(
     vaults[0]?.id ?? null,
   );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const selectedVault = vaults.find((v) => v.id === selectedVaultId);
   const conversationTitle = selectedVault?.name ?? "AI Tutor";
 
   return (
     <>
-      <style>{`
-        .ai-tutor-page textarea::placeholder { color: var(--ai-text-dim); }
-        .ai-tutor-page *::-webkit-scrollbar { width: 4px; height: 4px; }
-        .ai-tutor-page *::-webkit-scrollbar-track { background: transparent; }
-        .ai-tutor-page *::-webkit-scrollbar-thumb { background: var(--ai-border); border-radius: 999px; }
-        .ai-tutor-page *::-webkit-scrollbar-thumb:hover { background: var(--ai-accent); }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); box-shadow: var(--ai-avatar-glow); }
-          50% { transform: scale(1.03); }
-        }
-      `}</style>
+      {sidebarOpen && (
+        <div
+          className="ai-tutor-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       <div
         className="ai-tutor-page"
         style={{
@@ -1491,12 +1521,17 @@ function AiTutor() {
         <StudyMaterialsSidebar
           vaults={vaults}
           selectedVaultId={selectedVaultId}
-          onSelectVault={setSelectedVaultId}
+          onSelectVault={(id) => {
+            setSelectedVaultId(id);
+            setSidebarOpen(false);
+          }}
+          isOpen={sidebarOpen}
         />
         <ChatArea
           conversationTitle={conversationTitle}
           userId={userId}
           vaultId={selectedVaultId}
+          onToggleSidebar={() => setSidebarOpen((o) => !o)}
         />
       </div>
     </>

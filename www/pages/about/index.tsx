@@ -307,7 +307,7 @@ function AboutPage() {
             {values.map((v, i) => (
               <div
                 key={v.title}
-                className={`card-lift relative rounded-2xl p-8 flex flex-col gap-5 ${valuesSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+                className={`card-lift relative rounded-2xl p-8 flex flex-col items-center text-center gap-5 ${valuesSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
                 style={{
                   border: "1.5px solid var(--color-border)",
                   borderTop: `3px solid ${v.borderColor}`,
@@ -368,7 +368,7 @@ function AboutPage() {
             {audiences.map((a, i) => (
               <div
                 key={a.label}
-                className={`card-lift rounded-2xl p-8 flex flex-col gap-5 ${whoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
+                className={`card-lift rounded-2xl p-8 flex flex-col items-center text-center gap-5 ${whoSection.inView ? "animate-fade-in-up" : "opacity-0"}`}
                 style={{
                   background: a.bgGradient,
                   border: `1.5px solid ${a.borderColor}`,

@@ -27,7 +27,7 @@ export function FeatureCard(
   } = props;
   return (
     <div
-      className={`card-lift bg-bg-card rounded-2xl p-7 flex flex-col gap-5 border border-border shadow-sm ${inView ? "animate-fade-in-up" : "opacity-0"}`}
+      className={`card-lift bg-bg-card rounded-2xl p-7 flex flex-col gap-5 border border-border shadow-sm text-center items-center ${inView ? "animate-fade-in-up" : "opacity-0"}`}
       style={{
         borderTop: `3px solid ${accentColor}`,
         animationDelay: inView ? `${delay}ms` : "0ms",

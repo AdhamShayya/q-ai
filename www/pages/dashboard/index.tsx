@@ -330,9 +330,9 @@ function DashboardPage() {
   }
 
   return (
-    <main className="flex flex-col container w-full py-4">
-      <h3>Knowledge Vault</h3>
-      <p className="pt-2 mb-6">
+    <main className="flex flex-col  w-full py-4">
+      <h3 className="container">Knowledge Vault</h3>
+      <p className="container pt-2 mb-6">
         Your personal library of study materials, powered by AI
       </p>
 
@@ -369,7 +369,7 @@ function DashboardPage() {
       )}
 
       {/* Upload zone */}
-      <div className="mb-10 py-10 space-y-4">
+      <div className="mb-10 py-10 space-y-4 container">
         {pendingUpload == null ? (
           <UploadDropzone
             disabled={allDocuments.length >= USAGE_LIMITS.studyMaterials.max}
@@ -399,9 +399,9 @@ function DashboardPage() {
       </div>
 
       {/* Vault content */}
-      <div className="flex flex-col-reverse md:flex-row gap-8 items-start">
-        <div className="flex-4 min-w-0">
-          <h5 className="text-lg font-bold text-primary mb-4">
+      <div className="md:container flex flex-col-reverse md:flex-row gap-8 items-start">
+        <div className="flex-4 min-w-0 w-full">
+          <h5 className="max-md:container text-lg font-bold text-primary mb-4">
             Your Materials ({allDocuments.length})
           </h5>
 
@@ -422,7 +422,7 @@ function DashboardPage() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
+                    className="container shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
                     style={{ borderColor: "var(--color-border)" }}
                   >
                     <div
@@ -444,14 +444,14 @@ function DashboardPage() {
               </div>
             </div>
           ) : vaultData!.length === 0 ? (
-            <p className="text-sm">
+            <p className="container text-sm">
               No materials yet. Upload your first file above to get started.
             </p>
           ) : (
             <div className="space-y-8">
               {vaultData!.map(({ vault, documents }) => (
                 <div key={vault.id}>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="max-md:container flex items-center gap-2 mb-3">
                     <span className="text-base font-semibold">
                       {vault.name}
                     </span>
@@ -482,7 +482,7 @@ function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-4 overflow-x-auto py-2 scrollbar-themed">
+                  <div className="flex gap-4 overflow-x-auto py-2 scrollbar-themed max-md:pl-6">
                     {documents.map((doc) => (
                       <div key={doc.id} className="shrink-0 w-52">
                         <DocumentCard
@@ -513,34 +513,36 @@ function DashboardPage() {
             </div>
           )}
         </div>
-        <div className="flex flex-col w-full md:flex-1 border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
-            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border">
-              {USAGE_LIMITS.plan}
-            </span>
-          </div>
+        <div className="max-md:container flex flex-col w-full md:flex-2">
+          <div className=" border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
+              <span className="text-[12px] font-medium px-2 py-0.5 rounded-full border">
+                {USAGE_LIMITS.plan}
+              </span>
+            </div>
 
-          {items.map(({ label, used, max }) => {
-            const pct = Math.round((Math.min(used, max) / max) * 100);
-            return (
-              <div key={label} className="mb-3.5 last:mb-0">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-xs">{label}</span>
-                  <span className="text-xs">
-                    {used} / {max}
-                  </span>
+            {items.map(({ label, used, max }) => {
+              const pct = Math.round((Math.min(used, max) / max) * 100);
+              return (
+                <div key={label} className="mb-3.5 last:mb-0">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-xs">{label}</span>
+                    <span className="text-xs">
+                      {used} / {max}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-info rounded-full transition-[width] duration-600"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-info rounded-full transition-[width] duration-600"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>{" "}
+              );
+            })}
+          </div>{" "}
+        </div>
       </div>
     </main>
   );

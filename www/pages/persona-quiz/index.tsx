@@ -236,7 +236,7 @@ function OptionCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left rounded-xl p-4 border-2 transition-all duration-200 flex items-center gap-4 group"
+      className="w-full text-left rounded-xl p-3 sm:p-4 border-2 transition-all duration-200 flex items-center gap-2 sm:gap-4 group"
       style={{
         borderColor: selected ? "var(--color-info)" : "var(--color-border)",
         background: selected
@@ -261,11 +261,11 @@ function OptionCard({
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-text leading-snug">
+        <p className="text-sm font-semibold text-text leading-snug wrap-break-word whitespace-normal">
           {option.label}
         </p>
         <p
-          className="text-xs mt-0.5"
+          className="text-xs mt-0.5 wrap-break-word whitespace-normal"
           style={{ color: "var(--color-text-muted)" }}
         >
           {option.sub}
@@ -363,7 +363,7 @@ function PersonaQuizPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--color-bg)" }}>
-      <div className="container mx-auto px-6 py-12 max-w-2xl space-y-10">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-2xl space-y-10">
         {/* Hero */}
         <div
           ref={heroSection.ref}
@@ -389,7 +389,7 @@ function PersonaQuizPage() {
           >
             {persona != null ? "Edit Your Profile" : "2-Minute Quiz"}
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl text-text mb-4 leading-tight">
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-text mb-4 leading-tight">
             {persona != null
               ? "Update Your Learning DNA"
               : "Decode Your Learning DNA"}
@@ -452,7 +452,7 @@ function PersonaQuizPage() {
                 </h3>
               </div>
 
-              <div className="space-y-2.5 ml-9">
+              <div className="space-y-2.5 md:ml-9">
                 {question.options.map((opt) => (
                   <OptionCard
                     key={opt.value}

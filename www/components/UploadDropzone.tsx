@@ -103,8 +103,8 @@ export function UploadDropzone(props: UploadDropzoneProps) {
         <FileBadge icon="🖼️" label="PNG-JPG" />
         <FileBadge icon="📄" label="PDF" />
         <FileBadge icon="🎬" label="MP4" />
-        <span className="pl-3 border-l">Max 500 MB</span>
       </div>
+      <span className="pl-3">Max 500 MB</span>
 
       <button
         className="bg-primary text-white rounded-full px-7 py-2.5 text-sm font-semibold hover:bg-primary-hover transition-colors"

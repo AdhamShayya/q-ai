@@ -406,7 +406,7 @@ function FeaturesPage() {
             {standouts.map((item, i) => (
               <div
                 key={item.title}
-                className={`card-lift flex items-start gap-5 p-6 rounded-2xl bg-bg-card ${standoutCards.inView ? "animate-fade-in-up" : "opacity-0"}`}
+                className={`card-lift flex  items-center gap-5 p-6 rounded-2xl bg-bg-card ${standoutCards.inView ? "animate-fade-in-up" : "opacity-0"}`}
                 style={{
                   border: `1.5px solid ${item.borderColor}`,
                   borderTop: `3px solid ${item.accentColor}`,
@@ -469,7 +469,7 @@ function FeaturesPage() {
             {coreFeatures.map((feature, i) => (
               <div
                 key={feature.title}
-                className={`card-lift rounded-2xl p-8 flex items-start gap-5 ${coreCards.inView ? "animate-fade-in-up" : "opacity-0"}`}
+                className={`card-lift rounded-2xl p-8 flex max-md:flex-col items-center gap-5 ${coreCards.inView ? "animate-fade-in-up" : "opacity-0"}`}
                 style={{
                   background: feature.bgGradient,
                   border: `1.5px solid ${feature.borderColor}`,
