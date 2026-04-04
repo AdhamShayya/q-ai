@@ -1,107 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 184 184" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
   <defs>
-
-    <!-- Main ring gradient: violet → indigo → electric cyan -->
-    <linearGradient id="rd" x1="20" y1="20" x2="140" y2="140" gradientUnits="userSpaceOnUse">
+    <linearGradient id="gd" x1="15" y1="40" x2="130" y2="120" gradientUnits="userSpaceOnUse">
       <stop offset="0%"   stop-color="#a78bfa"/>
       <stop offset="45%"  stop-color="#7c3aed"/>
       <stop offset="100%" stop-color="#06b6d4"/>
     </linearGradient>
-
-    <!-- Neural-node gradient: lavender → cyan -->
-    <linearGradient id="nd" x1="63" y1="57" x2="97" y2="91" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#c4b5fd"/>
-      <stop offset="100%" stop-color="#22d3ee"/>
-    </linearGradient>
-
-    <!-- Soft radial ambient behind the whole mark -->
-    <radialGradient id="aura" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Glow for ring + tail -->
-    <filter id="glow-r" x="-25%" y="-25%" width="150%" height="150%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-
-    <!-- Lighter glow for neural dots -->
-    <filter id="glow-n" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="glow-dot" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-
   </defs>
 
-  <!-- ── Ambient aura ─────────────────────────────────────────── -->
-  <circle cx="80" cy="77" r="64" fill="url(#aura)"/>
-
-  <!-- ── Q ring ──────────────────────────────────────────────────
-       Circle c=(80,77) r=38 | circumference≈238.76
-       207px solid (≈311°) + 32px gap (≈48°)
-       rotate(45°) → gap lands at ~3:00–4:30 o'clock (right side)
-  ─────────────────────────────────────────────────────────────── -->
-  <circle
-    cx="80" cy="77" r="38"
-    stroke="url(#rd)"
-    stroke-width="12"
-    stroke-linecap="round"
-    stroke-dasharray="207 32"
-    transform="rotate(45, 80, 77)"
-    filter="url(#glow-r)"
+  <!-- Large 4-pointed sparkle cx=55 cy=80 R=40 -->
+  <path
+    d="M55,40 C58,60 75,77 95,80 C75,83 58,100 55,120 C52,100 35,83 15,80 C35,77 52,60 55,40 Z"
+    fill="url(#gd)" filter="url(#glow)"
   />
 
-  <!-- ── Q tail ─────────────────────────────────────────────────── -->
-  <line
-    x1="112" y1="96"
-    x2="135" y2="119"
-    stroke="url(#rd)"
-    stroke-width="12"
-    stroke-linecap="round"
-    filter="url(#glow-r)"
+  <!-- Small 4-pointed sparkle cx=112 cy=54 R=18 -->
+  <path
+    d="M112,36 C113.5,45 121,52.5 130,54 C121,55.5 113.5,63 112,72 C110.5,63 103,55.5 94,54 C103,52.5 110.5,45 112,36 Z"
+    fill="url(#gd)" filter="url(#glow)"
   />
 
-  <!-- ── Outer ring pulse (very faint border ring for depth) ──── -->
-  <circle
-    cx="80" cy="77" r="54"
-    stroke="rgba(124,58,237,0.14)"
-    stroke-width="1"
-    fill="none"
-  />
-
-  <!-- ── Neural constellation ───────────────────────────────── -->
-
-  <!-- Central node -->
-  <circle cx="80" cy="63" r="6.5" fill="url(#nd)" filter="url(#glow-n)"/>
-
-  <!-- Satellite nodes -->
-  <circle cx="63" cy="84" r="4.5" fill="#a78bfa" opacity="0.95" filter="url(#glow-n)"/>
-  <circle cx="97" cy="84" r="4.5" fill="#22d3ee" opacity="0.95" filter="url(#glow-n)"/>
-
-  <!-- Connecting lines -->
-  <line x1="80" y1="69.5" x2="63" y2="79.5" stroke="#a78bfa" stroke-width="1.5" opacity="0.72"/>
-  <line x1="80" y1="69.5" x2="97" y2="79.5" stroke="#22d3ee" stroke-width="1.5" opacity="0.72"/>
-  <line x1="63" y1="84"   x2="97" y2="84"   stroke="url(#nd)"  stroke-width="1.5" opacity="0.5"/>
-
-  <!-- Inner triangle highlight (very subtle fill) -->
-  <polygon
-    points="80,63 63,84 97,84"
-    fill="rgba(124,58,237,0.07)"
-    stroke="none"
-  />
-
-  <!-- Spark accent at tail end -->
-  <circle cx="135" cy="119" r="4" fill="#06b6d4" filter="url(#glow-n)" opacity="0.9"/>
-
-  <!-- Tiny extra star-spark beside the tail (gives "AI spark" feel) -->
-  <circle cx="143" cy="112" r="2"   fill="#c4b5fd" opacity="0.6"/>
-  <circle cx="128" cy="126" r="1.5" fill="#22d3ee" opacity="0.5"/>
-
+  <!-- Cardinal accent dots with glow -->
+  <circle cx="112" cy="27" r="2.5" fill="#a78bfa" opacity="0.85" filter="url(#glow-dot)"/>
+  <circle cx="139" cy="54" r="2.5" fill="#06b6d4" opacity="0.85" filter="url(#glow-dot)"/>
+  <circle cx="112" cy="81" r="2.5" fill="#a78bfa" opacity="0.85" filter="url(#glow-dot)"/>
+  <circle cx="85"  cy="54" r="2.5" fill="#06b6d4" opacity="0.85" filter="url(#glow-dot)"/>
 </svg>
