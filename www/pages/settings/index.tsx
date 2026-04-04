@@ -333,29 +333,6 @@ function SettingsPage() {
                 Change
               </Button>
             </div>
-
-            <div
-              className="flex items-center justify-between rounded-lg px-4 py-3"
-              style={{
-                background: "rgba(139,158,108,0.07)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              <div>
-                <p className="text-sm font-medium text-text">
-                  Download My Data
-                </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  Export all your vaults and materials
-                </p>
-              </div>
-              <Button variant="outline-accent" size="sm">
-                Download
-              </Button>
-            </div>
           </div>
         </SectionCard>
       </div>

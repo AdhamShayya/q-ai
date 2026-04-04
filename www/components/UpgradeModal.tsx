@@ -5,11 +5,14 @@ import { USAGE_LIMITS } from "../pages/dashboard";
 function UpgradeModal({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-(--primary-color) rounded-2xl p-10 w-fit mx-4 flex flex-col items-center gap-6 shadow-2xl"
+        style={{
+          backgroundColor: "var(--ai-bg)",
+        }}
+        className="rounded-2xl p-10 w-fit mx-4 opacity-100 flex flex-col items-center gap-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}

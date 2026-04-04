@@ -208,3 +208,12 @@ export const conversationApi = {
     `conversation.getMessages:${i.conversationId}`,
   ]),
 };
+
+export const adminApi = {
+  stats: q("admin.stats", client.admin.stats, 30_000),
+  usersWithStats: q(
+    "admin.usersWithStats",
+    client.admin.usersWithStats,
+    30_000,
+  ),
+};

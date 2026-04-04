@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <defs>
+
+    <!-- Main ring gradient: deep navy → sage green → steel blue -->
+    <linearGradient id="rl" x1="20" y1="20" x2="140" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#1a2332"/>
+      <stop offset="55%"  stop-color="#6c7d50"/>
+      <stop offset="100%" stop-color="#4a7fa5"/>
+    </linearGradient>
+
+    <!-- Neural-node fill gradient -->
+    <linearGradient id="nl" x1="63" y1="57" x2="97" y2="91" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#8b9e6c"/>
+      <stop offset="100%" stop-color="#4a7fa5"/>
+    </linearGradient>
+
+    <!-- Subtle drop-shadow for depth -->
+    <filter id="shadow-l" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a2332" flood-opacity="0.12"/>
+    </filter>
+
+  </defs>
+
+  <!-- ── Q ring ──────────────────────────────────────────────────
+       Circle c=(80,77) r=38 | circumference≈238.76
+       207px solid (≈311°) + 32px gap (≈48°)
+       rotate(45°) → gap lands at ~3:00–4:30 o'clock (right side)
+  ─────────────────────────────────────────────────────────────── -->
+  <circle
+    cx="80" cy="77" r="38"
+    stroke="url(#rl)"
+    stroke-width="12"
+    stroke-linecap="round"
+    stroke-dasharray="207 32"
+    transform="rotate(45, 80, 77)"
+    filter="url(#shadow-l)"
+  />
+
+  <!-- ── Q tail — diagonal descender at the gap (lower-right) ── -->
+  <line
+    x1="112" y1="96"
+    x2="135" y2="119"
+    stroke="url(#rl)"
+    stroke-width="12"
+    stroke-linecap="round"
+    filter="url(#shadow-l)"
+  />
+
+  <!-- ── Neural constellation inside the Q ──────────────────── -->
+
+  <!-- Central node (top of triangle) -->
+  <circle cx="80" cy="63" r="6"   fill="url(#nl)"/>
+
+  <!-- Satellite nodes (bottom two) -->
+  <circle cx="63" cy="84" r="4"   fill="#8b9e6c" opacity="0.82"/>
+  <circle cx="97" cy="84" r="4"   fill="#4a7fa5" opacity="0.82"/>
+
+  <!-- Connecting lines -->
+  <line x1="80" y1="69"  x2="63" y2="80"  stroke="#8b9e6c" stroke-width="1.5" opacity="0.55"/>
+  <line x1="80" y1="69"  x2="97" y2="80"  stroke="#4a7fa5" stroke-width="1.5" opacity="0.55"/>
+  <line x1="63" y1="84"  x2="97" y2="84"  stroke="#6c7d50" stroke-width="1.5" opacity="0.38"/>
+
+  <!-- Tiny accent dot on the tail end (spark) -->
+  <circle cx="135" cy="119" r="3.5" fill="#4a7fa5" opacity="0.7"/>
+
+</svg>

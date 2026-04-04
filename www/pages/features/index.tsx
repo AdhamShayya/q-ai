@@ -34,7 +34,7 @@ function FeaturesPage() {
       {/* -- HERO ---------------------------------------------------------------- */}
       <section
         ref={heroSection.ref}
-        className="relative flex flex-col justify-center overflow-hidden py-10"
+        className="relative flex flex-col justify-center overflow-hidden py-16"
       >
         {/* Dot grid */}
         <div

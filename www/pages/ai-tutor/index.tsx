@@ -1,16 +1,63 @@
 ﻿import _ from "lodash";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useLoaderData } from "react-router";
 import SVGIcon from "../../components/SVGIcon";
 import { useTypewriter } from "../../hooks/useTypewriter";
+import { useToast } from "../../hooks/useToast";
 import type { Serialised } from "../../shared";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
-import { vaultApi, userApi, conversationApi, personaApi } from "../../trpc";
+import {
+  vaultApi,
+  userApi,
+  conversationApi,
+  personaApi,
+  invalidateCache,
+} from "../../trpc";
+import UpgradeModal from "../../components/UpgradeModal";
+import { USAGE_LIMITS } from "../dashboard";
 
 const CHAT_WEBHOOK_URL = "https://techflow12.app.n8n.cloud/webhook/chat-tutor";
+const UPLOAD_WEBHOOK_URL =
+  "https://techflow12.app.n8n.cloud/webhook/q-ai/ingest";
+
+const ALLOWED_UPLOAD_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "video/mp4",
+  "application/pdf",
+]);
+const ALLOWED_UPLOAD_EXTS = new Set([".png", ".jpg", ".jpeg", ".mp4", ".pdf"]);
+
+function isAllowedFile(file: File): boolean {
+  if (ALLOWED_UPLOAD_TYPES.has(file.type)) return true;
+  const ext = "." + (file.name.split(".").pop()?.toLowerCase() ?? "");
+  return ALLOWED_UPLOAD_EXTS.has(ext);
+}
+
+async function sendFileToWebhook(props: {
+  file: File;
+  userId: string;
+  vaultId: string;
+  documentId: string;
+}) {
+  const { file, userId, vaultId, documentId } = props;
+  const form = new FormData();
+  form.append("file", file);
+  form.append("userId", userId);
+  form.append("vaultId", vaultId);
+  form.append("documentId", documentId);
+  form.append("filename", file.name);
+  form.append("mimeType", file.type ?? "application/octet-stream");
+  try {
+    await fetch(UPLOAD_WEBHOOK_URL, { method: "POST", body: form });
+  } catch (err) {
+    console.error("Webhook ingest failed for", file.name, err);
+  }
+}
 
 /**
  * Normalises the n8n webhook reply into a plain string.
@@ -74,7 +121,11 @@ export async function loader() {
   if (!user) return Response.redirect("/sign-in");
   if (persona == null) return Response.redirect("/onboarding");
   const vaults = await vaultApi.listByUser.query({ userId: user.id });
-  return { userId: user.id, vaults };
+  const allDocs = await Promise.all(
+    vaults.map((v) => vaultApi.getDocuments.query({ vaultId: v.id })),
+  );
+  const totalDocuments = allDocs.reduce((sum, docs) => sum + docs.length, 0);
+  return { userId: user.id, vaults, totalDocuments };
 }
 
 const ICON_STYLE_SUGGESTION = {
@@ -361,8 +412,19 @@ function ChatInput(props: {
   onChange: (v: string) => void;
   onSend?: () => void;
   disabled?: boolean;
+  onAttachFile?: () => void;
+  attachDisabled?: boolean;
+  isUploading?: boolean;
 }) {
-  const { value, onChange, onSend, disabled } = props;
+  const {
+    value,
+    onChange,
+    onSend,
+    disabled,
+    onAttachFile,
+    attachDisabled,
+    isUploading,
+  } = props;
   const MAX = 2000;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [focused, setFocused] = useState(false);
@@ -379,24 +441,26 @@ function ChatInput(props: {
 
   return (
     <div
-      className="ai-tutor-input-area"
       style={{
-        padding: "0.875rem 1.25rem 1rem",
-        background: "var(--ai-input-area)",
-        borderTop: "1px solid var(--ai-border-faint)",
+        padding: "0.875rem 1.25rem 1.25rem",
+        width: "70%",
+        margin: "0 auto",
       }}
     >
       {/* Input box */}
       <div
         style={{
           display: "flex",
+
           gap: "0.625rem",
           padding: "0.5rem 0.875rem",
           borderRadius: "1rem",
           border: focused
             ? "1.5px solid var(--ai-border-focus)"
             : "1.5px solid var(--ai-border-faint)",
-          background: "var(--ai-surface-subtle)",
+          background: "var(--ai-bg)",
+          backdropFilter: "none",
+          isolation: "isolate",
           alignItems: "center",
           transition: "border-color 0.2s, box-shadow 0.2s",
           boxShadow: focused
@@ -417,7 +481,6 @@ function ChatInput(props: {
             resize: "none",
             minHeight: "1.5rem",
             maxHeight: "7.5rem",
-            background: "transparent",
             border: "none",
             outline: "none",
             color: "var(--ai-text)",
@@ -438,6 +501,52 @@ function ChatInput(props: {
             paddingBottom: "0.1rem",
           }}
         >
+          {/* Attach file button */}
+          <div
+            title={
+              attachDisabled
+                ? "Select a vault first to add documents"
+                : "Add document to vault"
+            }
+            onClick={() => {
+              if (!attachDisabled && !isUploading) onAttachFile?.();
+            }}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "var(--ai-surface-subtle)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: attachDisabled || isUploading ? "not-allowed" : "pointer",
+              transition: "all 0.2s",
+              opacity: attachDisabled ? 0.4 : 1,
+            }}
+          >
+            {isUploading ? (
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  border: "2px solid var(--ai-border-faint)",
+                  borderTopColor: "var(--ai-accent)",
+                  display: "inline-block",
+                  animation: "spin 0.8s linear infinite",
+                }}
+              />
+            ) : (
+              <SVGIcon
+                name="plus"
+                size={14}
+                style={{ color: "var(--ai-text-muted)" }}
+              />
+            )}
+          </div>
+
+          {/* Send button */}
           <div
             onClick={() => {
               if (canSend) onSend?.();
@@ -495,6 +604,7 @@ function ChatInput(props: {
 function renderMarkdown(content: string) {
   return (
     <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
           <h1
@@ -594,11 +704,91 @@ function renderMarkdown(content: string) {
             {children}
           </pre>
         ),
+        table: ({ children }) => (
+          <div style={{ overflowX: "auto", margin: "0.6em 0" }}>
+            <table
+              style={{
+                borderCollapse: "collapse",
+                width: "100%",
+                fontSize: "0.9em",
+              }}
+            >
+              {children}
+            </table>
+          </div>
+        ),
+        thead: ({ children }) => (
+          <thead
+            style={{
+              background: "var(--ai-surface-subtle)",
+            }}
+          >
+            {children}
+          </thead>
+        ),
+        tbody: ({ children }) => <tbody>{children}</tbody>,
+        tr: ({ children }) => (
+          <tr
+            style={{
+              borderBottom: "1px solid var(--ai-border-faint)",
+            }}
+          >
+            {children}
+          </tr>
+        ),
+        th: ({ children }) => (
+          <th
+            style={{
+              padding: "0.45em 0.75em",
+              fontWeight: 700,
+              textAlign: "left",
+              border: "1px solid var(--ai-border-faint)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td
+            style={{
+              padding: "0.4em 0.75em",
+              border: "1px solid var(--ai-border-faint)",
+              verticalAlign: "top",
+            }}
+          >
+            {children}
+          </td>
+        ),
       }}
     >
       {content}
     </ReactMarkdown>
   );
+}
+
+function useSpeech() {
+  const [speaking, setSpeaking] = useState(false);
+
+  const speak = (text: string) => {
+    if (!window.speechSynthesis) {
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const stripped = text.replace(/[#*`_~>]/g, "").trim();
+    const utterance = new SpeechSynthesisUtterance(stripped);
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stop = () => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  };
+
+  return { speaking, speak, stop };
 }
 
 function MessageBubble({
@@ -617,6 +807,7 @@ function MessageBubble({
     () => setTypingDone(true),
   );
   const showMarkdown = !isStreaming || typingDone;
+  const { speaking, speak, stop } = useSpeech();
 
   return (
     <div
@@ -630,64 +821,92 @@ function MessageBubble({
         animation: "fadeSlideIn 0.25s ease-out",
       }}
     >
-      {!isUser && (
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: "50%",
-            flexShrink: 0,
-            background: "var(--ai-accent-gradient)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "var(--ai-glow-sm)",
-            marginBottom: 2,
-          }}
-        >
-          <SVGIcon name="sparkles" size={13} style={{ color: "#fff" }} />
-        </div>
-      )}
       <div
-        className="ai-tutor-msg-bubble"
         style={{
           maxWidth: "70%",
-          padding: "0.7rem 1.05rem",
-          borderRadius: isUser
-            ? "1.2rem 1.2rem 0.3rem 1.2rem"
-            : "0.3rem 1.2rem 1.2rem 1.2rem",
-          background: isUser ? "var(--ai-user-bubble)" : "var(--ai-surface)",
-          color: isUser ? "#fff" : "var(--ai-text)",
-          fontSize: "0.875rem",
-          lineHeight: 1.65,
-          border: isUser ? "none" : "1px solid var(--ai-border)",
-          wordBreak: "break-word",
-          boxShadow: isUser
-            ? "var(--ai-glow-lg)"
-            : "0 2px 14px rgba(0,0,0,0.25)",
-          backdropFilter: isUser ? "none" : "blur(8px)",
-          ...(isUser ? { whiteSpace: "pre-wrap" as const } : {}),
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.35rem",
         }}
       >
-        {isUser ? (
-          displayed
-        ) : showMarkdown ? (
-          renderMarkdown(msg.content)
-        ) : (
-          <span style={{ whiteSpace: "pre-wrap" }}>
-            {displayed}
-            <span
-              style={{
-                display: "inline-block",
-                width: "2px",
-                height: "0.9em",
-                background: "var(--ai-cursor-color)",
-                marginLeft: "2px",
-                verticalAlign: "middle",
-                animation: "blink 0.65s step-end infinite",
-              }}
+        <div
+          className="ai-tutor-msg-bubble"
+          style={{
+            padding: "0.4rem 0.75rem",
+            borderRadius: isUser
+              ? "1.2rem 1.2rem 0.3rem 1.2rem"
+              : "0.3rem 1.2rem 1.2rem 1.2rem",
+            background: isUser ? "var(--ai-user-bubble)" : "var(--ai-surface)",
+            color: isUser ? "#fff" : "var(--ai-text)",
+            fontSize: "0.875rem",
+            lineHeight: 1.65,
+            border: isUser ? "none" : "1px solid var(--ai-border)",
+            wordBreak: "break-word",
+            boxShadow: isUser
+              ? "var(--ai-glow-lg)"
+              : "0 2px 14px rgba(0,0,0,0.25)",
+            backdropFilter: isUser ? "none" : "blur(8px)",
+            ...(isUser ? { whiteSpace: "pre-wrap" as const } : {}),
+          }}
+        >
+          {isUser ? (
+            displayed
+          ) : showMarkdown ? (
+            renderMarkdown(msg.content)
+          ) : (
+            <span style={{ whiteSpace: "pre-wrap" }}>
+              {displayed}
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "2px",
+                  height: "0.9em",
+                  background: "var(--ai-cursor-color)",
+                  marginLeft: "2px",
+                  verticalAlign: "middle",
+                  animation: "blink 0.65s step-end infinite",
+                }}
+              />
+            </span>
+          )}
+        </div>
+
+        {/* TTS button — only for assistant messages */}
+        {!isUser && (
+          <button
+            title={speaking ? "Stop speaking" : "Read aloud"}
+            onClick={() => (speaking ? stop() : speak(msg.content))}
+            style={{
+              alignSelf: "flex-end",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.3rem",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "0.2rem 0.4rem",
+              borderRadius: "0.5rem",
+              color: speaking
+                ? "var(--ai-accent, #7c6ef2)"
+                : "var(--ai-text-muted)",
+              transition: "color 0.2s, background 0.2s",
+              fontSize: "0.7rem",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "var(--ai-surface-subtle)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "none";
+            }}
+          >
+            <SVGIcon
+              name={speaking ? "volume-x" : "volume-2"}
+              size={14}
+              style={{ color: "inherit" }}
             />
-          </span>
+            <span>{speaking ? "Stop" : "Listen"}</span>
+          </button>
         )}
       </div>
     </div>
@@ -757,12 +976,17 @@ function ChatArea({
   userId,
   vaultId,
   onToggleSidebar,
+  allDocumentsCount,
+  onDocumentUploaded,
 }: {
   conversationTitle?: string;
   userId: string;
   vaultId: string | null;
   onToggleSidebar?: () => void;
+  allDocumentsCount: number;
+  onDocumentUploaded: () => void;
 }) {
+  const toast = useToast();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -771,8 +995,101 @@ function ChatArea({
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null,
   );
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounterRef = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const isInitialLoadRef = useRef(false);
+
+  // ── File upload ───────────────────────────────────────────────────────────
+
+  async function handleFiles(rawFiles: File[]) {
+    if (vaultId == null) {
+      toast.error("Please select a vault before uploading documents.");
+      return;
+    }
+
+    const valid = rawFiles.filter(isAllowedFile);
+    const rejected = rawFiles.filter((f) => !isAllowedFile(f));
+    if (rejected.length > 0) {
+      toast.error(
+        `Unsupported file${rejected.length > 1 ? "s" : ""} removed: ${rejected.map((f) => f.name).join(", ")}`,
+      );
+    }
+    if (valid.length === 0) return;
+
+    if (allDocumentsCount + valid.length > USAGE_LIMITS.studyMaterials.max) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    setIsUploadingDoc(true);
+    try {
+      const savedDocs = await Promise.all(
+        valid.map((file) =>
+          vaultApi.addDocument.mutate({
+            vaultId: vaultId!,
+            filename: file.name,
+            fileType: file.name.split(".").pop()?.toUpperCase() ?? "FILE",
+            fileSize: file.size,
+            mimeType: file.type || undefined,
+            courseVault: conversationTitle ?? "AI Tutor",
+          }),
+        ),
+      );
+
+      await Promise.allSettled(
+        valid.map((file, i) =>
+          sendFileToWebhook({
+            file,
+            userId,
+            vaultId: vaultId!,
+            documentId: savedDocs[i]!.id,
+          }),
+        ),
+      );
+
+      // Invalidate cache so sidebar refreshes
+      invalidateCache(`vault.getDocuments:${vaultId}`);
+      onDocumentUploaded();
+      toast.success(
+        `${valid.length} document${valid.length > 1 ? "s" : ""} added to vault`,
+      );
+    } catch (err) {
+      console.error("Upload failed:", err);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setIsUploadingDoc(false);
+    }
+  }
+
+  // ── Drag & drop handlers ──────────────────────────────────────────────────
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounterRef.current++;
+    if (e.dataTransfer.items.length > 0) setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) setIsDragOver(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    void handleFiles(files);
+  };
 
   // Load or create conversation + messages when vault changes
   useEffect(() => {
@@ -894,14 +1211,87 @@ function ChatArea({
 
   return (
     <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       style={{
         display: "flex",
         flexDirection: "column",
-        width: "100%",
+        flex: 1,
+        height: "100%",
+        overflow: "hidden",
         background: "var(--ai-bg)",
         position: "relative",
       }}
     >
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        hidden
+        accept=".pdf,.mp4,.png,.jpg,.jpeg"
+        multiple
+        onChange={(e) => {
+          void handleFiles(Array.from(e.target.files ?? []));
+          e.target.value = "";
+        }}
+      />
+
+      {/* Drag-over overlay */}
+      {isDragOver && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 50,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "1rem",
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(6px)",
+            border: "2px dashed var(--ai-accent)",
+            borderRadius: "0.5rem",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              background: "var(--ai-accent-gradient)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "var(--ai-avatar-glow)",
+            }}
+          >
+            <SVGIcon name="upload" size={28} style={{ color: "#fff" }} />
+          </div>
+          <p
+            style={{
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: "1rem",
+            }}
+          >
+            Drop to add to vault
+          </p>
+          {vaultId == null && (
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.78rem" }}>
+              No vault selected — please select one first
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Upgrade modal */}
+      {showUpgradeModal && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
       {/* Chat header */}
       <div
         style={{
@@ -983,24 +1373,6 @@ function ChatArea({
               </p>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#10b981",
-                boxShadow: "0 0 10px rgba(16,185,129,0.65)",
-                animation: "statusPing 2s ease-in-out infinite",
-                display: "inline-block",
-              }}
-            />
-            <span
-              style={{ fontSize: "0.72rem", color: "#10b981", fontWeight: 500 }}
-            >
-              Online
-            </span>
-          </div>
         </div>
       </div>
 
@@ -1010,7 +1382,7 @@ function ChatArea({
           flex: 1,
           overflowY: "auto",
           paddingTop: "1rem",
-          paddingBottom: "0.5rem",
+          paddingBottom: "8rem",
         }}
       >
         {isChatLoading ? (
@@ -1057,12 +1429,30 @@ function ChatArea({
         )}
       </div>
 
-      <ChatInput
-        value={message}
-        onChange={setMessage}
-        onSend={sendMessage}
-        disabled={isLoading}
-      />
+      {/* Floating input bar */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          // background: "var(--ai-bg)",  todo activate if wane the whole bg of the input to be that
+          pointerEvents: "none",
+        }}
+      >
+        <div style={{ pointerEvents: "auto", backgroundColor: "var(--ai-bg)" }}>
+          <ChatInput
+            value={message}
+            onChange={setMessage}
+            onSend={sendMessage}
+            disabled={isLoading}
+            onAttachFile={() => fileInputRef.current?.click()}
+            attachDisabled={vaultId == null}
+            isUploading={isUploadingDoc}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -1280,7 +1670,13 @@ function DocumentRow({ doc }: { doc: Serialised<IDocumentSchema> }) {
   );
 }
 
-function VaultContents({ vaultId }: { vaultId: string }) {
+function VaultContents({
+  vaultId,
+  refreshKey,
+}: {
+  vaultId: string;
+  refreshKey?: number;
+}) {
   const [docs, setDocs] = useState<Serialised<IDocumentSchema>[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -1291,12 +1687,11 @@ function VaultContents({ vaultId }: { vaultId: string }) {
       .then(setDocs)
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
-  }, [vaultId]);
+  }, [vaultId, refreshKey]);
 
   return (
     <div
       style={{
-        borderTop: "1px solid var(--ai-border-faint)",
         display: "flex",
         flexDirection: "column",
         flex: 1,
@@ -1345,7 +1740,7 @@ function VaultContents({ vaultId }: { vaultId: string }) {
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "0.25rem 1rem 1rem",
+          padding: "0rem 1rem 1rem",
           display: "flex",
           flexDirection: "column",
           gap: "0.4rem",
@@ -1384,8 +1779,9 @@ function StudyMaterialsSidebar(props: {
   selectedVaultId: string | null;
   onSelectVault: (id: string) => void;
   isOpen: boolean;
+  refreshKey?: number;
 }) {
-  const { vaults, selectedVaultId, onSelectVault, isOpen } = props;
+  const { vaults, selectedVaultId, onSelectVault, isOpen, refreshKey } = props;
   return (
     <aside
       className={`ai-tutor-sidebar${isOpen ? " sidebar-open" : ""}`}
@@ -1404,8 +1800,7 @@ function StudyMaterialsSidebar(props: {
       {/* Header */}
       <div
         style={{
-          padding: "1.25rem 1.25rem 1rem",
-          borderBottom: "1px solid var(--ai-border-faint)",
+          padding: "1rem  1.25rem 0.5rem 1.25rem",
           flexShrink: 0,
         }}
       >
@@ -1437,24 +1832,30 @@ function StudyMaterialsSidebar(props: {
             Study Materials
           </p>
         </div>
-        <p
-          style={{
-            fontSize: "0.72rem",
-            color: "var(--ai-text-dim)",
-            paddingLeft: "1.25rem",
-          }}
-        >
-          Select a vault to link this chat
-        </p>
       </div>
 
       {/* Vault list */}
+
+      {/* Vault contents section */}
+      {selectedVaultId != null && (
+        <VaultContents vaultId={selectedVaultId} refreshKey={refreshKey} />
+      )}
+
+      <p
+        style={{
+          fontSize: "0.72rem",
+          color: "var(--ai-text-dim)",
+          padding: "1.25rem",
+        }}
+      >
+        Select a vault to link this chat
+      </p>
       <div
         style={{
           flexShrink: 0,
           maxHeight: "40%",
           overflowY: "auto",
-          padding: "1rem",
+          padding: "0.25rem 1rem",
           display: "flex",
           flexDirection: "column",
           gap: "0.625rem",
@@ -1482,9 +1883,6 @@ function StudyMaterialsSidebar(props: {
           ))
         )}
       </div>
-
-      {/* Vault contents section */}
-      {selectedVaultId != null && <VaultContents vaultId={selectedVaultId} />}
     </aside>
   );
 }
@@ -1492,14 +1890,22 @@ function StudyMaterialsSidebar(props: {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 function AiTutor() {
-  const { userId, vaults } = useLoaderData<typeof loader>();
+  const { userId, vaults, totalDocuments } = useLoaderData<typeof loader>();
   const [selectedVaultId, setSelectedVaultId] = useState<string | null>(
     vaults[0]?.id ?? null,
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [docRefreshKey, setDocRefreshKey] = useState(0);
+  // Track live total count so plan checks stay accurate after uploads
+  const [totalDocs, setTotalDocs] = useState(totalDocuments);
 
   const selectedVault = vaults.find((v) => v.id === selectedVaultId);
   const conversationTitle = selectedVault?.name ?? "AI Tutor";
+
+  function handleDocumentUploaded() {
+    setDocRefreshKey((k) => k + 1);
+    setTotalDocs((n) => n + 1);
+  }
 
   return (
     <>
@@ -1526,12 +1932,15 @@ function AiTutor() {
             setSidebarOpen(false);
           }}
           isOpen={sidebarOpen}
+          refreshKey={docRefreshKey}
         />
         <ChatArea
           conversationTitle={conversationTitle}
           userId={userId}
           vaultId={selectedVaultId}
           onToggleSidebar={() => setSidebarOpen((o) => !o)}
+          allDocumentsCount={totalDocs}
+          onDocumentUploaded={handleDocumentUploaded}
         />
       </div>
     </>

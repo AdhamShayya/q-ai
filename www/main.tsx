@@ -19,7 +19,7 @@ import {
 import { userApi } from "./trpc";
 import LandingPage from "./pages";
 import AboutPage from "./pages/about";
-import Header from "./components/Navbar";
+import Header from "./components/Header";
 import SignInPage from "./pages/sign-in";
 import Footer from "./components/Footer";
 import SignUpPage from "./pages/sign-up";
@@ -33,6 +33,7 @@ import OnboardingPage, { loader as onboardingLoader } from "./pages/onboarding";
 import PersonaQuizPage, {
   loader as personaQuizLoader,
 } from "./pages/persona-quiz";
+import AdminPage, { loader as adminLoader } from "./pages/admin";
 // import VoiceStudyPage from "./pages/voice-study";
 
 async function rootLoader() {
@@ -109,6 +110,11 @@ export const router = createBrowserRouter([
         path: href("/persona-quiz"),
         element: <PersonaQuizPage />,
         loader: personaQuizLoader,
+      },
+      {
+        path: href("/admin"),
+        element: <AdminPage />,
+        loader: adminLoader,
       },
       {
         path: href("/onboarding"),

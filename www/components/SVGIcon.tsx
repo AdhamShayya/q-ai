@@ -44,7 +44,11 @@ export type IconName =
   | "menu"
   | "x"
   | "sun"
-  | "moon";
+  | "moon"
+  | "plus"
+  | "paperclip"
+  | "volume-2"
+  | "volume-x";
 
 interface SVGIconProps {
   name: IconName;
@@ -391,6 +395,33 @@ function IconPaths({
       );
     case "moon":
       return <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />;
+    case "plus":
+      return (
+        <>
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </>
+      );
+    case "paperclip":
+      return (
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+      );
+    case "volume-2":
+      return (
+        <>
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </>
+      );
+    case "volume-x":
+      return (
+        <>
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </>
+      );
     case "check":
       return (
         <>

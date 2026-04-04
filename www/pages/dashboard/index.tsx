@@ -28,7 +28,7 @@ export async function loader() {
 
 export const USAGE_LIMITS = {
   plan: "Free Plan",
-  studyMaterials: { max: 5 },
+  studyMaterials: { max: 26 },
   aiConversations: { used: 7, max: 10 },
 };
 
@@ -40,7 +40,7 @@ interface VaultWithDocuments {
 }
 
 const Upload_Webhook_API =
-  "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
+  "https://techflow12.app.n8n.cloud/webhook/q-ai/ingest";
 
 // ── Webhook helper ────────────────────────────────────────────────────────────
 async function sendFileToWebhook(props: {
@@ -422,12 +422,12 @@ function DashboardPage() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="container shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden animate-pulse"
+                    className="container flex flex-col shrink-0 w-52 border-[1.5px] rounded-lg overflow-hidden p-0"
                     style={{ borderColor: "var(--color-border)" }}
                   >
                     <div
-                      className="h-38"
-                      style={{ background: "var(--color-bg-muted)" }}
+                      className="h-28 w-full"
+                      style={{ background: "transparent" }}
                     />
                     <div className="px-4 py-8 space-y-2 bg-(--ai-surface)">
                       <div
