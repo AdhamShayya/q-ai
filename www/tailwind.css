@@ -494,3 +494,701 @@
 .animate-counter-pop {
   animation: counterPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AI TUTOR — GLOBAL COMPONENT & MARKDOWN CLASSES
+   Defined here so they are available on every page via the global CSS import.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Additional keyframes ─────────────────────────────────────────────────── */
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes bounceDots {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes spinFast {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aiPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: var(--ai-avatar-glow);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+/* ── Animation utilities ─────────────────────────────────────────────────── */
+
+.animate-fade-slide-in {
+  animation: fadeSlideIn 0.25s ease-out;
+}
+.animate-blink {
+  animation: blink 0.65s step-end infinite;
+}
+.animate-spin-fast {
+  animation: spinFast 0.8s linear infinite;
+}
+
+/* ── Ambient orbs ────────────────────────────────────────────────────────── */
+
+.ai-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ai-orb-1 {
+  width: 260px;
+  height: 260px;
+  top: 15%;
+  left: 15%;
+  background: radial-gradient(circle, var(--ai-orb1) 0%, transparent 70%);
+}
+.ai-orb-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 20%;
+  right: 10%;
+  background: radial-gradient(circle, var(--ai-orb2) 0%, transparent 70%);
+}
+.ai-orb-3 {
+  width: 140px;
+  height: 140px;
+  top: 50%;
+  right: 20%;
+  background: radial-gradient(circle, var(--ai-orb3) 0%, transparent 70%);
+}
+
+/* ── Avatar variants ─────────────────────────────────────────────────────── */
+
+.ai-avatar-xl {
+  background: var(--ai-accent-gradient);
+  box-shadow: var(--ai-avatar-glow);
+  animation: aiPulse 3s ease-in-out infinite;
+}
+
+.ai-avatar-md {
+  background: var(--ai-accent-gradient);
+  box-shadow: var(--ai-glow-sm);
+}
+
+/* ── Gradient heading text ───────────────────────────────────────────────── */
+
+.ai-gradient-text {
+  background: var(--ai-heading-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Horizontal divider ──────────────────────────────────────────────────── */
+
+.ai-divider {
+  height: 1px;
+  flex: 1;
+  background: var(--ai-border-faint);
+}
+
+/* ── Suggestion cards ────────────────────────────────────────────────────── */
+
+.ai-suggestion-card {
+  background: var(--ai-surface-subtle);
+  border: 1px solid var(--ai-border-faint);
+  border-radius: 0.875rem;
+  color: var(--ai-text-secondary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--ai-hover-surface);
+    border-color: var(--ai-hover-border);
+    box-shadow: var(--ai-hover-glow);
+    color: var(--ai-hover-text);
+  }
+}
+
+/* ── Top accent line ─────────────────────────────────────────────────────── */
+
+.ai-gradient-line {
+  height: 2px;
+  background: var(--ai-accent-gradient);
+}
+
+/* ── Chat header ─────────────────────────────────────────────────────────── */
+
+.ai-chat-header {
+  border-bottom: 1px solid var(--ai-border-faint);
+  background: var(--ai-header-bg);
+  backdrop-filter: blur(16px);
+  flex-shrink: 0;
+}
+
+/* ── Chat input bar ─────────────────────────────────────────────────────── */
+
+.ai-input-bar {
+  flex-shrink: 0;
+  padding: 0.875rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--ai-border-faint);
+  background: var(--ai-bg);
+}
+
+.ai-input-field {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.625rem;
+  background: var(--ai-surface-subtle);
+  border: 1.5px solid var(--ai-border-faint);
+  border-radius: 1.25rem;
+  padding: 0.5rem 0.625rem 0.5rem 0.875rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  & textarea {
+    color: var(--ai-text);
+    background: transparent;
+    &::placeholder {
+      color: var(--ai-text-dim);
+    }
+  }
+}
+
+.ai-input-field--focused {
+  border-color: var(--ai-border-focus);
+  box-shadow:
+    0 0 0 3px var(--ai-focus-ring),
+    0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ai-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ai-accent-gradient);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  box-shadow: var(--ai-glow-sm);
+
+  &:hover {
+    transform: scale(1.07);
+  }
+}
+
+.ai-send-btn--disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+  background: var(--ai-surface);
+  box-shadow: none;
+}
+
+/* ── Round icon action buttons ───────────────────────────────────────────── */
+
+.ai-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ai-surface-subtle);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--ai-hover-surface);
+  }
+}
+
+.ai-icon-btn-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Spinners ────────────────────────────────────────────────────────────── */
+
+.ai-spinner-ring {
+  border: 2px solid var(--ai-border-faint);
+  border-top-color: var(--ai-accent);
+  border-radius: 50%;
+  display: inline-block;
+  animation: spinFast 0.8s linear infinite;
+}
+
+.ai-loading-ring {
+  border: 2.5px solid var(--ai-border-faint);
+  border-top-color: var(--ai-spinner);
+  border-radius: 50%;
+  animation: spinFast 0.8s linear infinite;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.3);
+}
+
+/* ── Message bubbles ─────────────────────────────────────────────────────── */
+
+.ai-bubble-user {
+  background: var(--ai-user-bubble);
+  color: #fff;
+  box-shadow: var(--ai-glow-lg);
+  border-radius: 1.2rem 1.2rem 0.3rem 1.2rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.ai-bubble-assistant {
+  background: var(--ai-surface);
+  color: var(--ai-text);
+  border: 1px solid var(--ai-border);
+  border-radius: 0.3rem 1.2rem 1.2rem 1.2rem;
+  word-break: break-word;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+/* ── Typing cursor ───────────────────────────────────────────────────────── */
+
+.ai-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  background: var(--ai-cursor-color);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.65s step-end infinite;
+}
+
+/* ── TTS read-aloud button ───────────────────────────────────────────────── */
+
+.ai-tts-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.5rem;
+  color: var(--ai-text-muted);
+  transition:
+    color 0.2s,
+    background 0.2s;
+  font-size: 0.7rem;
+
+  &:hover {
+    background: var(--ai-surface-subtle);
+  }
+}
+
+.ai-tts-btn-active {
+  color: var(--ai-accent);
+}
+
+/* ── Typing indicator ────────────────────────────────────────────────────── */
+
+.ai-typing-bubble {
+  background: var(--ai-surface);
+  border: 1px solid var(--ai-border);
+  border-radius: 0.3rem 1.2rem 1.2rem 1.2rem;
+  backdrop-filter: blur(8px);
+}
+
+.ai-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ai-accent);
+  display: inline-block;
+  animation: bounceDots 1.2s ease-in-out infinite;
+}
+
+/* ── Drag-over overlay ───────────────────────────────────────────────────── */
+
+.ai-drag-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  border: 2px dashed var(--ai-accent);
+  border-radius: 0.5rem;
+  pointer-events: none;
+}
+
+/* ── Vault cards ─────────────────────────────────────────────────────────── */
+
+.ai-vault-card {
+  flex-shrink: 0;
+  background: var(--ai-surface-subtle);
+  border: 1.5px solid var(--ai-border-faint);
+  border-radius: 0.875rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:not(.ai-vault-selected):hover {
+    background: var(--ai-surface);
+    border-color: var(--ai-border);
+  }
+}
+
+.ai-vault-selected {
+  background: var(--ai-hover-surface);
+  border-color: var(--ai-hover-border);
+  box-shadow: var(--ai-hover-glow);
+}
+
+.ai-vault-bar {
+  height: 3px;
+  transition: background 0.2s;
+}
+.ai-vault-bar-active {
+  background: var(--ai-accent-gradient);
+}
+.ai-vault-bar-inactive {
+  background: var(--ai-border-faint);
+}
+
+.ai-vault-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ai-text);
+  transition: all 0.2s;
+}
+
+.ai-vault-icon-active {
+  background: var(--ai-user-bubble);
+  box-shadow: var(--ai-send-glow);
+}
+.ai-vault-icon-inactive {
+  background: var(--ai-surface);
+}
+
+.ai-vault-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ai-user-bubble);
+  box-shadow: var(--ai-glow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Document rows ───────────────────────────────────────────────────────── */
+
+.ai-doc-row {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.625rem;
+  background: var(--ai-surface-subtle);
+  border: 1px solid var(--ai-border-faint);
+  overflow: hidden;
+  transition: background 0.15s;
+  cursor: default;
+
+  &:hover {
+    background: var(--ai-surface);
+  }
+}
+
+/* ── Count badge ─────────────────────────────────────────────────────────── */
+
+.ai-count-badge {
+  font-size: 0.68rem;
+  background: var(--ai-surface-subtle);
+  border: 1px solid var(--ai-border-faint);
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: var(--ai-text-dim);
+}
+
+/* ── Sidebar panel ───────────────────────────────────────────────────────── */
+
+.ai-sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ai-panel);
+  border-left: 1px solid var(--ai-border-faint);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+/* ── Status indicator dot (sidebar header) ───────────────────────────────── */
+
+.ai-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ai-accent-gradient);
+  box-shadow: 0 0 8px var(--ai-accent);
+}
+
+/* ── Trust-badge separator ───────────────────────────────────────────────── */
+
+.ai-trust-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ai-border);
+  flex-shrink: 0;
+}
+
+/* ── Page root layout ────────────────────────────────────────────────────── */
+
+.ai-page {
+  display: flex;
+  height: calc(100vh - 64px);
+  background: var(--ai-bg);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MARKDOWN PROSE — .ai-markdown wrapper
+   All child elements styled via CSS descendants so tables, code blocks,
+   headings etc. render correctly wherever this class is used.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ai-markdown {
+  line-height: 1.65;
+
+  h1 {
+    font-size: 1.1em;
+    font-weight: 700;
+    margin: 0.6em 0 0.4em;
+  }
+  h2 {
+    font-size: 1.05em;
+    font-weight: 700;
+    margin: 0.55em 0 0.35em;
+  }
+  h3 {
+    font-size: 1em;
+    font-weight: 700;
+    margin: 0.5em 0 0.3em;
+  }
+  p {
+    margin: 0.35em 0;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+  em {
+    font-style: italic;
+  }
+
+  ul {
+    padding-left: 1.25em;
+    margin: 0.3em 0;
+    list-style-type: disc;
+  }
+  ol {
+    padding-left: 1.25em;
+    margin: 0.3em 0;
+    list-style-type: decimal;
+  }
+  li {
+    margin: 0.15em 0;
+  }
+
+  code {
+    background: var(--ai-code-bg);
+    padding: 0.1em 0.4em;
+    border-radius: 0.3em;
+    font-family: monospace;
+    font-size: 0.88em;
+    color: var(--ai-code-color);
+  }
+
+  pre {
+    background: var(--ai-surface-subtle);
+    border: 1px solid var(--ai-border-faint);
+    padding: 0.65em 0.9em;
+    border-radius: 0.625em;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 0.84em;
+    margin: 0.4em 0;
+  }
+
+  /* ── Tables (rendered by remark-gfm) ── */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+  }
+
+  thead {
+    background: var(--ai-surface-subtle);
+  }
+  tr {
+    border-bottom: 1px solid var(--ai-border-faint);
+  }
+
+  th {
+    padding: 0.45em 0.75em;
+    font-weight: 700;
+    text-align: left;
+    border: 1px solid var(--ai-border-faint);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.4em 0.75em;
+    border: 1px solid var(--ai-border-faint);
+    vertical-align: top;
+  }
+}
+
+/* Table overflow wrapper (added by renderMarkdown) */
+.ai-markdown-table-wrap {
+  overflow-x: auto;
+  margin: 0.6em 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR DRAWER — desktop static panel / mobile slide-in drawer
+   Scrollbar overrides scoped to the AI Tutor page wrapper
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ai-tutor-page {
+  display: flex;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+
+  textarea::placeholder {
+    color: var(--ai-text-dim);
+  }
+
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--ai-border);
+    border-radius: 999px;
+    &:hover {
+      background: var(--ai-accent);
+    }
+  }
+}
+
+/* Desktop — sidebar is a static panel */
+.ai-tutor-sidebar {
+  position: static;
+  width: 300px;
+  min-width: 280px;
+  max-width: 320px;
+  transform: none;
+}
+
+.ai-tutor-mobile-toggle {
+  display: none !important;
+}
+
+/* Mobile — sidebar becomes a slide-in drawer */
+@media (max-width: 767px) {
+  .ai-tutor-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 49;
+  }
+
+  .ai-tutor-sidebar {
+    position: fixed !important;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 80vw !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    z-index: 50;
+    border-left: none !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    &.sidebar-open {
+      transform: translateX(0);
+    }
+  }
+
+  .ai-tutor-mobile-toggle {
+    display: flex !important;
+  }
+  .ai-suggestions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .ai-tutor-msg-row {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .ai-tutor-msg-bubble {
+    max-width: 90% !important;
+  }
+}

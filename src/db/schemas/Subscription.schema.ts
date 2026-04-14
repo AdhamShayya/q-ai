@@ -18,7 +18,7 @@ export const subscriptions = pgTable("subscriptions", {
   stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 

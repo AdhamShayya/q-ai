@@ -6,6 +6,9 @@ import ConversationModel from "./models/Conversation"
 import SubscriptionModel from "./models/Subscription"
 import DocumentChunkModel from "./models/DocumentChunk"
 import LearningPersonaModel from "./models/LearningPersona"
+import FlashcardModel from "./models/Flashcard"
+import FlashcardReviewModel from "./models/FlashcardReview"
+import StudyPlanModel from "./models/StudyPlan"
 
 // ── ORM ────────────────────────────────────────────────────────────────
 
@@ -18,4 +21,7 @@ export const ORM = {
   Subscription: SubscriptionModel,
   DocumentChunk: DocumentChunkModel,
   LearningPersona: LearningPersonaModel,
+  Flashcard: FlashcardModel,
+  FlashcardReview: FlashcardReviewModel,
+  StudyPlan: StudyPlanModel,
 } as const

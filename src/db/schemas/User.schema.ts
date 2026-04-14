@@ -23,7 +23,7 @@ export const users = pgTable("users", {
   subscriptionStatus: subscriptionStatusEnum("subscription_status").default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 
