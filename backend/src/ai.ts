@@ -80,7 +80,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
  */
 async function getLearningPersona(userId: string): Promise<LearningPersona | null> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return null;
-  
+
   try {
     // Fetch the persona matching the given user
     const response = await fetch(`${SUPABASE_URL}/rest/v1/learning_personas?user_id=eq.${userId}&select=*`, {
@@ -142,7 +142,7 @@ async function retrieveRelevantChunks(userId: string, vaultId: string, message: 
       }
       return [];
     }
-    
+
     return await response.json();
   } catch (err) {
     console.error("Error retrieving relevant chunks:", err);
@@ -217,12 +217,12 @@ async function getChatHistory(conversationId: string): Promise<ChatMessage[]> {
 function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[], message: string, history: ChatMessage[] = []): string {
   let prompt = "You are Q-Ai, an expert AI tutor specialized in helping students deeply understand their own study materials.\n\n";
   prompt += "You must prioritize the user's vault content as the primary source of truth.\n\n";
-  
+
   // Conditionally apply AI personalization formatting 
   if (persona) {
     prompt += "LEARNER PROFILE\n";
     prompt += "Adapt your teaching style to this learner profile:\n\n";
-    
+
     if (persona.learning_style) prompt += `- Preferred explanation style: ${persona.learning_style}\n`;
     if (persona.info_entry) prompt += `- Best information intake: ${persona.info_entry.answer || persona.info_entry}\n`;
     if (persona.problem_solving) prompt += `- Preferred problem-solving approach: ${persona.problem_solving}\n`;
@@ -233,7 +233,7 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
       const outcome = persona.output_preference.answer || persona.output_preference;
       prompt += `- Desired outcome: Help the user ${typeof outcome === 'string' ? outcome.toLowerCase() : JSON.stringify(outcome)}\n`;
     }
-    
+
     prompt += `\nTeaching behavior rules:
 1. Match the learner's abstraction level.
 2. Use examples in their preferred processing style.
@@ -241,7 +241,7 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
 4. Prioritize clarity over jargon.
 5. If the user is confused, simplify before adding depth.\n\n`;
   }
-  
+
   // Inject context logic 
   prompt += "RETRIEVED CONTEXT\n";
   if (chunks.length === 0) {
@@ -251,7 +251,7 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
       prompt += `[Context ${i + 1}]: ${chunk.content}\n`;
     });
   }
-  
+
   if (history && history.length > 0) {
     prompt += "\nCONVERSATION HISTORY\n";
     history.forEach(msg => {
@@ -259,7 +259,7 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
       prompt += `${roleName}: ${msg.content}\n\n`;
     });
   }
-  
+
   prompt += `\nUSER QUESTION\n${message}\n\n`;
   prompt += `RULES
 1. Base your answer primarily on the retrieved context.
@@ -275,7 +275,7 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
 6. Never invent that something exists in the vault if it does not.
 7. If the user asks for memorization help, provide a simpler study version at the end.
 8. If formulas or definitions appear in context, preserve them accurately.`;
-  
+
   return prompt;
 }
 
@@ -289,17 +289,17 @@ function buildChatPrompt(persona: LearningPersona | null, chunks: DocumentChunk[
  */
 function buildFlashcardsPrompt(persona: LearningPersona | null, chunks: DocumentChunk[]): string {
   let prompt = "You are an AI that generates educational flashcards based on provided context.\n\n";
-  
+
   // Integrate stylistic traits into the answer derivations
   if (persona) {
     prompt += `Consider the user's learning style: ${persona.learning_style} and problem-solving method: ${persona.problem_solving} when formatting explanations or hints.\n\n`;
   }
-  
+
   prompt += "Context Material to convert into flashcards:\n";
   chunks.forEach((chunk, i) => {
     prompt += `[Context ${i + 1}]: ${chunk.content}\n`;
   });
-  
+
   prompt += `\nGenerate relevant conceptual and factual flashcards based on the context.
 You MUST output ONLY a valid JSON array. Do not include markdown, code blocks, or any other explanations.
 Format requirement:
@@ -322,8 +322,8 @@ async function callGemini(prompt: string): Promise<string> {
   }
 
   // Uses Gemini 1.5 Pro via standard REST structure
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
-  
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+
   const payload = {
     contents: [
       { parts: [{ text: prompt }] }
@@ -347,7 +347,7 @@ async function callGemini(prompt: string): Promise<string> {
   // Extract raw text value targeting standard candidate structures
   const data = await response.json();
   const text = data.candidates && data.candidates[0]?.content?.parts?.[0]?.text;
-  
+
   return text || "";
 }
 
@@ -361,13 +361,13 @@ async function callGemini(prompt: string): Promise<string> {
 function safeJsonParse<T>(jsonString: string): T | null {
   try {
     let cleanJson = jsonString.trim();
-    
+
     // Discards bounding markdown code block indicators
     if (cleanJson.startsWith('```json')) cleanJson = cleanJson.slice(7);
     if (cleanJson.startsWith('```')) cleanJson = cleanJson.slice(3);
     if (cleanJson.endsWith('```')) cleanJson = cleanJson.slice(0, -3);
     cleanJson = cleanJson.trim();
-    
+
     return JSON.parse(cleanJson) as T;
   } catch (error) {
     console.error("Failed to parse JSON:", error);
@@ -394,34 +394,34 @@ export async function runAI(input: RunAIInput): Promise<ChatResponse | Flashcard
 
     // 1. Gather relevant subsets via semantic distance estimation matching user query
     const chunks = await retrieveRelevantChunks(userId, vaultId, message);
-    
+
     // 2. Synthesize payload instructions
     const prompt = buildChatPrompt(persona, chunks, message, history);
-    
+
     // 3. Obtain LLM interpretation
     const geminiResponse = await callGemini(prompt);
-    
+
     return {
       answer: geminiResponse,
       contextUsed: chunks.length
     };
-  } 
-  
+  }
+
   // Vault Flashcard Generation Boilerplate Pipeline
   if (type === "flashcards") {
     // 1. Force fetch all document chunks regardless of limits
     const allChunks = await getAllVaultChunks(userId, vaultId);
-    
+
     if (allChunks.length === 0) {
       return []; // Return early if no relevant training material is uploaded
     }
 
     // 2. Build extraction command logic
     const prompt = buildFlashcardsPrompt(persona, allChunks);
-    
+
     // 3. Initiate processing logic returning stringified JSON
     const geminiResponse = await callGemini(prompt);
-    
+
     // 4. Transform and fallback onto empty structure instead of crashing pipeline
     const parsed = safeJsonParse<Flashcard[]>(geminiResponse);
     return parsed || [];

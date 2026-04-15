@@ -1,0 +1,55 @@
+Q-AI Project Structure & Responsibilities
+=========================================
+
+.
+├── backend/                        # Standalone AI Engine module (isolated for AI specific tasks)
+│   └── src/
+│       ├── ai.ts                   # Core AI logic: Gemini integration, RAG pipeline, & flashcard generation
+│       └── db/
+│           └── index.ts            # Database connection and low-level fetching for AI services
+├── src/                            # Primary Backend (tRPC API Server)
+│   ├── controllers/                # Business logic handlers for API procedures
+│   │   ├── admin.controller.ts     # Administrative operations and management logic
+│   │   ├── conversation.controller.ts # Chat session and message management
+│   │   ├── document.controller.ts   # Document ingestion and processing logic
+│   │   ├── persona.controller.ts    # User learning profile management
+│   │   ├── user.controller.ts       # Profile and authentication-related logic
+│   │   └── vault.controller.ts      # Vault (document collection) management logic
+│   ├── db/                         # Database layer
+│   │   └── index.ts                # Drizzle ORM client initialization and connection
+│   ├── routers/                    # tRPC route definitions (mapping endpoints to controllers)
+│   │   ├── admin.router.ts         # Routes for administrative tasks
+│   │   ├── conversation.router.ts  # Routes for chat and AI interaction
+│   │   ├── index.ts                # Root tRPC router (merges all sub-routers)
+│   │   ├── persona.router.ts       # Routes for learning styles and personas
+│   │   ├── user.router.ts          # Routes for user accounts and auth
+│   │   └── vault.router.ts         # Routes for vault and document management
+│   ├── utils/                      # Shared helper functions and middleware
+│   ├── main.ts                     # Backend entry point: starts the tRPC server
+│   ├── trpc.ts                     # tRPC server-side configuration and context setup
+│   ├── drizzle.config.ts           # Configuration for Drizzle ORM migrations
+│   └── .env                        # Local environment secrets and configuration
+├── www/                            # Frontend Application (React + Vite + tRPC Client)
+│   ├── components/                 # Reusable React UI components
+│   │   ├── Navbar.tsx              # Main navigation navigation element
+│   │   ├── AuthCard.tsx            # Login and Sign-up form container
+│   │   ├── DocumentCard.tsx        # UI representation of an uploaded document
+│   │   └── ...                     # Various UI kit elements (Button, Modal, etc.)
+│   ├── pages/                      # Main screen components and routing logic
+│   │   ├── dashboard/              # User's main overview and vault access
+│   │   ├── ai-tutor/               # Interactive AI chat interface
+│   │   ├── persona-quiz/           # Learning style assessment flow
+│   │   └── ...                     # Other app views (Settings, About, etc.)
+│   ├── styles/                     # Styling layer
+│   │   ├── index.scss              # Global design system and layout styles
+│   │   └── ai-tutor.scss           # Specific styles for the tutor interface
+│   ├── main.tsx                    # Application entry point: mounts the React tree
+│   ├── trpc.ts                     # tRPC client-side setup and hooks
+│   └── vite.config.ts              # Vite build and development configuration
+├── structure/                      # Project documentation and architectural blueprints
+│   ├── DEVELOPMENT_TODO.md         # Active development roadmap and task list
+│   ├── PROJECT_STATUS.md           # High-level overview of current development state
+│   └── ...                         # Detailed guides for auth, network, and setup
+├── package.json                    # Root configuration: manages monorepo workspaces (www, src)
+├── README.md                       # General project introduction and high-level info
+└── tree.txt                        # This file: Mapping of project structure and responsibilities
