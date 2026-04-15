@@ -31,7 +31,7 @@ export const documents = pgTable("documents", {
   metadataJson: jsonb("metadata_json").default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 

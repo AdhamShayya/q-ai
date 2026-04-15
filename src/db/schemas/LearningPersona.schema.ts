@@ -37,7 +37,7 @@ export const learningPersonas = pgTable("learning_personas", {
   preferencesJson: jsonb("preferences_json").default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 

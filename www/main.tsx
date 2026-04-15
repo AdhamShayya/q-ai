@@ -34,6 +34,11 @@ import PersonaQuizPage, {
   loader as personaQuizLoader,
 } from "./pages/persona-quiz";
 import AdminPage, { loader as adminLoader } from "./pages/admin";
+import MCQPage from "./pages/mcq";
+import FlashcardsPage, { loader as flashcardsLoader } from "./pages/flashcards";
+import StudyPlannerPage, {
+  loader as studyPlannerLoader,
+} from "./pages/study-planner";
 // import VoiceStudyPage from "./pages/voice-study";
 
 async function rootLoader() {
@@ -120,6 +125,20 @@ export const router = createBrowserRouter([
         path: href("/onboarding"),
         element: <OnboardingPage />,
         loader: onboardingLoader,
+      },
+      {
+        path: "/mcq",
+        element: <MCQPage />,
+      },
+      {
+        path: href("/flashcards"),
+        element: <FlashcardsPage />,
+        loader: flashcardsLoader,
+      },
+      {
+        path: href("/study-planner"),
+        element: <StudyPlannerPage />,
+        loader: studyPlannerLoader,
       },
       // {
       //   path: href("/voice-study"),

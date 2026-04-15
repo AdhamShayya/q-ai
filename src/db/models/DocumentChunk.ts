@@ -13,6 +13,10 @@ class DocumentChunkModel extends BaseModel<IDocumentChunkSchema> {
     return this.findWhere(eq(documentChunks.documentId, documentId))
   }
 
+  async findByVaultId(vaultId: string): Promise<IDocumentChunkSchema[]> {
+    return this.findWhere(eq(documentChunks.vaultId, vaultId))
+  }
+
   async deleteByVaultId(vaultId: string): Promise<void> {
     await db.delete(documentChunks).where(eq(documentChunks.vaultId, vaultId))
   }

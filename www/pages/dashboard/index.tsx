@@ -29,7 +29,6 @@ export async function loader() {
 export const USAGE_LIMITS = {
   plan: "Free Plan",
   studyMaterials: { max: 26 },
-  aiConversations: { used: 7, max: 10 },
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -40,7 +39,7 @@ interface VaultWithDocuments {
 }
 
 const Upload_Webhook_API =
-  "https://techflow12.app.n8n.cloud/webhook/q-ai/ingest";
+  "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
 
 // ── Webhook helper ────────────────────────────────────────────────────────────
 async function sendFileToWebhook(props: {
@@ -143,11 +142,6 @@ function DashboardPage() {
       label: "Study Materials",
       used: allDocuments.length,
       max: USAGE_LIMITS.studyMaterials.max,
-    },
-    {
-      label: "AI Conversations",
-      used: USAGE_LIMITS.aiConversations.used,
-      max: USAGE_LIMITS.aiConversations.max,
     },
   ];
 
@@ -448,7 +442,7 @@ function DashboardPage() {
               No materials yet. Upload your first file above to get started.
             </p>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-8 max-h-[600px] overflow-y-auto scrollbar-themed pr-2">
               {vaultData!.map(({ vault, documents }) => (
                 <div key={vault.id}>
                   <div className="max-md:container flex items-center gap-2 mb-3">
@@ -482,30 +476,40 @@ function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-4 overflow-x-auto py-2 scrollbar-themed max-md:pl-6">
-                    {documents.map((doc) => (
-                      <div key={doc.id} className="shrink-0 w-52">
-                        <DocumentCard
-                          doc={doc}
-                          courseLabel={vault.courseName ?? vault.name}
-                          isDeleting={deletingIds.has(doc.id)}
-                          onDelete={() =>
-                            requestDeleteDocument(doc.id, doc.filename)
+                  <div className="relative">
+                    {/* Right fade — shows overflow hint */}
+                    <div
+                      className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 z-10"
+                      style={{
+                        background:
+                          "linear-gradient(to right, transparent, var(--color-bg))",
+                      }}
+                    />
+                    <div className="flex gap-4 overflow-x-auto py-2 scrollbar-themed max-md:pl-6">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="shrink-0 w-52">
+                          <DocumentCard
+                            doc={doc}
+                            courseLabel={vault.courseName ?? vault.name}
+                            isDeleting={deletingIds.has(doc.id)}
+                            onDelete={() =>
+                              requestDeleteDocument(doc.id, doc.filename)
+                            }
+                          />
+                        </div>
+                      ))}
+                      <div className="flex shrink-0 ">
+                        <AddDocumentCard
+                          isUploading={uploadingVaultIds.has(vault.id)}
+                          onFiles={(files) =>
+                            handleAddToVault(
+                              vault.id,
+                              files,
+                              vault.courseName ?? vault.name,
+                            )
                           }
                         />
                       </div>
-                    ))}
-                    <div className="flex shrink-0 ">
-                      <AddDocumentCard
-                        isUploading={uploadingVaultIds.has(vault.id)}
-                        onFiles={(files) =>
-                          handleAddToVault(
-                            vault.id,
-                            files,
-                            vault.courseName ?? vault.name,
-                          )
-                        }
-                      />
                     </div>
                   </div>
                 </div>

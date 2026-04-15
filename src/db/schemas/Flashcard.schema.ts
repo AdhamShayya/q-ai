@@ -1,61 +1,56 @@
-import { type } from "arktype"
-import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core"
 
-import { users } from "./User.schema"
-import { vaults } from "./Vault.schema"
 import type { IModelConfig } from "../types/model-config"
+import { vaults } from "./Vault.schema"
+import { users } from "./User.schema"
 
 // ── Table ─────────────────────────────────────────────────────────────────────
-export const conversations = pgTable("conversations", {
+
+export const flashcards = pgTable("flashcards", {
   id: uuid("id").defaultRandom().primaryKey(),
+  vaultId: uuid("vault_id")
+    .notNull()
+    .references(() => vaults.id),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
-  vaultId: uuid("vault_id").references(() => vaults.id),
-  title: varchar("title", { length: 255 }),
+  front: text("front").notNull(),
+  back: text("back").notNull(),
+  sourceContext: text("source_context"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
-export type Conversation = typeof conversations.$inferSelect
-export type NewConversation = typeof conversations.$inferInsert
+
+export type Flashcard = typeof flashcards.$inferSelect
+export type NewFlashcard = typeof flashcards.$inferInsert
 
 // ── Domain interface ─────────────────────────────────────────────────────────
-export interface IConversationSchema {
+
+export interface IFlashcardSchema {
   id: string
+  vaultId: string
   userId: string
-  vaultId: string | null
-  title: string | null
+  front: string
+  back: string
+  sourceContext: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
-// ── Validators ───────────────────────────────────────────────────────────────
-export const CreateConversationInput = type({
-  userId: "string",
-  "vaultId?": "string",
-  "title?": "string",
-})
-
-export const UpdateConversationInput = type({
-  "title?": "string",
-  "vaultId?": "string",
-})
-
-export type CreateConversationInput = typeof CreateConversationInput.infer
-export type UpdateConversationInput = typeof UpdateConversationInput.infer
-
 // ── Model config ─────────────────────────────────────────────────────────────
 
-export const ConversationModelConfig: IModelConfig = {
-  tableName: "conversations",
+export const FlashcardModelConfig: IModelConfig = {
+  tableName: "flashcards",
   primaryKeyType: "uuid",
   properties: {
     id: { type: "string", label: "ID", isRequired: true },
+    vaultId: { type: "string", label: "Vault ID", isRequired: true },
     userId: { type: "string", label: "User ID", isRequired: true },
-    vaultId: { type: "string", label: "Vault ID", isRequired: false },
-    title: { type: "string", label: "Title", isRequired: false },
+    front: { type: "string", label: "Front", isRequired: true },
+    back: { type: "string", label: "Back", isRequired: true },
+    sourceContext: { type: "string", label: "Source Context", isRequired: false },
     createdAt: { type: "Date", label: "Created At", isRequired: false },
     updatedAt: { type: "Date", label: "Updated At", isRequired: false },
   },

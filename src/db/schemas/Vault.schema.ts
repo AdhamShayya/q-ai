@@ -16,7 +16,7 @@ export const vaults = pgTable("vaults", {
   description: text("description"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 

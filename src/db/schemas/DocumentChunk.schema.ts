@@ -1,5 +1,5 @@
 import { type } from "arktype"
-import { pgTable, uuid, text, timestamp, jsonb, customType } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, timestamp, jsonb, customType, index } from "drizzle-orm/pg-core"
 
 import { documents } from "./Document.schema"
 import { vaults } from "./Vault.schema"
@@ -31,7 +31,7 @@ export const documentChunks = pgTable("document_chunks", {
   embedding: vector("embedding"),
   metadata: jsonb("metadata").default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 

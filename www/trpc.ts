@@ -207,6 +207,11 @@ export const conversationApi = {
   addMessage: mut(client.conversation.addMessage, (i) => [
     `conversation.getMessages:${i.conversationId}`,
   ]),
+  chat: mut(client.conversation.chat, (i) => [
+    i.conversationId
+      ? `conversation.getMessages:${i.conversationId}`
+      : "conversation.getMessages:",
+  ]),
 };
 
 export const adminApi = {
@@ -216,4 +221,49 @@ export const adminApi = {
     client.admin.usersWithStats,
     30_000,
   ),
+};
+
+// ── Feature APIs ──────────────────────────────────────────────────────────────
+
+export const flashcardApi = {
+  list: qk(
+    (i) => `flashcard.list:${i.vaultId}:${i.userId}`,
+    client.flashcard.list,
+    TTL.vault,
+  ),
+  getDue: qk(
+    (i) => `flashcard.due:${i.userId}`,
+    client.flashcard.getDue,
+    30_000,
+  ),
+  generate: mut(client.flashcard.generate, (i) => [
+    `flashcard.list:${i.vaultId}:${i.userId}`,
+    `flashcard.due:${i.userId}`,
+  ]),
+  review: mut(client.flashcard.review, (i) => [
+    `flashcard.due:${i.userId}`,
+    "flashcard.list:",
+  ]),
+  delete: mut(client.flashcard.delete, () => [
+    "flashcard.list:",
+    "flashcard.due:",
+  ]),
+  deleteAll: mut(client.flashcard.deleteAll, (i) => [
+    `flashcard.list:${i.vaultId}:${i.userId}`,
+    `flashcard.due:${i.userId}`,
+  ]),
+};
+
+export const studyPlannerApi = {
+  get: qk(
+    (i) => `studyplanner.get:${i.vaultId}:${i.userId}`,
+    client.studyPlanner.get,
+    TTL.vault,
+  ),
+  create: mut(client.studyPlanner.create, (i) => [
+    `studyplanner.get:${i.vaultId}:${i.userId}`,
+  ]),
+  delete: mut(client.studyPlanner.delete, (i) => [
+    `studyplanner.get:${i.vaultId}:${i.userId}`,
+  ]),
 };

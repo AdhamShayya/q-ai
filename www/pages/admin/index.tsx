@@ -113,7 +113,7 @@ function avatarGradient(id: string): string {
   const idx =
     id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
     AVATAR_PALETTES.length;
-  return AVATAR_PALETTES[idx] ?? AVATAR_PALETTES[0];
+  return AVATAR_PALETTES[idx] ?? "from-violet-500 to-purple-600";
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────

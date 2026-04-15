@@ -23,7 +23,7 @@ export const messages = pgTable("messages", {
   content: text("content").notNull(),
   metadataJson: jsonb("metadata_json").default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-})
+}).enableRLS()
 
 // ── Drizzle types ─────────────────────────────────────────────────────────────
 
