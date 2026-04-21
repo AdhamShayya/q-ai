@@ -1,159 +1,57 @@
 /**
  * queue.ts
  * ─────────────────────────────────────────────────────────────────────────────
- * BullMQ queue configuration and factory for the document ingestion pipeline.
+ * Graphile-worker runner for the document ingestion pipeline.
  *
- * Exports:
- *   - ingestionQueue    → The BullMQ Queue instance (used to push jobs)
- *   - addIngestionJob   → Helper to enqueue a document for processing
- *   - getRedisConnection → Shared IORedis connection config
+ * Jobs are stored in PostgreSQL (no Redis required). Creating a job inside
+ * a database transaction guarantees the document record and its processing
+ * job are always created together — or not at all.
  *
- * Queue name: "document-ingestion"
- * Retry:      3 attempts with exponential backoff (2s base)
- * Concurrency: 5 (configured on the worker side)
- *
- * ⚠ Requires `bullmq` and `ioredis` packages to be installed.
+ * Requires graphile-worker tables to exist (auto-migrated on first start).
+ * For Supabase: set GRAPHILE_DB_URL to the direct connection (port 5432),
+ * not the PgBouncer pooler, because graphile-worker uses advisory locks.
  */
 
-import { Queue } from "bullmq";
-import type { ConnectionOptions } from "bullmq";
-import type { IngestionJobData, IngestionResponse } from "../types/ingestion.types";
-import { QUEUE_CONFIG } from "../types/ingestion.types";
+import { run, type Runner } from "graphile-worker"
+import { env } from "../config/config"
+import { processIngestionJob } from "./ingestion.processor"
+import { INGEST_TASK, type IngestionJobData } from "../types/ingestion.types"
 
-// ── Redis Connection ──────────────────────────────────────────────────────────
+let runner: Runner | null = null
 
-/**
- * Returns the Redis connection options used by both the Queue and Worker.
- * Reads from REDIS_URL (full connection string) or falls back to
- * individual REDIS_HOST / REDIS_PORT environment variables.
- *
- * Default: localhost:6379
- */
-export function getRedisConnection(): ConnectionOptions {
-  const redisUrl = process.env.REDIS_URL;
-
-  if (redisUrl) {
-    // Parse the Redis URL for BullMQ's ConnectionOptions format
-    try {
-      const url = new URL(redisUrl);
-      return {
-        host: url.hostname,
-        port: parseInt(url.port || "6379", 10),
-        password: url.password || undefined,
-        username: url.username || undefined,
-      };
-    } catch {
-      console.warn(
-        "[Queue] Failed to parse REDIS_URL, falling back to defaults"
-      );
-    }
+export async function startIngestionQueue(): Promise<void> {
+  if (runner != null) {
+    return
   }
 
-  return {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: parseInt(process.env.REDIS_PORT || "6379", 10),
-    password: process.env.REDIS_PASSWORD || undefined,
-  };
-}
-
-// ── Queue Instance ────────────────────────────────────────────────────────────
-
-/**
- * The BullMQ Queue instance for document ingestion jobs.
- *
- * Jobs are added here by the API controller immediately after a document
- * record is created. The worker (ingestion.worker.ts) picks them up
- * asynchronously and processes them through the full pipeline.
- */
-export const ingestionQueue = new Queue<IngestionJobData>(
-  QUEUE_CONFIG.QUEUE_NAME,
-  {
-    connection: getRedisConnection(),
-    defaultJobOptions: {
-      attempts: QUEUE_CONFIG.MAX_RETRIES,
-      backoff: {
-        type: QUEUE_CONFIG.BACKOFF.type,
-        delay: QUEUE_CONFIG.BACKOFF.delay,
-      },
-      removeOnComplete: {
-        count: 1000, // Keep last 1000 completed jobs for observability
-        age: 24 * 60 * 60, // Remove completed jobs older than 24 hours
-      },
-      removeOnFail: {
-        count: 5000, // Keep more failed jobs for debugging
-        age: 7 * 24 * 60 * 60, // Keep failed jobs for 7 days
+  runner = await run({
+    connectionString: env.GRAPHILE_DB_URL,
+    concurrency: 5,
+    taskList: {
+      [INGEST_TASK]: async (payload: unknown) => {
+        await processIngestionJob(payload as IngestionJobData)
       },
     },
+  })
+
+  runner.events.on(
+    "job:error",
+    (params: { job: { id: unknown; task_identifier: string }; error: unknown }) => {
+      console.error(
+        `[Queue] ❌ Job ${params.job.id} (${params.job.task_identifier}) failed:`,
+        params.error instanceof Error ? params.error.message : params.error,
+      )
+    },
+  )
+
+  console.log("[Queue] ✅ Graphile-worker started")
+}
+
+export async function stopIngestionQueue(): Promise<void> {
+  if (runner == null) {
+    return
   }
-);
-
-// ── Public API ────────────────────────────────────────────────────────────────
-
-/**
- * Adds a new document ingestion job to the queue.
- *
- * This is the integration point between the API layer and the async
- * processing pipeline. The controller calls this after:
- *   1. Storing the file in Supabase Storage
- *   2. Creating the document record in the DB
- *
- * The function returns immediately — the caller does NOT wait for processing.
- *
- * @param jobData - Ingestion job payload
- * @returns The standard immediate response for the API client
- */
-export async function addIngestionJob(
-  jobData: IngestionJobData
-): Promise<IngestionResponse> {
-  const job = await ingestionQueue.add(
-    `ingest-${jobData.filename}`, // Human-readable job name
-    jobData,
-    {
-      // Priority: lower number = higher priority
-      // Could be extended to prioritize smaller files or premium users
-      priority: 1,
-    }
-  );
-
-  console.log(
-    `[Queue] Job ${job.id} added for document: ${jobData.filename} ` +
-      `(doc: ${jobData.documentId})`
-  );
-
-  return {
-    success: true,
-    status: "processing",
-    documentId: jobData.documentId,
-  };
-}
-
-/**
- * Returns the current queue health metrics.
- * Useful for monitoring dashboards and health check endpoints.
- */
-export async function getQueueHealth(): Promise<{
-  waiting: number;
-  active: number;
-  completed: number;
-  failed: number;
-  delayed: number;
-}> {
-  const [waiting, active, completed, failed, delayed] = await Promise.all([
-    ingestionQueue.getWaitingCount(),
-    ingestionQueue.getActiveCount(),
-    ingestionQueue.getCompletedCount(),
-    ingestionQueue.getFailedCount(),
-    ingestionQueue.getDelayedCount(),
-  ]);
-
-  return { waiting, active, completed, failed, delayed };
-}
-
-/**
- * Gracefully shuts down the queue connection.
- * Should be called during application shutdown.
- */
-export async function closeQueue(): Promise<void> {
-  await ingestionQueue.close();
-  console.log("[Queue] Ingestion queue closed");
+  await runner.stop()
+  runner = null
+  console.log("[Queue] Graphile-worker stopped")
 }

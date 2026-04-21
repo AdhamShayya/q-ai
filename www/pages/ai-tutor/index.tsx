@@ -20,8 +20,7 @@ import {
 import UpgradeModal from "../../components/UpgradeModal";
 import { USAGE_LIMITS } from "../dashboard";
 
-const UPLOAD_WEBHOOK_URL =
-  "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
+const BACKEND_UPLOAD_URL = "http://localhost:4000/upload";
 
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/png",
@@ -37,24 +36,19 @@ function isAllowedFile(file: File): boolean {
   return ALLOWED_UPLOAD_EXTS.has(ext);
 }
 
-async function sendFileToWebhook(props: {
-  file: File;
-  userId: string;
-  vaultId: string;
-  documentId: string;
-}) {
-  const { file, userId, vaultId, documentId } = props;
+async function uploadFile(props: { file: File; vaultId: string }) {
+  const { file, vaultId } = props;
   const form = new FormData();
   form.append("file", file);
-  form.append("userId", userId);
   form.append("vaultId", vaultId);
-  form.append("documentId", documentId);
   form.append("filename", file.name);
-  form.append("mimeType", file.type ?? "application/octet-stream");
   try {
-    await fetch(UPLOAD_WEBHOOK_URL, { method: "POST", body: form });
+    const res = await fetch(BACKEND_UPLOAD_URL, { method: "POST", body: form });
+    if (!res.ok) {
+      console.error("File upload failed for", file.name, await res.text());
+    }
   } catch (err) {
-    console.error("Webhook ingest failed for", file.name, err);
+    console.error("File upload failed for", file.name, err);
   }
 }
 
@@ -579,7 +573,12 @@ function ChatArea({
 
     setIsUploadingDoc(true);
     try {
-      const savedDocs = await Promise.all(
+      // Upload files to backend storage first, then create DB records + enqueue ingestion jobs
+      await Promise.allSettled(
+        valid.map((file) => uploadFile({ file, vaultId: vaultId! })),
+      );
+
+      await Promise.all(
         valid.map((file) =>
           vaultApi.addDocument.mutate({
             vaultId: vaultId!,
@@ -588,17 +587,6 @@ function ChatArea({
             fileSize: file.size,
             mimeType: file.type || undefined,
             courseVault: conversationTitle ?? "AI Tutor",
-          }),
-        ),
-      );
-
-      await Promise.allSettled(
-        valid.map((file, i) =>
-          sendFileToWebhook({
-            file,
-            userId,
-            vaultId: vaultId!,
-            documentId: savedDocs[i]!.id,
           }),
         ),
       );

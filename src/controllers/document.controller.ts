@@ -1,17 +1,16 @@
+import { sql } from "drizzle-orm"
 import { TRPCError } from "@trpc/server"
 
+import { db } from "../db"
 import { ORM } from "../db/orm"
-import type { IDocumentSchema } from "../db/schemas/Document.schema"
+import { documents } from "../db/schemas/Document.schema"
+import type { IDocumentSchema, DocumentMetadata } from "../db/schemas/Document.schema"
+import { INGEST_TASK, type IngestionJobData } from "../types/ingestion.types"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export type InputType = "file" | "img" | "vid"
 
-export interface RagPayload {
-  inputType: InputType
-  vault_id: string
-  filename: string
-  courseVault: string
-}
+export type { DocumentMetadata as RagPayload }
 
 export interface AddDocumentInput {
   vaultId: string
@@ -22,7 +21,7 @@ export interface AddDocumentInput {
   courseVault: string
 }
 
-export type DocumentWithRag = IDocumentSchema & { ragPayload: RagPayload }
+export type DocumentWithRag = IDocumentSchema & { ragPayload: DocumentMetadata }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -55,27 +54,59 @@ export async function addDocument(input: AddDocumentInput): Promise<DocumentWith
     throw new TRPCError({ code: "NOT_FOUND", message: "Vault not found" })
   }
 
+  const filePath = `vault/${input.vaultId}/${input.filename}`
   const inputType = resolveInputType(input.mimeType, input.filename)
-
-  const ragPayload: RagPayload = {
+  const metadata: DocumentMetadata = {
     inputType,
     vault_id: input.vaultId,
     filename: input.filename,
     courseVault: input.courseVault,
   }
 
-  const doc = await ORM.Document.create({
-    vaultId: input.vaultId,
-    filename: input.filename,
-    fileType: input.fileType,
-    filePath: `vault/${input.vaultId}/${input.filename}`,
-    fileSize: input.fileSize,
-    mimeType: input.mimeType ?? null,
-    metadataJson: ragPayload,
-    processingStatus: "pending",
+  // Atomic: document row and ingestion job are created in ONE transaction.
+  // If either fails, both roll back — no orphaned "pending" documents.
+  const doc = await db.transaction(async (tx) => {
+    const [inserted] = await tx
+      .insert(documents)
+      .values({
+        vaultId: input.vaultId,
+        filename: input.filename,
+        fileType: input.fileType,
+        filePath,
+        fileSize: input.fileSize,
+        mimeType: input.mimeType ?? null,
+        metadataJson: metadata,
+        processingStatus: "pending",
+      })
+      .returning()
+
+    if (inserted == null) {
+      throw new Error("Failed to create document record")
+    }
+
+    const jobData: IngestionJobData = {
+      documentId: inserted.id,
+      vaultId: input.vaultId,
+      userId: vault.userId,
+      filename: input.filename,
+      filePath,
+      mimeType: input.mimeType,
+      courseVault: input.courseVault,
+    }
+
+    await tx.execute(sql`
+      SELECT graphile_worker.add_job(
+        identifier   => ${INGEST_TASK},
+        payload      => ${JSON.stringify(jobData)}::json,
+        max_attempts => 3,
+        job_key      => ${inserted.id}
+      )
+    `)
+
+    return inserted
   })
 
-  return { ...doc, ragPayload }
+  return { ...doc, ragPayload: metadata }
 }
 
 export async function getDocumentsByVaultId(vaultId: string): Promise<IDocumentSchema[]> {

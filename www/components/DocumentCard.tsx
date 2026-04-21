@@ -12,11 +12,8 @@ interface DocumentCardProps {
 
 export function DocumentCard(props: DocumentCardProps) {
   const { doc, courseLabel, onDelete, isDeleting } = props;
-  const meta = doc.metadataJson as {
-    inputType?: string;
-    courseVault?: string;
-  } | null;
-  const inputType = meta?.inputType ?? "file";
+  const inputType = doc.metadataJson?.inputType ?? "file";
+  const status = doc.processingStatus;
 
   return (
     <div className="border-[1.5px] border-(--secondary-color) rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5">
@@ -54,8 +51,22 @@ export function DocumentCard(props: DocumentCardProps) {
           <span className="text-xs">{formatFileSize(doc.fileSize)}</span>
         </div>
         <p className="text-xs opacity-70 truncate">
-          {meta?.courseVault ?? courseLabel}
+          {doc.metadataJson?.courseVault ?? courseLabel}
         </p>
+        {(status === "pending" || status === "processing") && (
+          <div className="flex items-center gap-1.5 pt-1">
+            <div className="w-2 h-2 rounded-full bg-info animate-pulse" />
+            <span className="text-xs opacity-60">
+              {status === "pending" ? "Queued…" : "Processing…"}
+            </span>
+          </div>
+        )}
+        {status === "error" && (
+          <div className="flex items-center gap-1.5 pt-1">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-xs text-red-500">Processing failed</span>
+          </div>
+        )}
       </div>
     </div>
   );

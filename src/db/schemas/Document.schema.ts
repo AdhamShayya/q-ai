@@ -13,6 +13,16 @@ export const processingStatusEnum = pgEnum("processing_status", [
   "error",
 ])
 
+// ── Metadata shape ───────────────────────────────────────────────────────────
+
+/** Shape of the metadata_json column — mirrors the RagPayload set at upload time. */
+export interface DocumentMetadata {
+  inputType: "file" | "img" | "vid"
+  vault_id: string
+  filename: string
+  courseVault: string
+}
+
 // ── Table ─────────────────────────────────────────────────────────────────────
 
 export const documents = pgTable("documents", {
@@ -28,7 +38,9 @@ export const documents = pgTable("documents", {
   uploadDate: timestamp("upload_date", { withTimezone: true }).defaultNow(),
   processingStatus: processingStatusEnum("processing_status").default("pending"),
   processingError: text("processing_error"),
-  metadataJson: jsonb("metadata_json").default({}),
+  metadataJson: jsonb("metadata_json")
+    .$type<DocumentMetadata>()
+    .default({} as DocumentMetadata),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }).enableRLS()
@@ -51,7 +63,7 @@ export interface IDocumentSchema {
   uploadDate: Date | null
   processingStatus: "pending" | "processing" | "completed" | "error" | null
   processingError: string | null
-  metadataJson: Record<string, unknown> | null
+  metadataJson: DocumentMetadata | null
   createdAt: Date | null
   updatedAt: Date | null
 }

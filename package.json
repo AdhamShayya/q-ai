@@ -9,9 +9,5 @@
   "scripts": {
     "dev": "bun run --cwd www dev",
     "backend": "bun run --cwd src dev"
-  },
-  "dependencies": {
-    "bullmq": "^5.74.1",
-    "ioredis": "^5.10.1"
   }
 }

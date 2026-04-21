@@ -7,27 +7,28 @@
  * Follows the same Supabase REST pattern established in backend/src/ai.ts.
  */
 
-import type { FileCategory, IngestionJobData } from "../types/ingestion.types";
-import { FILE_CATEGORY_MAP } from "../types/ingestion.types";
+import type { FileCategory, IngestionJobData } from "../types/ingestion.types"
+import { FILE_CATEGORY_MAP } from "../types/ingestion.types"
+import { env } from "../config/config"
 
 // ── Environment ───────────────────────────────────────────────────────────────
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
+const SUPABASE_URL = env.SUPABASE_URL
+const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_KEY
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface FileDownloadResult {
   /** Raw file bytes. */
-  buffer: Buffer;
+  buffer: Buffer
   /** Base64-encoded content (for Gemini inline_data). */
-  base64: string;
+  base64: string
   /** Resolved MIME type. */
-  mimeType: string;
+  mimeType: string
   /** Resolved file category for pipeline routing. */
-  category: FileCategory;
+  category: FileCategory
   /** Original filename. */
-  filename: string;
+  filename: string
 }
 
 // ── File Extension → MIME ─────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ const EXT_TO_MIME: Record<string, string> = {
   mp4: "video/mp4",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-};
+}
 
 // ── Internal Helpers ──────────────────────────────────────────────────────────
 
@@ -49,8 +50,8 @@ const EXT_TO_MIME: Record<string, string> = {
  * Extracts the lowercase file extension from a filename.
  */
 function getExtension(filename: string): string {
-  const parts = filename.split(".");
-  return parts.length >= 2 ? (parts.pop() ?? "").toLowerCase() : "";
+  const parts = filename.split(".")
+  return parts.length >= 2 ? (parts.pop() ?? "").toLowerCase() : ""
 }
 
 /**
@@ -58,32 +59,29 @@ function getExtension(filename: string): string {
  * Extension-based detection is used as the primary strategy since
  * MIME types from uploads can be unreliable.
  */
-export function detectFileCategory(
-  filename: string,
-  mimeType?: string
-): FileCategory {
-  const ext = getExtension(filename);
-  const fromExt = FILE_CATEGORY_MAP[ext];
-  if (fromExt) return fromExt;
+export function detectFileCategory(filename: string, mimeType?: string): FileCategory {
+  const ext = getExtension(filename)
+  const fromExt = FILE_CATEGORY_MAP[ext]
+  if (fromExt) return fromExt
 
   // Fallback: derive from MIME prefix
   if (mimeType) {
-    if (mimeType.startsWith("image/")) return "image";
-    if (mimeType.startsWith("video/")) return "video";
-    if (mimeType === "application/pdf") return "document";
+    if (mimeType.startsWith("image/")) return "image"
+    if (mimeType.startsWith("video/")) return "video"
+    if (mimeType === "application/pdf") return "document"
   }
 
   // Default: treat as text/document for extraction attempt
-  return "document";
+  return "document"
 }
 
 /**
  * Resolves a MIME type string from extension or passed-in MIME.
  */
 function resolveMimeType(filename: string, mimeType?: string): string {
-  if (mimeType && mimeType !== "application/octet-stream") return mimeType;
-  const ext = getExtension(filename);
-  return EXT_TO_MIME[ext] ?? "application/octet-stream";
+  if (mimeType && mimeType !== "application/octet-stream") return mimeType
+  const ext = getExtension(filename)
+  return EXT_TO_MIME[ext] ?? "application/octet-stream"
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -102,39 +100,31 @@ function resolveMimeType(filename: string, mimeType?: string): string {
  * @returns Download result with buffer, base64, MIME, and category
  * @throws Error if Supabase is misconfigured or the download fails
  */
-export async function downloadFile(
-  jobData: IngestionJobData
-): Promise<FileDownloadResult> {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    throw new Error(
-      "[FileService] SUPABASE_URL or SUPABASE_SERVICE_KEY is not configured"
-    );
-  }
-
-  const storageUrl = `${SUPABASE_URL}/storage/v1/object/${jobData.filePath}`;
+export async function downloadFile(jobData: IngestionJobData): Promise<FileDownloadResult> {
+  const storageUrl = `${SUPABASE_URL}/storage/v1/object/${jobData.filePath}`
 
   const response = await fetch(storageUrl, {
     headers: {
       apikey: SUPABASE_SERVICE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
     },
-  });
+  })
 
-  if (!response.ok) {
-    const errorText = await response.text();
+  if (response.ok === false) {
+    const errorText = await response.text()
     throw new Error(
       `[FileService] Failed to download file "${jobData.filename}" ` +
-        `from "${storageUrl}": ${response.status} — ${errorText}`
-    );
+        `from "${storageUrl}": ${response.status} — ${errorText}`,
+    )
   }
 
   // Convert the response body to a Node.js Buffer
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const base64 = buffer.toString("base64");
+  const arrayBuffer = await response.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+  const base64 = buffer.toString("base64")
 
-  const mimeType = resolveMimeType(jobData.filename, jobData.mimeType);
-  const category = detectFileCategory(jobData.filename, jobData.mimeType);
+  const mimeType = resolveMimeType(jobData.filename, jobData.mimeType)
+  const category = detectFileCategory(jobData.filename, jobData.mimeType)
 
   return {
     buffer,
@@ -142,7 +132,7 @@ export async function downloadFile(
     mimeType,
     category,
     filename: jobData.filename,
-  };
+  }
 }
 
 /**
@@ -154,8 +144,6 @@ export async function downloadFile(
  * @returns True if at least one chunk already exists
  */
 export async function hasExistingChunks(documentId: string): Promise<boolean> {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return false;
-
   try {
     const response = await fetch(
       `${SUPABASE_URL}/rest/v1/document_chunks?document_id=eq.${documentId}&select=id&limit=1`,
@@ -164,14 +152,14 @@ export async function hasExistingChunks(documentId: string): Promise<boolean> {
           apikey: SUPABASE_SERVICE_KEY,
           Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
         },
-      }
-    );
+      },
+    )
 
-    if (!response.ok) return false;
-    const data = await response.json();
-    return Array.isArray(data) && data.length > 0;
+    if (!response.ok) return false
+    const data = await response.json()
+    return Array.isArray(data) && data.length > 0
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -182,16 +170,11 @@ export async function hasExistingChunks(documentId: string): Promise<boolean> {
  * @param documentId - UUID of the document whose chunks should be purged
  */
 export async function purgeExistingChunks(documentId: string): Promise<void> {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return;
-
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/document_chunks?document_id=eq.${documentId}`,
-    {
-      method: "DELETE",
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      },
-    }
-  );
+  await fetch(`${SUPABASE_URL}/rest/v1/document_chunks?document_id=eq.${documentId}`, {
+    method: "DELETE",
+    headers: {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+    },
+  })
 }

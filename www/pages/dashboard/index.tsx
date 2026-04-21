@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 
 import SVGIcon from "../../components/SVGIcon";
-import { vaultApi, userApi, personaApi } from "../../trpc";
 import { UploadForm } from "../../components/UploadForm";
 import UpgradeModal from "../../components/UpgradeModal";
 import { PendingUpload, Serialised } from "../../shared";
@@ -10,9 +9,10 @@ import { DocumentCard } from "../../components/DocumentCard";
 import { UploadDropzone } from "../../components/UploadDropzone";
 import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import { AddDocumentCard } from "../../components/AddDocumentCard";
-import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
-import ConfirmModal, { ConfirmModalProps } from "../../components/ConfirmModal";
 import DuplicateVaultModal from "../../components/DuplicateVaultModal";
+import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
+import { vaultApi, userApi, personaApi, invalidateCache } from "../../trpc";
+import ConfirmModal, { ConfirmModalProps } from "../../components/ConfirmModal";
 
 // backend
 export async function loader() {
@@ -38,38 +38,29 @@ interface VaultWithDocuments {
   documents: Serialised<IDocumentSchema>[];
 }
 
-const Upload_Webhook_API =
-  "https://techflow12.app.n8n.cloud/webhook-test/q-ai/ingest";
+const BACKEND_URL = "http://localhost:4000";
 
-// ── Webhook helper ────────────────────────────────────────────────────────────
-async function sendFileToWebhook(props: {
-  file: File;
-  userId: string;
-  vaultId: string;
-  documentId: string;
-}) {
-  const { file, userId, vaultId, documentId } = props;
+// ── Storage upload ────────────────────────────────────────────────────────────
+async function uploadFileToStorage(props: { file: File; vaultId: string }) {
+  const { file, vaultId } = props;
   const form = new FormData();
   form.append("file", file);
-  form.append("userId", userId);
   form.append("vaultId", vaultId);
-  form.append("documentId", documentId);
   form.append("filename", file.name);
-  form.append("mimeType", file.type ?? "application/octet-stream");
-  try {
-    console.log("Sending file to webhook:", file.name, {
-      userId,
-      vaultId,
-      documentId,
-    });
-    await fetch(Upload_Webhook_API, { method: "POST", body: form });
-    console.log("sent file to webhook:", file.name, {
-      userId,
-      vaultId,
-      documentId,
-    });
-  } catch (err) {
-    console.error("Webhook ingest failed for", file.name, err);
+
+  const res = await fetch(`${BACKEND_URL}/upload`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+
+  if (res.ok === false) {
+    const { error } = (await res
+      .json()
+      .catch(() => ({ error: "Upload failed" }))) as {
+      error: string;
+    };
+    throw new Error(error);
   }
 }
 
@@ -117,8 +108,10 @@ function DashboardPage() {
   const [isAppending, setIsAppending] = useState(false);
   const allDocuments = vaultData?.flatMap((v) => v.documents) ?? [];
 
-  async function loadDocuments() {
-    setDocsLoading(true);
+  async function loadDocuments(silent = false) {
+    if (silent === false) {
+      setDocsLoading(true);
+    }
     try {
       const latestVaults = await vaultApi.listByUser.query({ userId });
       const withDocs = await Promise.all(
@@ -129,13 +122,40 @@ function DashboardPage() {
       );
       setVaultData(withDocs);
     } finally {
-      setDocsLoading(false);
+      if (silent === false) {
+        setDocsLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     void loadDocuments();
   }, []);
+  // todo - fix the pulling logic
+  // currently it only polls when there's at least 1 doc in pending/processing,
+  // but if the user uploads a new vault with 3 docs, then all 3 will be pending but only the first one will trigger the polling, so when it finishes processing and moves to the next doc, \
+  // the UI won't know to poll again.
+  // Maybe we can add a "processingCount" field to the vault query that returns how many docs are still pending/processing,
+  // and use that as the trigger for polling instead of checking the individual doc statuses?
+
+  // Poll every 4 s while any document is still being processed
+  useEffect(() => {
+    const allDocs = vaultData?.flatMap((v) => v.documents) ?? [];
+    const hasProcessing = allDocs.some(
+      (d) =>
+        d.processingStatus === "pending" || d.processingStatus === "processing",
+    );
+    if (hasProcessing === false) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      invalidateCache("vault.getDocuments:", "vault.listByUser:");
+      await loadDocuments(true);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [vaultData]);
 
   const items = [
     {
@@ -181,8 +201,14 @@ function DashboardPage() {
         name: vaultName,
         courseName,
       });
-      // 1️⃣ Save every document record to the DB
-      const savedDocs = await Promise.all(
+      // 1️⃣ Upload each file to Supabase Storage
+      await Promise.all(
+        pendingUpload.files.map((file) =>
+          uploadFileToStorage({ file, vaultId: vault.id }),
+        ),
+      );
+      // 2️⃣ Create DB records + atomically enqueue ingestion jobs
+      await Promise.all(
         pendingUpload.files.map((file) =>
           vaultApi.addDocument.mutate({
             vaultId: vault.id,
@@ -191,18 +217,6 @@ function DashboardPage() {
             fileSize: file.size,
             mimeType: file.type || undefined,
             courseVault: courseName || vaultName,
-          }),
-        ),
-      );
-      // 2️⃣ Forward each file to the ingest webhook (fire-and-forget per file)
-      await Promise.allSettled(
-        pendingUpload.files.map((file, i) =>
-          sendFileToWebhook({
-            file,
-            userId,
-            vaultId: vault.id,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            documentId: savedDocs[i]!.id,
           }),
         ),
       );
@@ -227,8 +241,12 @@ function DashboardPage() {
     }
     setUploadingVaultIds((prev) => new Set(prev).add(vaultId));
     try {
-      // 1️⃣ Save document records to the DB
-      const savedDocs = await Promise.all(
+      // 1️⃣ Upload each file to Supabase Storage
+      await Promise.all(
+        files.map((file) => uploadFileToStorage({ file, vaultId })),
+      );
+      // 2️⃣ Create DB records + atomically enqueue ingestion jobs
+      await Promise.all(
         files.map((file) =>
           vaultApi.addDocument.mutate({
             vaultId,
@@ -237,17 +255,6 @@ function DashboardPage() {
             fileSize: file.size,
             mimeType: file.type ?? undefined,
             courseVault: courseName,
-          }),
-        ),
-      );
-      // 2️⃣ Forward each file to the ingest webhook
-      await Promise.allSettled(
-        files.map((file, i) =>
-          sendFileToWebhook({
-            file,
-            userId,
-            vaultId,
-            documentId: savedDocs[i]!.id,
           }),
         ),
       );
@@ -393,7 +400,7 @@ function DashboardPage() {
       </div>
 
       {/* Vault content */}
-      <div className="md:container flex flex-col-reverse md:flex-row gap-8 items-start">
+      <div className="relative md:container flex flex-col-reverse md:flex-row gap-8 items-start">
         <div className="flex-4 min-w-0 w-full">
           <h5 className="max-md:container text-lg font-bold text-primary mb-4">
             Your Materials ({allDocuments.length})
@@ -516,6 +523,13 @@ function DashboardPage() {
               ))}
             </div>
           )}
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 z-10"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent, var(--color-bg))",
+            }}
+          />
         </div>
         <div className="max-md:container flex flex-col w-full md:flex-2">
           <div className=" border border-(--secondary-color) bg-(--ai-surface) rounded-lg p-8">
