@@ -182,8 +182,8 @@ export async function storeDocumentChunks(
   // todo - check the error
   const insertPayloads: VectorChunkInsert[] = chunks.map((chunk, i) => ({
     content: chunk.content,
-    embedding: embeddings[i],
-    metadata: metadatas[i],
+    embedding: embeddings[i]!,
+    metadata: metadatas[i]!,
     document_id: documentId,
     vault_id: vaultId,
     user_id: userId,

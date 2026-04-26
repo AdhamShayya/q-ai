@@ -69,7 +69,7 @@ function recursiveSplit(
     return result;
   }
 
-  const separator = SEPARATORS[separatorIdx];
+  const separator = SEPARATORS[separatorIdx]!
 
   // If separator is empty string, do character-level split
   if (separator === "") {
@@ -113,7 +113,7 @@ function recursiveSplit(
         );
         // Add all sub-parts except the last (which becomes the new current)
         for (let i = 0; i < subParts.length - 1; i++) {
-          merged.push(subParts[i]);
+          merged.push(subParts[i]!);
         }
         current = subParts[subParts.length - 1] ?? "";
       } else {
@@ -141,13 +141,13 @@ function recursiveSplit(
 function applyOverlap(chunks: string[], overlap: number): string[] {
   if (overlap <= 0 || chunks.length <= 1) return chunks;
 
-  const result: string[] = [chunks[0]];
+  const result: string[] = [chunks[0]!];
 
   for (let i = 1; i < chunks.length; i++) {
-    const prevChunk = chunks[i - 1];
+    const prevChunk = chunks[i - 1]!;
     // Take the last `overlap` characters of the previous chunk
     const overlapText = prevChunk.slice(-overlap);
-    result.push(overlapText + chunks[i]);
+    result.push(overlapText + chunks[i]!);
   }
 
   return result;

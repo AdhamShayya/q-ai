@@ -25,6 +25,7 @@ import Footer from "./components/Footer";
 import SignUpPage from "./pages/sign-up";
 import ContactPage from "./pages/contact";
 import FeaturesPage from "./pages/features";
+import WaitlistModal from "./components/WaitlistModal";
 import UsersPage, { loader as usersLoader } from "./pages/users";
 import AiTutorPage, { loader as aiTutorLoader } from "./pages/ai-tutor";
 import SettingsPage, { loader as settingsLoader } from "./pages/settings";
@@ -60,6 +61,7 @@ function RootLayout() {
   return (
     <>
       <ThemeSync />
+      <WaitlistModal />
       <Header user={user} />
       <Outlet />
       {pathname !== href("/ai-tutor") && <Footer />}

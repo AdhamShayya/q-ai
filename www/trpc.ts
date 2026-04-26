@@ -6,7 +6,7 @@ import { createTRPCClient, httpBatchLink } from "@trpc/client";
 const client = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://localhost:4000/trpc",
+      url: import.meta.env.PROD ? "/trpc" : "http://localhost:4000/trpc",
       fetch: (url, opts) => fetch(url, { ...opts, credentials: "include" }),
     }),
   ],
@@ -266,4 +266,8 @@ export const studyPlannerApi = {
   delete: mut(client.studyPlanner.delete, (i) => [
     `studyplanner.get:${i.vaultId}:${i.userId}`,
   ]),
+};
+
+export const waitlistApi = {
+  join: mut(client.waitlist.join, () => []),
 };

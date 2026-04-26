@@ -6,6 +6,7 @@ import { conversationRouter } from "./conversation.router"
 import { adminRouter } from "./admin.router"
 import { flashcardRouter } from "./flashcard.router"
 import { studyPlannerRouter } from "./studyplanner.router"
+import { waitlistRouter } from "./waitlist.router"
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   admin: adminRouter,
   flashcard: flashcardRouter,
   studyPlanner: studyPlannerRouter,
+  waitlist: waitlistRouter,
 })
 
 export type AppRouter = typeof appRouter

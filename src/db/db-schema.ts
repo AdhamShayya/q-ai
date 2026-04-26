@@ -9,6 +9,7 @@ import * as LearningPersonaSchema from "./schemas/LearningPersona.schema"
 import * as FlashcardSchema from "./schemas/Flashcard.schema"
 import * as FlashcardReviewSchema from "./schemas/FlashcardReview.schema"
 import * as StudyPlanSchema from "./schemas/StudyPlan.schema"
+import * as WaitlistSchema from "./schemas/Waitlist.schema"
 
 /**
  * Merged schema object passed to Drizzle.
@@ -27,4 +28,5 @@ export const schema = {
   ...FlashcardSchema,
   ...FlashcardReviewSchema,
   ...StudyPlanSchema,
+  ...WaitlistSchema,
 }

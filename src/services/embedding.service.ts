@@ -77,7 +77,7 @@ async function embedSingle(text: string): Promise<number[]> {
     );
   }
 
-  const data: EmbeddingResponse = await response.json();
+  const data = (await response.json()) as EmbeddingResponse;
   return data.embedding.values;
 }
 
@@ -116,7 +116,7 @@ async function embedBatchChunk(texts: string[]): Promise<number[][]> {
     );
   }
 
-  const data: BatchEmbeddingResponse = await response.json();
+  const data = (await response.json()) as BatchEmbeddingResponse;
 
   if (!data.embeddings || data.embeddings.length !== texts.length) {
     throw new Error(

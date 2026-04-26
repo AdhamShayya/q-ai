@@ -20,7 +20,9 @@ import {
 import UpgradeModal from "../../components/UpgradeModal";
 import { USAGE_LIMITS } from "../dashboard";
 
-const BACKEND_UPLOAD_URL = "http://localhost:4000/upload";
+const BACKEND_UPLOAD_URL = import.meta.env.PROD
+  ? "/upload"
+  : "http://localhost:4000/upload";
 
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/png",

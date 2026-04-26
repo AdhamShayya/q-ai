@@ -38,7 +38,7 @@ interface VaultWithDocuments {
   documents: Serialised<IDocumentSchema>[];
 }
 
-const BACKEND_URL = "http://localhost:4000";
+const BACKEND_URL = import.meta.env.PROD ? "" : "http://localhost:4000";
 
 // ── Storage upload ────────────────────────────────────────────────────────────
 async function uploadFileToStorage(props: { file: File; vaultId: string }) {

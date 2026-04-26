@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "dev": "bun run --cwd www dev",
-    "backend": "bun run --cwd src dev"
-  }
+    "backend": "bun run --cwd src dev",
+    "build": "bun run --cwd www build && bun run --cwd src build"
+  },
+  "trustedDependencies": ["sass-embedded"]
 }

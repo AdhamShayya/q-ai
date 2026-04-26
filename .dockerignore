@@ -1,0 +1,43 @@
+# Dependencies (installed fresh inside Docker)
+
+node_modules
+\*\*/node_modules
+
+# Build outputs
+
+dist
+\*\*/dist
+www/dist
+
+# Environment files (use fly secrets set for these)
+
+.env
+.env.\*
+
+# Git
+
+.git
+.gitignore
+
+# Docs / project planning
+
+structure/
+
+# OS / editor
+
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Logs
+
+\*.log
+
+# TypeScript build info
+
+\*.tsbuildinfo
+
+# Drizzle migrations metadata (not needed at runtime)
+
+src/drizzle

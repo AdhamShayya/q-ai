@@ -1,3 +1,4 @@
+import path from "path"
 import cors from "cors"
 import multer from "multer"
 import express from "express"
@@ -45,8 +46,15 @@ app.get("/health", (_req, res) => {
 // ── Storage bucket bootstrap ─────────────────────────────────────────────────
 // Creates the "vault" bucket if it doesn't exist yet. Called once at startup.
 async function ensureStorageBucket(): Promise<void> {
-  if (env.SUPABASE_URL == null || env.SUPABASE_SERVICE_KEY == null) {
-    throw new Error("Supabase storage not configured — cannot ensure bucket exists")
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+    throw new Error(
+      `Supabase storage not configured — SUPABASE_URL="${env.SUPABASE_URL}" SUPABASE_SERVICE_KEY=${env.SUPABASE_SERVICE_KEY ? "[set]" : "[missing]"}`,
+    )
+  }
+  if (!env.SUPABASE_URL.startsWith("https://")) {
+    throw new Error(
+      `SUPABASE_URL must be the HTTPS REST URL (e.g. https://<project-id>.supabase.co), got: "${env.SUPABASE_URL}"`,
+    )
   }
 
   const headers = {
@@ -116,7 +124,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       "Content-Type": file.mimetype || "application/octet-stream",
       "x-upsert": "true",
     },
-    body: file.buffer,
+    body: new Uint8Array(file.buffer),
   })
 
   if (!storageRes.ok) {
@@ -144,6 +152,17 @@ app.use(
         : undefined,
   }),
 )
+
+// ── Static Frontend (production) ──────────────────────────────────────────────
+// In production the Vite build is copied to /app/public next to /app/dist.
+// Express serves it as static files and falls back to index.html for SPA routing.
+if (env.NODE_ENV === "production") {
+  const publicDir = path.join(__dirname, "../public")
+  app.use(express.static(publicDir))
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(publicDir, "index.html"))
+  })
+}
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((_req, res) => {
