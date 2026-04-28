@@ -1,5 +1,5 @@
-import { eq } from "drizzle-orm"
-import { asc } from "drizzle-orm"
+import { eq, and } from "drizzle-orm"
+import { asc, count } from "drizzle-orm"
 
 import { db } from "../index"
 import { BaseModel } from "../base-model"
@@ -13,6 +13,14 @@ class MessageModel extends BaseModel<IMessageSchema> {
       .where(eq(messages.conversationId, conversationId))
       .orderBy(asc(messages.createdAt))
     return rows as unknown as IMessageSchema[]
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    const rows = await db
+      .select({ total: count() })
+      .from(messages)
+      .where(and(eq(messages.userId, userId), eq(messages.role, "user")))
+    return rows[0]?.total ?? 0
   }
 
   async deleteByConversationId(conversationId: string): Promise<void> {

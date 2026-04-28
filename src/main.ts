@@ -10,6 +10,8 @@ import { env } from "./config/config"
 import { appRouter } from "./routers"
 import { checkDatabaseConnection } from "./db"
 import { startIngestionQueue, stopIngestionQueue } from "./queue/queue"
+import { pendingSessions, verifyWebhookSignature } from "./routers/payment.router"
+import UserModel from "./db/models/User"
 
 export type Context = {
   req: express.Request
@@ -135,6 +137,56 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 
   res.status(200).json({ path: `vault/${vaultId}/${filename}` })
+})
+
+// ── Matensa Payment Webhook ───────────────────────────────────────────────────
+// Called by Matensa when a payment session completes or fails.
+// Signature is verified before acting on the result.
+app.post("/api/payments/webhook", async (req, res) => {
+  const body = req.body as {
+    sessionId?: string
+    success?: boolean
+    timestampUnix?: number
+    nonce?: string
+    signature?: string
+  }
+
+  const { sessionId, success, timestampUnix, nonce, signature } = body
+
+  if (!sessionId || timestampUnix == null || !nonce || !signature) {
+    res.status(400).json({ error: "Missing required fields" })
+    return
+  }
+
+  const session = pendingSessions.get(sessionId)
+  if (!session) {
+    // Unknown session — may have already been processed
+    res.status(200).json({ ok: true })
+    return
+  }
+
+  const isValid = verifyWebhookSignature(
+    sessionId,
+    success ?? false,
+    timestampUnix,
+    nonce,
+    signature,
+    session.callbackSecret,
+  )
+
+  if (!isValid) {
+    console.warn("[Payment] Invalid webhook signature for session", sessionId)
+    res.status(401).json({ error: "Invalid signature" })
+    return
+  }
+
+  if (success === true) {
+    await UserModel.updateById(session.userId, { subscriptionTier: "premium" })
+    console.log(`[Payment] User ${session.userId} upgraded to premium via webhook`)
+  }
+
+  pendingSessions.delete(sessionId)
+  res.status(200).json({ ok: true })
 })
 
 // All tRPC procedures are available under /trpc/*

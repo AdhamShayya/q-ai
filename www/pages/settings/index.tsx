@@ -7,6 +7,7 @@ import { useToast } from "../../hooks/useToast";
 import { userApi, personaApi } from "../../trpc";
 import { useInView } from "../../hooks/useInView";
 import FormField from "../../components/FormField";
+import PaymentModal from "../../components/PaymentModal";
 import type { IUserPublic } from "@src/db/schemas/User.schema";
 import type { ILearningPersonaSchema } from "@src/db/schemas/LearningPersona.schema";
 
@@ -84,6 +85,7 @@ function SettingsPage() {
   const [name, setName] = useState(user.name ?? "");
   const [email, setEmail] = useState(user.email ?? "");
   const [saving, setSaving] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   async function handleSaveAccount(e: React.FormEvent) {
     e.preventDefault();
@@ -103,6 +105,16 @@ function SettingsPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--color-bg)" }}>
       <div className="container mx-auto px-6 py-4 max-w-3xl space-y-8">
+        {showPaymentModal === true && (
+          <PaymentModal
+            userId={user.id}
+            onClose={() => setShowPaymentModal(false)}
+            onSuccess={() => {
+              setShowPaymentModal(false);
+              window.location.reload();
+            }}
+          />
+        )}
         {/* Header */}
         <div
           ref={headerSection.ref}
@@ -298,8 +310,13 @@ function SettingsPage() {
               ))}
             </div>
 
-            {!isPremium && (
-              <Button variant="solid" size="md" fullWidth>
+            {isPremium === false && (
+              <Button
+                variant="solid"
+                size="md"
+                fullWidth
+                onClick={() => setShowPaymentModal(true)}
+              >
                 Upgrade to Premium <br className="md:hidden " /> — $24.99/mo
               </Button>
             )}

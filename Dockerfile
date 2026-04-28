@@ -12,10 +12,12 @@ WORKDIR /app
 COPY package.json bun.lockb ./
 COPY src/package.json ./src/
 COPY www/package.json ./www/
-# Copy source before install so node_modules are created last and never overwritten
 COPY www/ ./www/
 COPY src/ ./src/
 RUN bun install --frozen-lockfile --trust-all-scripts
+# Bun hoists sass to /app/node_modules; Vite 6 resolves it directly from /app/www/node_modules.
+# Hard-copy (not symlink) so no symlink-resolution issues inside the container.
+RUN rm -rf /app/www/node_modules/sass && mkdir -p /app/www/node_modules && cp -r /app/node_modules/sass /app/www/node_modules/sass
 RUN bun run --cwd www build
 
 # ── Stage 3: Build backend (TypeScript → JS) ──────────────────────────────────

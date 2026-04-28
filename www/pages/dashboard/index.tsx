@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import SVGIcon from "../../components/SVGIcon";
 import { UploadForm } from "../../components/UploadForm";
 import UpgradeModal from "../../components/UpgradeModal";
+import PaymentModal from "../../components/PaymentModal";
 import { PendingUpload, Serialised } from "../../shared";
 import { DocumentCard } from "../../components/DocumentCard";
 import { UploadDropzone } from "../../components/UploadDropzone";
@@ -11,7 +12,13 @@ import type { IVaultSchema } from "@src/db/schemas/Vault.schema";
 import { AddDocumentCard } from "../../components/AddDocumentCard";
 import DuplicateVaultModal from "../../components/DuplicateVaultModal";
 import type { IDocumentSchema } from "@src/db/schemas/Document.schema";
-import { vaultApi, userApi, personaApi, invalidateCache } from "../../trpc";
+import {
+  vaultApi,
+  userApi,
+  personaApi,
+  conversationApi,
+  invalidateCache,
+} from "../../trpc";
 import ConfirmModal, { ConfirmModalProps } from "../../components/ConfirmModal";
 
 // backend
@@ -22,13 +29,33 @@ export async function loader() {
   ]);
   if (user == null) return Response.redirect("/sign-in");
   if (persona == null) return Response.redirect("/onboarding");
-  const vaults = await vaultApi.listByUser.query({ userId: user.id });
-  return { userId: user.id, vaults };
+  const [vaults, chatCount] = await Promise.all([
+    vaultApi.listByUser.query({ userId: user.id }),
+    conversationApi.countUserMessages.query({ userId: user.id }),
+  ]);
+  return {
+    userId: user.id,
+    vaults,
+    subscriptionTier: user.subscriptionTier,
+    chatCount,
+  };
 }
 
+// Limits per plan
+export const PLAN_LIMITS = {
+  free: { docs: 3, chats: 10 },
+  premium: { docs: 30, chats: Infinity },
+} as const;
+
+/** Returns the active limits object for a given tier. */
+export function getLimits(tier: "free" | "premium" | null | undefined) {
+  return tier === "premium" ? PLAN_LIMITS.premium : PLAN_LIMITS.free;
+}
+
+// Keep the old export for UpgradeModal back-compat
 export const USAGE_LIMITS = {
   plan: "Free Plan",
-  studyMaterials: { max: 26 },
+  studyMaterials: { max: PLAN_LIMITS.free.docs },
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -69,9 +96,14 @@ async function uploadFileToStorage(props: { file: File; vaultId: string }) {
 function DashboardPage() {
   const [docsLoading, setDocsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const { userId, vaults } = useLoaderData<typeof loader>();
+  const { userId, vaults, subscriptionTier, chatCount } =
+    useLoaderData<typeof loader>();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const limits = getLimits(subscriptionTier);
+  const isPremium = subscriptionTier === "premium";
 
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [vaultData, setVaultData] = useState<VaultWithDocuments[] | null>(null);
@@ -161,7 +193,12 @@ function DashboardPage() {
     {
       label: "Study Materials",
       used: allDocuments.length,
-      max: USAGE_LIMITS.studyMaterials.max,
+      max: limits.docs,
+    },
+    {
+      label: "AI Chats",
+      used: chatCount as number,
+      max: limits.chats,
     },
   ];
 
@@ -183,10 +220,7 @@ function DashboardPage() {
       return;
     }
 
-    if (
-      allDocuments.length + pendingUpload.files.length >
-      USAGE_LIMITS.studyMaterials.max
-    ) {
+    if (allDocuments.length + pendingUpload.files.length > limits.docs) {
       setPendingUpload(null);
       setShowUpgradeModal(true);
       return;
@@ -235,7 +269,7 @@ function DashboardPage() {
     files: File[],
     courseName: string,
   ) {
-    if (allDocuments.length + files.length > USAGE_LIMITS.studyMaterials.max) {
+    if (allDocuments.length + files.length > limits.docs) {
       setShowUpgradeModal(true);
       return;
     }
@@ -338,7 +372,25 @@ function DashboardPage() {
       </p>
 
       {showUpgradeModal === true && (
-        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+        <UpgradeModal
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={() => {
+            setShowUpgradeModal(false);
+            setShowPaymentModal(true);
+          }}
+        />
+      )}
+
+      {showPaymentModal === true && (
+        <PaymentModal
+          userId={userId}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={() => {
+            setShowPaymentModal(false);
+            invalidateCache("user.me");
+            window.location.reload();
+          }}
+        />
       )}
 
       <ConfirmModal
@@ -373,13 +425,10 @@ function DashboardPage() {
       <div className="mb-10 py-10 space-y-4 container">
         {pendingUpload == null ? (
           <UploadDropzone
-            disabled={allDocuments.length >= USAGE_LIMITS.studyMaterials.max}
+            disabled={allDocuments.length >= limits.docs}
             onDisabledClick={() => setShowUpgradeModal(true)}
             onFiles={(files) => {
-              if (
-                allDocuments.length + files.length >
-                USAGE_LIMITS.studyMaterials.max
-              ) {
+              if (allDocuments.length + files.length > limits.docs) {
                 setShowUpgradeModal(true);
                 return;
               }
@@ -536,30 +585,52 @@ function DashboardPage() {
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-sm font-bold text-primary">Usage Metrics</h4>
               <span className="text-[12px] font-medium px-2 py-0.5 rounded-full border">
-                {USAGE_LIMITS.plan}
+                {isPremium ? "Premium" : "Free Plan"}
               </span>
             </div>
 
             {items.map(({ label, used, max }) => {
-              const pct = Math.round((Math.min(used, max) / max) * 100);
+              const isUnlimited = max === Infinity;
+              const pct = isUnlimited
+                ? 0
+                : Math.round((Math.min(used, max) / max) * 100);
               return (
                 <div key={label} className="mb-3.5 last:mb-0">
                   <div className="flex justify-between mb-1.5">
                     <span className="text-xs">{label}</span>
                     <span className="text-xs">
-                      {used} / {max}
+                      {isUnlimited ? `${used} / ∞` : `${used} / ${max}`}
                     </span>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden">
+                  {!isUnlimited && (
                     <div
-                      className="h-full bg-info rounded-full transition-[width] duration-600"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                      className="h-2 rounded-full overflow-hidden"
+                      style={{ background: "var(--color-bg-muted)" }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-[width] duration-600"
+                        style={{
+                          width: `${pct}%`,
+                          background:
+                            pct >= 100 ? "#ef4444" : "var(--color-info)",
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
-          </div>{" "}
+
+            {!isPremium && (
+              <button
+                className="mt-4 w-full rounded-full py-2.5 text-xs font-semibold transition-colors"
+                style={{ background: "#b8893a", color: "#fff" }}
+                onClick={() => setShowPaymentModal(true)}
+              >
+                Upgrade to Premium — $24.99/mo
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </main>

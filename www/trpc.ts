@@ -202,6 +202,11 @@ export const conversationApi = {
     client.conversation.getMessages,
     TTL.conversation,
   ),
+  countUserMessages: qk(
+    (i) => `conversation.countUserMessages:${i.userId}`,
+    client.conversation.countUserMessages,
+    TTL.conversation,
+  ),
 
   // — Mutations
   addMessage: mut(client.conversation.addMessage, (i) => [
@@ -211,6 +216,7 @@ export const conversationApi = {
     i.conversationId
       ? `conversation.getMessages:${i.conversationId}`
       : "conversation.getMessages:",
+    `conversation.countUserMessages:`,
   ]),
 };
 
@@ -270,4 +276,17 @@ export const studyPlannerApi = {
 
 export const waitlistApi = {
   join: mut(client.waitlist.join, () => []),
+};
+
+export const paymentApi = {
+  // — Mutations
+  createSession: mut(client.payment.createSession, () => []),
+  confirmUpgrade: mut(client.payment.confirmUpgrade, () => ["user.me"]),
+
+  // — Queries
+  getSessionStatus: qk(
+    (i) => `payment.getSessionStatus:${i.sessionId}`,
+    client.payment.getSessionStatus,
+    5_000, // 5 s — short TTL since we poll this
+  ),
 };

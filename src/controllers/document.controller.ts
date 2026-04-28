@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server"
 import { db } from "../db"
 import { ORM } from "../db/orm"
 import { documents } from "../db/schemas/Document.schema"
+import DocumentChunkModel from "../db/models/DocumentChunk"
 import type { IDocumentSchema, DocumentMetadata } from "../db/schemas/Document.schema"
 import { INGEST_TASK, type IngestionJobData } from "../types/ingestion.types"
 
@@ -122,6 +123,7 @@ export async function getDocumentById(id: string): Promise<IDocumentSchema> {
 }
 
 export async function deleteDocument(id: string): Promise<{ id: string }> {
+  await DocumentChunkModel.deleteByDocumentId(id)
   const deletedId = await ORM.Document.deleteById(id)
   if (deletedId == null) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Document not found" })

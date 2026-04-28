@@ -15,6 +15,10 @@ const envSchema = type({
   COOKIE_SECRET: "string >= 32",
   "PORT?": "string.numeric.parse",
   "NODE_ENV?": "'development' | 'test' | 'production'",
+  "MATENSA_KEY?": "string",
+  "MATENSA_SECRET?": "string",
+  "MATENSA_API_URL?": "string",
+  "BACKEND_PUBLIC_URL?": "string",
 })
 
 const _parsed = envSchema(process.env)
@@ -73,6 +77,10 @@ export const env = {
   SUPABASE_SERVICE_KEY: _parsed.SUPABASE_SERVICE_KEY ?? "",
   NODE_ENV: _parsed.NODE_ENV ?? ("development" as const),
   CORS_ORIGIN: _parsed.CORS_ORIGIN ?? "http://localhost:3000",
+  MATENSA_KEY: _parsed.MATENSA_KEY ?? "",
+  MATENSA_SECRET: _parsed.MATENSA_SECRET ?? "",
+  MATENSA_API_URL: _parsed.MATENSA_API_URL ?? "https://api-staging.matensa.com",
+  BACKEND_PUBLIC_URL: _parsed.BACKEND_PUBLIC_URL ?? "http://localhost:4000",
 }
 
 export type Env = typeof env

@@ -1,12 +1,13 @@
 import { router } from "../trpc"
 import { userRouter } from "./user.router"
 import { vaultRouter } from "./vault.router"
-import { personaRouter } from "./persona.router"
-import { conversationRouter } from "./conversation.router"
 import { adminRouter } from "./admin.router"
-import { flashcardRouter } from "./flashcard.router"
-import { studyPlannerRouter } from "./studyplanner.router"
+import { personaRouter } from "./persona.router"
+import { paymentRouter } from "./payment.router"
 import { waitlistRouter } from "./waitlist.router"
+import { flashcardRouter } from "./flashcard.router"
+import { conversationRouter } from "./conversation.router"
+import { studyPlannerRouter } from "./studyplanner.router"
 
 export const appRouter = router({
   user: userRouter,
@@ -17,6 +18,7 @@ export const appRouter = router({
   flashcard: flashcardRouter,
   studyPlanner: studyPlannerRouter,
   waitlist: waitlistRouter,
+  payment: paymentRouter,
 })
 
 export type AppRouter = typeof appRouter

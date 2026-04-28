@@ -295,7 +295,7 @@ export default function WaitlistModal() {
 
         {/* ── Card ── */}
         <div
-          className="relative mx-4 w-full max-w-120 rounded-2xl overflow-hidden"
+          className="relative w-full max-w-120 md:rounded-2xl overflow-hidden"
           style={{
             background: "#ffffff",
             boxShadow:
@@ -317,7 +317,7 @@ export default function WaitlistModal() {
           />
 
           {/* Card content */}
-          <div className="px-10 pt-10 pb-10">
+          <div className="px-5 pt-10 pb-10">
             {status !== "success" ? (
               <>
                 <LogoMark />
